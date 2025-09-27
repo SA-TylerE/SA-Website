@@ -43,6 +43,7 @@ a{ color:inherit; text-decoration:none }
 .nav{
   position:sticky; top:0; z-index:1000;
   background:#fff; border-bottom:1px solid var(--border);
+  overflow:visible; /* ensure dropdowns can spill */
 }
 .nav__inner{
   display:grid; grid-template-columns:auto 1fr auto; align-items:center;
@@ -75,25 +76,17 @@ a{ color:inherit; text-decoration:none }
 .dropdown a::after,
 .submenu__link::after{
   content:"";
-  position:absolute;
-  left:0;
-  bottom:0;                 /* underline (not overline) */
-  height:3px;
-  width:100%;
-  background:var(--red);
-  transform:scaleX(0);
-  transform-origin:left;    /* left → right */
+  position:absolute; left:0; bottom:0;
+  height:3px; width:100%; background:var(--red);
+  transform:scaleX(0); transform-origin:left;
   transition:transform .2s ease;
 }
-
 .menu__link:hover::after,
 .menu__link:focus-visible::after,
 .dropdown a:hover::after,
 .dropdown a:focus-visible::after,
 .submenu__link:hover::after,
-.submenu__link:focus-visible::after{
-  transform:scaleX(1);
-}
+.submenu__link:focus-visible::after{ transform:scaleX(1); }
 
 /* Header CTAs */
 .menu__cta{ display:flex; gap:12px }
@@ -110,42 +103,44 @@ a{ color:inherit; text-decoration:none }
 /* Dropdowns */
 .has-dropdown{
   position:relative;
-  /* Invisible hover buffer below the parent to prevent flicker
-     without covering the animated underline */
   --hover-buffer:10px;
   padding-bottom:var(--hover-buffer);
   margin-bottom:calc(var(--hover-buffer) * -1);
 }
-
 .dropdown{
   position:absolute; top:100%; left:0; min-width:260px;
   background:#fff; border:1px solid var(--border); border-radius:8px;
   box-shadow:0 10px 24px rgba(0,0,0,.08); padding:8px 0; display:none; margin-top:0;
-  z-index:1001; list-style:none;
+  z-index:1100; /* was 1001; ensure over everything */
+  list-style:none; pointer-events:auto;
 }
 .dropdown li{ list-style:none }
-
-/* Dropdown items */
 .dropdown a, .submenu__link{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
   padding:12px 16px; border-radius:6px; color:var(--black); font-weight:600;
 }
 .dropdown a:hover, .submenu__link:hover{
-  background:rgba(209,211,212,.4); /* lighter so the red underline pops */
+  background:rgba(209,211,212,.4);
   color:var(--red);
 }
-
-/* Remove old decorative red bar from dropdown container */
-.dropdown::before{ display:none }
+.dropdown::before{ display:none } /* remove old bar */
 
 /* Subdropdown (flyout) */
 .has-subdropdown{ position:relative }
 .subdropdown{
   position:absolute; top:0; left:calc(100% - 1px); min-width:260px;
   background:#fff; border:1px solid var(--border); border-radius:8px;
-  box-shadow:0 10px 24px rgba(0,0,0,.08); padding:8px 0; display:none; z-index:1002;
+  box-shadow:0 10px 24px rgba(0,0,0,.08); padding:8px 0; display:none; z-index:1101;
 }
-.submenu__link::after{ content:"›"; opacity:.6 }
+.submenu__link{ padding-right:28px }
+.submenu__link::before{
+  content:"›"; position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  font-size:.95rem; line-height:1; color:var(--gray-dark);
+  transition: transform .2s ease, color .2s ease, opacity .2s ease; opacity:.85;
+}
+.submenu__link:hover::before, .submenu__link:focus-visible::before{
+  color:var(--red); transform:translateY(-50%) translateX(2px); opacity:1;
+}
 
 /* Keep open on hover across panel transitions */
 .has-dropdown:hover > .dropdown,
@@ -178,13 +173,13 @@ a{ color:inherit; text-decoration:none }
 .hero{ position:relative; padding:84px 0; overflow:hidden }
 .hero--light{ background:#fff }
 
-/* Base background layer (light by default; can be overridden per section) */
+/* Base background layer */
 .hero--bg::before{
   content:""; position:absolute; inset:0;
   background-image:var(--hero-bg); background-size:cover; background-position:center; background-repeat:no-repeat;
   opacity:.18; pointer-events:none; z-index:0;
 }
-/* Base gradient overlay (subtle) */
+/* Base gradient overlay */
 .hero--bg::after{
   content:""; position:absolute; inset:0;
   background: linear-gradient(to right, rgba(255,255,255,.6), rgba(255,255,255,0));
@@ -223,11 +218,18 @@ a{ color:inherit; text-decoration:none }
 .section__head h2{ margin:0 0 6px 0; font-size:2rem }
 .section__head .lead{ color:var(--gray-dark) }
 
-/* Generic grid + cards */
+/* Generic grids */
 .grid{ display:grid; gap:28px }
+/* Homepage uses grid--3; keep it working */
 .grid--3{ grid-template-columns:repeat(3,1fr) }
 @media (max-width:1024px){ .grid--3{ grid-template-columns:1fr 1fr } }
 @media (max-width:720px){ .grid--3{ grid-template-columns:1fr } }
+
+/* New utilities for Managed Services */
+.grid-2{ grid-template-columns:repeat(2,1fr) }
+.grid-3{ grid-template-columns:repeat(3,1fr) }
+@media (max-width:1024px){ .grid-3{ grid-template-columns:1fr 1fr } }
+@media (max-width:900px){ .grid-2{ grid-template-columns:1fr } }
 
 .card{
   background:#fff; border:1px solid var(--border); border-radius:12px; padding:18px;
@@ -337,7 +339,7 @@ a{ color:inherit; text-decoration:none }
    Scoped Enhancements — Only for the first hero section
    (.hero--enhanced)
    ========================================================= */
-.hero--enhanced::before{ opacity:0.55 } /* try 0.45–0.65 to taste */
+.hero--enhanced::before{ opacity:0.55 }
 .hero--enhanced::after{
   background: linear-gradient(
     to right,
@@ -346,135 +348,37 @@ a{ color:inherit; text-decoration:none }
     rgba(0,0,0,0.06) 100%
   );
 }
-
-/* Slight readability bump for hero text only */
 .hero--enhanced .kicker,
 .hero--enhanced h1,
 .hero--enhanced p,
 .hero--enhanced .hero__badges li,
 .hero--enhanced .btn{ text-shadow:0 1px 2px rgba(0,0,0,0.18) }
-
-/* Larger kicker per your request */
-.hero--enhanced .kicker{
-  font-size:1rem; letter-spacing:.18em;
-}
-
-/* Tighter, right-aligned stat card with sensible max width */
+.hero--enhanced .kicker{ font-size:1rem; letter-spacing:.18em; }
 .hero--enhanced .hero__art{ display:flex; justify-content:flex-end }
-.hero--enhanced .stat-card{
-  max-width:380px; width:100%; padding:16px 18px;
-}
-@media (max-width:980px){
-  .hero--enhanced .stat-card{ max-width:100% }
-}
-/* Chevron indicator for items that have a subdropdown */
-.submenu__link {
-  padding-right: 28px; /* room for the chevron */
-}
+.hero--enhanced .stat-card{ max-width:380px; width:100%; padding:16px 18px; }
+@media (max-width:980px){ .hero--enhanced .stat-card{ max-width:100% } }
 
-/* Use ::before so it doesn't conflict with the ::after underline */
-.submenu__link::before {
-  content: "›";
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.95rem;
-  line-height: 1;
-  color: var(--gray-dark);
-  transition: transform .2s ease, color .2s ease, opacity .2s ease;
-  opacity: 0.85;
-}
-
-/* Hover/Focus state: nudge and recolor the chevron for feedback */
-.submenu__link:hover::before,
-.submenu__link:focus-visible::before {
-  color: var(--red);
-  transform: translateY(-50%) translateX(2px);
-  opacity: 1;
-}
-/* Keep underline active on parent while dropdown is open */
-.has-dropdown:hover > .menu__link::after,
-.has-dropdown:focus-within > .menu__link::after {
-  transform: scaleX(1);
-}
-
-.has-dropdown:hover > .menu__link,
-.has-dropdown:focus-within > .menu__link {
-  color: var(--red);
-}
-/* Keep underline + red text on parent while dropdown is open */
-
-/* Top-level dropdowns */
-.has-dropdown:hover > .menu__link::after,
-.has-dropdown:focus-within > .menu__link::after {
-  transform: scaleX(1);
-}
-.has-dropdown:hover > .menu__link,
-.has-dropdown:focus-within > .menu__link {
-  color: var(--red);
-}
-
-/* Subdropdown parents */
-.has-subdropdown:hover > .submenu__link::after,
-.has-subdropdown:focus-within > .submenu__link::after {
-  transform: scaleX(1);
-}
-.has-subdropdown:hover > .submenu__link,
-.has-subdropdown:focus-within > .submenu__link {
-  color: var(--red);
-}
 /* Footer logo update */
-.footer__brand img {
-  height: 130px;   /* give it more presence */
-  width: auto;
-}
+.footer__brand img{ height:130px; width:auto }
+.footer__brand p{ display:none }
+.footer__bar{ border-top:1px solid var(--border); font-size:.9rem; color:var(--gray-dark); padding:12px 0; text-align:center }
 
-/* Remove tagline text since it’s baked into the image */
-.footer__brand p { display: none; }
-
-.footer__bar {
-  border-top: 1px solid var(--border);
-  font-size: .9rem;
-  color: var(--gray-dark);
-  padding: 12px 0;
-  text-align: center; /* centered copyright */
-}
 /* ========== Scroll reveal (once) ========== */
-.reveal {
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity .6s ease, transform .6s ease;
-  will-change: opacity, transform;
-}
-
-.reveal.is-visible {
-  opacity: 1;
-  transform: none;
-}
-
-/* Respect accessibility settings */
-@media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1 !important; transform: none !important; }
-}
-/* Stagger children inside a visible section (grids, lists, badges) */
-.reveal.is-visible .grid > * ,
+.reveal{ opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease; will-change:opacity,transform }
+.reveal.is-visible{ opacity:1; transform:none }
+@media (prefers-reduced-motion:reduce){ .reveal{ opacity:1 !important; transform:none !important } }
+.reveal.is-visible .grid > *,
 .reveal.is-visible .steps > li,
-.reveal.is-visible .security__panel > .badge {
-  animation: sa-reveal .6s ease both;
-}
-.reveal.is-visible .grid > *:nth-child(1) { animation-delay: .05s }
-.reveal.is-visible .grid > *:nth-child(2) { animation-delay: .12s }
-.reveal.is-visible .grid > *:nth-child(3) { animation-delay: .19s }
-.reveal.is-visible .steps > li:nth-child(1) { animation-delay: .05s }
-.reveal.is-visible .steps > li:nth-child(2) { animation-delay: .12s }
-.reveal.is-visible .steps > li:nth-child(3) { animation-delay: .19s }
-.reveal.is-visible .steps > li:nth-child(4) { animation-delay: .26s }
+.reveal.is-visible .security__panel > .badge{ animation:sa-reveal .6s ease both }
+.reveal.is-visible .grid > *:nth-child(1){ animation-delay:.05s }
+.reveal.is-visible .grid > *:nth-child(2){ animation-delay:.12s }
+.reveal.is-visible .grid > *:nth-child(3){ animation-delay:.19s }
+.reveal.is-visible .steps > li:nth-child(1){ animation-delay:.05s }
+.reveal.is-visible .steps > li:nth-child(2){ animation-delay:.12s }
+.reveal.is-visible .steps > li:nth-child(3){ animation-delay:.19s }
+.reveal.is-visible .steps > li:nth-child(4){ animation-delay:.26s }
+@keyframes sa-reveal{ from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none} }
 
-@keyframes sa-reveal {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: none; }
-}
 /* -------------------------
    Support Page
 ------------------------- */
@@ -485,281 +389,173 @@ a{ color:inherit; text-decoration:none }
   padding: 64px 0;
   background: var(--panel);
 }
-.remote-hero h1{
-  margin: 0 0 8px 0;
-  font-size: 2.2rem;
-}
-.remote-hero p{
-  margin: 0;
-  color: var(--gray-dark);
-  font-size: 1.05rem;
-}
+.remote-hero h1{ margin: 0 0 8px 0; font-size: 2.2rem; }
+.remote-hero p{ margin: 0; color: var(--gray-dark); font-size: 1.05rem; }
 
 /* Main grid (downloads + how-to) */
 .remote-grid{
   display: grid;
   gap: 28px;
   grid-template-columns: 1.2fr .8fr;
-  align-items: start;                 /* let both cards size to their content */
+  align-items: stretch;            /* equal heights */
 }
-@media (max-width: 980px){
-  .remote-grid{ grid-template-columns: 1fr; }
-}
+@media (max-width: 980px){ .remote-grid{ grid-template-columns: 1fr; } }
 
-/* Cards in support page: no hover “lift” */
-.remote-grid .card{
-  /* keep your base card look but remove the hover motion */
-  display: block;
-  transition: none;
+/* Make both cards fill the row height */
+.remote-grid > .card{
+  height: 100%;
+  transition: none;                /* no hover pop */
 }
-.remote-grid .card:hover{
-  transform: none;
-  box-shadow: 0 10px 24px rgba(0,0,0,.06);
-}
+.remote-grid > .card:hover{ transform: none !important; box-shadow: 0 10px 24px rgba(0,0,0,.06) }
 
-/* Download header row (button + texts) */
-.download-header{
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;               /* small, consistent gap below header row */
-}
-
-/* Big download button */
-#download-button{
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 22px;
-}
-#download-button img.platform-icon{
-  width: 22px; height: 22px; display: block;
-}
-
-/* Meta text next to the download button */
-.download-meta{
-  display: grid;
-  gap: 2px;
-}
-.download-meta .platform-status{ font-weight: 700; }
-.download-meta .platform-note{ color: var(--gray-dark); font-size: .95rem; }
-
-/* “Choose a different platform” block */
-.override-wrapper{
-  margin-top: 18px;                  /* tasteful breathing room (not huge) */
-}
-.override-wrapper > strong{
-  display: block;
-  margin-bottom: 8px;
-}
-
-/* Override platform button group */
-.override-group{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-/* Platform buttons: no hover lift */
-.override-download-btn{
-  appearance: none;
-  border: 1px solid var(--border);
-  background: #fff;
-  padding: 10px 14px;
-  border-radius: var(--radius-pill);
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  gap: 10px;
-  align-items: center;
-  transition: none;                  /* kill animation */
-}
-.override-download-btn:hover,
-.override-download-btn:active{
-  transform: none;
-  box-shadow: none;
-  border-color: var(--border);
-}
-.override-download-btn img{
-  width: 18px; height: 18px; display: block;
-}
-
-/* “How it works” card */
-.howto-card h2{ margin: 0 0 8px 0; }
-.howto-steps{
-  line-height: 1.6;
-  padding-left: 1.25rem;
-  margin: 0;
-}
-
-/* Small notice card used in <noscript> fallback */
-.notice{
-  background: #fffaf0;
-  border: 1px solid #ffe2a8;
-  border-radius: var(--radius-card);
-  padding: 12px 14px;
-}
-/* --- Support page: equal height cards with centered download box --- */
-
-/* Force equal height columns in the grid */
-.remote-grid{
-  align-items: stretch;   /* stretch children to equal height */
-}
-
-/* How-it-works card stays normal (content top-aligned) */
-.howto-card{
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-/* Download card: vertically center its content */
+/* Download (Splashtop) card centers its content vertically */
 .remote-grid .card.download-card{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;  /* centers the inner content */
-}
-/* --- Support page: platform button interactions --- */
-
-/* Base state */
-.override-download-btn {
-  border: 1px solid var(--border);
-  background: #fff;
-  padding: 10px 14px;
-  border-radius: var(--radius-pill);
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  gap: 10px;
-  align-items: center;
-  transition: all .15s ease;
+  display: flex; flex-direction: column; justify-content: center;
 }
 
-/* Hover feedback */
-.override-download-btn:hover {
-  border-color: var(--red);
-  box-shadow: 0 4px 10px rgba(0,0,0,.08);
-  transform: translateY(-1px);
+/* How-it-works card stays normal */
+.howto-card{
+  display: flex; flex-direction: column; justify-content: flex-start;
 }
 
-/* Active click feedback */
-.override-download-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0,0,0,.06);
+/* Download header row */
+.download-header{
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;
 }
+/* Big download button */
+#download-button{ display:inline-flex; align-items:center; gap:10px; padding:12px 22px; }
+#download-button img.platform-icon{ width:22px; height:22px; display:block }
 
-/* Selected state (JS will toggle .selected) */
-.override-download-btn.selected {
-  background: var(--red);
-  color: #fff;
-  border-color: var(--red);
-  box-shadow: 0 4px 12px rgba(170,30,46,.3);
+/* Meta text */
+.download-meta{ display:grid; gap:2px }
+.download-meta .platform-status{ font-weight:700 }
+.download-meta .platform-note{ color:var(--gray-dark); font-size:.95rem }
+
+/* Choose a different platform */
+.override-wrapper{ margin-top:18px }
+.override-wrapper > strong{ display:block; margin-bottom:8px }
+.override-group{ display:flex; flex-wrap:wrap; gap:10px }
+.override-download-btn{
+  appearance:none; border:1px solid var(--border); background:#fff;
+  padding:10px 14px; border-radius:var(--radius-pill); font-weight:700; cursor:pointer;
+  display:inline-flex; gap:10px; align-items:center; transition:all .15s ease;
 }
-.override-download-btn.selected img {
-  filter: brightness(0) invert(1); /* makes the icon white */
-}
-.section__cta {
-  margin-top: 20px; /* adds breathing room between grid and button */
-}
-/* Disabled button look (for "Open a Ticket" until Syncro embed is ready) */
-.btn[aria-disabled="true"] {
-  opacity: .55;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-/* Remove hover-lift for the Helpdesk contact card */
-#helpdesk.card,
-#helpdesk .card {
-  transition: none;
-}
-#helpdesk.card:hover,
-#helpdesk .card:hover {
-  transform: none;
-  box-shadow: 0 10px 24px rgba(0,0,0,.06); /* keep the soft base shadow */
-}
-/* Tighten vertical spacing around Helpdesk section */
-#helpdesk.section {
-  padding-bottom: 28px; /* was 64px */
-}
-#helpdesk + .section {
-  padding-top: 28px; /* reduce gap before Splashtop section */
-}
+.override-download-btn:hover{ border-color:var(--red); box-shadow:0 4px 10px rgba(0,0,0,.08); transform:translateY(-1px) }
+.override-download-btn:active{ transform:translateY(0); box-shadow:0 2px 6px rgba(0,0,0,.06) }
+.override-download-btn.selected{ background:var(--red); color:#fff; border-color:var(--red); box-shadow:0 4px 12px rgba(170,30,46,.3) }
+.override-download-btn img{ width:18px; height:18px; display:block }
+.override-download-btn.selected img{ filter:brightness(0) invert(1) }
+.section__cta{ margin-top:20px }
+
+/* Disable hover-lift on "Contact the Helpdesk" area (safety net) */
+#helpdesk .card,
+#helpdesk.card{ transition:none !important }
+#helpdesk .card:hover,
+#helpdesk.card:hover{ transform:none !important; box-shadow:0 10px 24px rgba(0,0,0,.06) }
+
 /* Collapsible email form card */
 .collapsible{
-  overflow: hidden;
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-top: 0;                  /* no gap when closed */
-  border-width: 0 !important;     /* hide the card border when closed */
-  background: transparent;        /* hide background when closed */
-  box-shadow: none;               /* no shadow when closed */
-  transition:
-    max-height .2s ease,
-    padding .2s ease,
-    margin .2s ease,
-    border-color .2s ease,
-    box-shadow .2s ease,
-    background-color .2s ease;
+  overflow:hidden; max-height:0; padding-top:0; padding-bottom:0; margin-top:0;
+  border-width:0 !important; background:transparent; box-shadow:none;
+  transition:max-height .2s ease, padding .2s ease, margin .2s ease, border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
 }
-
 .collapsible.is-open{
-  max-height: 700px;              /* tall enough for the form */
-  padding-top: 18px;
-  padding-bottom: 18px;
-  margin-top: 12px;
-  border-width: 1px !important;   /* restore card border */
-  border-color: var(--border);
-  background: #fff;               /* restore card background */
-  box-shadow: 0 10px 24px rgba(0,0,0,.06);
+  max-height:700px; padding-top:18px; padding-bottom:18px; margin-top:12px;
+  border-width:1px !important; border-color:var(--border); background:#fff; box-shadow:0 10px 24px rgba(0,0,0,.06);
 }
 
-
-/* Simple form layout matching site style */
-.support-form .form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+/* Simple form layout */
+.support-form .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
+.support-form .form-grid .full{ grid-column:1 / -1 }
+.support-form label span{ display:block; font-weight:700; margin-bottom:6px }
+.support-form input, .support-form textarea{
+  width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font:inherit;
 }
-.support-form .form-grid .full { grid-column: 1 / -1; }
-.support-form label span { display:block; font-weight:700; margin-bottom:6px; }
-.support-form input, .support-form textarea {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font: inherit;
-}
-.support-form input:focus, .support-form textarea:focus {
-  outline: 2px solid rgba(170,30,46,.25);
-  border-color: var(--red);
-}
-.support-form .form-actions { display:flex; gap:12px; margin-top: 8px; }
-.support-form .form-note { margin: 10px 0 0; color: var(--gray-dark); font-size: .95rem; }
+.support-form input:focus, .support-form textarea:focus{ outline:2px solid rgba(170,30,46,.25); border-color:var(--red) }
+.support-form .form-actions{ display:flex; gap:12px; margin-top:8px }
+.support-form .form-note{ margin:10px 0 0; color:var(--gray-dark); font-size:.95rem }
+@media (max-width:720px){ .support-form .form-grid{ grid-template-columns:1fr } }
 
-@media (max-width: 720px){
-  .support-form .form-grid { grid-template-columns: 1fr; }
+/* Normalize form controls */
+button, input, select, textarea{ font:inherit; color:inherit }
+.btn{ -webkit-appearance:none; appearance:none }
+
+/* =========================================================
+   Managed Services — page-specific tweaks & fixes
+   ========================================================= */
+
+/* Sub-nav “bubble” pills */
+.subnav{
+  position:sticky; top:0; z-index:5;
+  background:#fff; border-bottom:1px solid var(--border);
+}
+.subnav .container{ display:flex; gap:.6rem; overflow:auto; padding:.5rem 1rem }
+.subnav a{
+  white-space:nowrap; padding:.5rem .85rem; border-radius:999px;
+  border:1px solid var(--border); font-weight:700;
+  transition:background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease;
+}
+.subnav a:hover, .subnav a:focus-visible{
+  background:var(--red); color:#fff; border-color:var(--red); transform:translateY(-1px);
+}
+.subnav a.is-active{ background:var(--red); color:#fff; border-color:var(--red) }
+
+/* FAQ cards */
+.faq{ margin:0; display:grid; gap:12px }
+.faq dt{
+  background:#fff; border:1px solid var(--border); border-radius:12px;
+  padding:12px 14px; font-weight:800; position:relative;
+}
+.faq dt::after{
+  content:"+"; position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  color:var(--red); font-weight:800;
+}
+.faq dd{
+  margin:-8px 0 4px 0;
+  background:#fff; border:1px solid var(--border); border-top:0;
+  border-radius:0 0 12px 12px; padding:12px 14px; color:var(--gray-dark);
 }
 
-/* Keep helpdesk area from "popping" on hover (as you asked earlier) */
-#helpdesk .card { transition: none; }
-#helpdesk .card:hover { transform:none; box-shadow:0 10px 24px rgba(0,0,0,.06); }
-
-/* Tighten spacing between Helpdesk and next section */
-#helpdesk.section { padding-bottom: 28px; }
-#helpdesk + .section { padding-top: 28px; }
-
-/* Disabled look (Open a Ticket placeholder) */
-.btn[aria-disabled="true"] { opacity:.55; cursor:not-allowed; pointer-events:none; }
-/* Normalize form controls to inherit site font/colors */
-button, input, select, textarea {
-  font: inherit;
-  color: inherit;
+/* Visual variety (no HTML edits) */
+main > section{ position:relative }
+main > section:nth-of-type(even){ background:var(--panel) }
+main > section:nth-of-type(3n)::before{
+  content:""; position:absolute; inset:0 auto 0 0; width:4px;
+  background:linear-gradient(var(--red), var(--orange)); opacity:.45;
 }
 
-/* Ensure buttons styled as .btn don't use browser default look */
-.btn {
-  -webkit-appearance: none;
-  appearance: none;
+/* Buttons for this page */
+.cta-row .btn{
+  transition:transform .15s ease, background-color .2s ease, color .2s ease, border-color .2s ease;
 }
+.btn-primary{ background:var(--red); color:#fff; border:2px solid transparent }
+.btn-primary:hover{ background:var(--orange); transform:translateY(-1px) }
+.btn-primary:active{ transform:translateY(0) }
+.btn-outline{ background:#fff; color:var(--red); border:2px solid var(--red) }
+.btn-outline:hover{ background:var(--red); color:#fff; transform:translateY(-1px) }
+.btn-outline:active{ transform:translateY(0) }
+
+/* Tighter spacing for Managed Services sections only */
+#helpdesk.section,
+#maintenance.section,
+#patching.section,
+#assets.section,
+#onboarding.section,
+#network.section,
+#cloud.section,
+#voip.section,
+#backup-dr.section,
+#faq.section{ padding-top:48px; padding-bottom:48px }
+
+/* Compact hero on this page */
+.hero{ padding:64px 0 32px; background:var(--panel); border-bottom:1px solid var(--border) }
+.lead{ line-height:1.6 }
+
+/* Section lists: red check bullets */
+.checklist{ list-style:none; padding:0; margin:.25rem 0 0 0 }
+.checklist li{ position:relative; padding-left:22px; margin:.5rem 0; color:var(--black) }
+.checklist li::before{ content:"✔"; position:absolute; left:0; top:0; color:var(--red); font-weight:800 }
+
+/* Optional card link */
+.card .learn-link{ font-weight:800; color:var(--red) }
+.card .learn-link:hover{ color:var(--orange); text-decoration:underline }

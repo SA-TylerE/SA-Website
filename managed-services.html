@@ -16,16 +16,412 @@
   <!-- Shared header -->
   <div data-include="partials/header.html"></div>
 
+  <!-- Page hero -->
+  <header class="hero">
+    <div class="container">
+      <div class="kicker eyebrow">Managed IT Services</div>
+      <h1>Everything your team needs, handled.</h1>
+      <p class="lead">
+        Predictable pricing, responsive support, and rock-solid foundations. We become your IT department—keeping systems patched,
+        backed up, and secure while your team gets fast, friendly help when they need it.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#helpdesk">See what’s included</a>
+        <a class="btn btn-outline" href="tel:15038787000">Call 503-878-7000</a>
+        <a class="btn btn-outline" href="/contact.html">Request a quote</a>
+      </div>
+      <p class="note muted">Serving Portland–Vancouver and remote teams across the U.S.</p>
+    </div>
+  </header>
+
+  <!-- Sticky in-page subnav -->
+  <nav class="subnav" aria-label="Managed Services Sections">
+    <div class="container">
+      <a href="#helpdesk">Helpdesk</a>
+      <a href="#maintenance">Monitoring</a>
+      <a href="#patching">Patching</a>
+      <a href="#assets">Assets & Licensing</a>
+      <a href="#onboarding">On/Offboarding</a>
+      <a href="#network">Network & Wi-Fi</a>
+      <a href="#cloud">Cloud Productivity</a>
+      <a href="#voip">VoIP</a>
+      <a href="#backup-dr">Backup & DR</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </nav>
+
   <main>
-    <section id="helpdesk" class="section"><div class="container"><h2>Helpdesk & Remote Support</h2></div></section>
-    <section id="maintenance" class="section"><div class="container"><h2>Maintenance & Monitoring</h2></div></section>
-    <section id="patching" class="section"><div class="container"><h2>Patching & Compliance</h2></div></section>
-    <section id="assets" class="section"><div class="container"><h2>Asset & License Management</h2></div></section>
-    <section id="onboarding" class="section"><div class="container"><h2>User On/Offboarding</h2></div></section>
-    <section id="network" class="section"><div class="container"><h2>Network & Wi-Fi Management</h2></div></section>
-    <section id="cloud" class="section"><div class="container"><h2>Cloud Productivity (Microsoft 365/Google)</h2></div></section>
-    <section id="voip" class="section"><div class="container"><h2>VOIP Phones</h2></div></section>
-    <section id="backup-dr" class="section"><div class="container"><h2>Backup & Disaster Recovery</h2></div></section>
+
+    <!-- Helpdesk & Remote Support -->
+    <section id="helpdesk" class="section">
+      <div class="container split">
+        <div>
+          <span class="pill">Included</span>
+          <h2>Helpdesk & Remote Support</h2>
+          <p>
+            Your users get quick answers from real engineers—via email, phone, or the desktop agent. Most fixes happen
+            remotely in minutes; onsite visits are available when hands are required.
+          </p>
+          <div class="grid grid-2">
+            <div class="card">
+              <h3>What you get</h3>
+              <ul class="checklist">
+                <li>Unlimited user support during business hours</li>
+                <li>Remote remediation for Windows & macOS</li>
+                <li>Application help (M365, Google, browsers, VPN, printing)</li>
+                <li>Endpoint protection alert response</li>
+                <li>Hardware troubleshooting & vendor coordination</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Service levels</h3>
+              <ul class="checklist">
+                <li>Priority triage for outages & security events</li>
+                <li>Ticket portal + email updates</li>
+                <li>Optional after-hours coverage</li>
+                <li>Monthly service reports</li>
+              </ul>
+            </div>
+          </div>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="tel:15038787000">Call Helpdesk: 503-878-7000</a>
+            <a class="btn btn-outline" href="/support.html">Open/Email Support</a>
+          </div>
+        </div>
+        <aside class="card">
+          <h3>Fast answers, fewer interruptions</h3>
+          <p class="muted">We fix common issues (passwords, printers, app errors, updates) before they become team-wide problems,
+            and document the fix so next time is even faster.</p>
+          <ul class="checklist">
+            <li>Clear, plain-English communication</li>
+            <li>Root-cause analysis for recurring issues</li>
+            <li>Quarterly review to reduce ticket drivers</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Maintenance & Monitoring -->
+    <section id="maintenance" class="section">
+      <div class="container">
+        <h2>Maintenance & Monitoring</h2>
+        <p>
+          24×7 monitoring watches your endpoints, servers, and key services. We remediate quietly in the background and
+          alert you only when decisions are needed.
+        </p>
+        <div class="grid grid-3">
+          <div class="card">
+            <h3>Endpoint Care</h3>
+            <ul class="checklist">
+              <li>RMM agent with health checks</li>
+              <li>Automated disk cleanup & updates</li>
+              <li>Next-gen AV/EDR (managed)</li>
+              <li>Device encryption status tracking</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Server Health</h3>
+            <ul class="checklist">
+              <li>Resource & service monitors</li>
+              <li>Backup job success verification</li>
+              <li>Certificate & SSL expiry alerts</li>
+              <li>Storage & RAID early-warning</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Proactive Tasks</h3>
+            <ul class="checklist">
+              <li>Automated remediation scripts</li>
+              <li>Standardized baseline policies</li>
+              <li>Quarterly cleanup & tune-ups</li>
+              <li>Hardware lifecycle planning</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Patching & Compliance -->
+    <section id="patching" class="section">
+      <div class="container">
+        <h2>Patching & Compliance</h2>
+        <p>
+          We keep OS and critical apps current with staged rings and maintenance windows that respect your business. Need
+          reporting for frameworks like CIS, HIPAA, or cyber-insurance? We’ve got that too.
+        </p>
+        <div class="grid grid-3">
+          <div class="card">
+            <h3>Windows & macOS</h3>
+            <ul class="checklist">
+              <li>Patch rings (pilot → broad)</li>
+              <li>Deferrals & blackout windows</li>
+              <li>Rollback plans for bad updates</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Third-Party Apps</h3>
+            <ul class="checklist">
+              <li>Browsers, Java, Zoom, Adobe, etc.</li>
+              <li>Silent install & update enforcement</li>
+              <li>Vulnerability prioritization</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Evidence & Policy</h3>
+            <ul class="checklist">
+              <li>Patch compliance reports</li>
+              <li>Configuration baselines</li>
+              <li>Audit-ready documentation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Asset & License Management -->
+    <section id="assets" class="section">
+      <div class="container">
+        <h2>Asset & License Management</h2>
+        <p>
+          Always know what you own, where it is, and who uses it. We maintain a living inventory of devices, warranties,
+          and software so budgeting and audits aren’t a scramble.
+        </p>
+        <div class="grid grid-3">
+          <div class="card">
+            <h3>Hardware Inventory</h3>
+            <ul class="checklist">
+              <li>Device details & location</li>
+              <li>Warranty & lifecycle tracking</li>
+              <li>Spare & loaner pool management</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Software & Licensing</h3>
+            <ul class="checklist">
+              <li>M365/Google & line-of-business apps</li>
+              <li>License assignment & cleanup</li>
+              <li>Renewal reminders & right-sizing</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Procurement Help</h3>
+            <ul class="checklist">
+              <li>Standardized builds & images</li>
+              <li>Vendor quotes & order handling</li>
+              <li>Asset tagging & DOA coverage</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- User On/Offboarding -->
+    <section id="onboarding" class="section">
+      <div class="container">
+        <h2>User On/Offboarding</h2>
+        <p>
+          New hires ready on day one; departures handled securely. We use checklists and automation to keep accounts,
+          access, and equipment consistent.
+        </p>
+        <div class="grid grid-3">
+          <div class="card">
+            <h3>Onboarding</h3>
+            <ul class="checklist">
+              <li>Account creation & group membership</li>
+              <li>Mailbox/license assignment</li>
+              <li>Device setup & apps preloaded</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Offboarding</h3>
+            <ul class="checklist">
+              <li>Account disable & retention policy</li>
+              <li>Data transfer to manager/HR</li>
+              <li>Device collection & wipe</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Access Governance</h3>
+            <ul class="checklist">
+              <li>Role-based access standards</li>
+              <li>MFA & conditional access</li>
+              <li>Periodic access reviews</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Network & Wi-Fi Management -->
+    <section id="network" class="section">
+      <div class="container">
+        <h2>Network & Wi-Fi Management</h2>
+        <p>
+          From gateway to switch to AP, we build reliable networks with clear documentation and safe defaults. Remote
+          management means quicker changes and fewer site visits.
+        </p>
+        <div class="grid grid-3">
+          <div class="card">
+            <h3>Design & Standards</h3>
+            <ul class="checklist">
+              <li>Segmentation & VLANs</li>
+              <li>Guest & IoT isolation</li>
+              <li>Secure remote access (VPN)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Operations</h3>
+            <ul class="checklist">
+              <li>Config backups & change logs</li>
+              <li>Firmware management</li>
+              <li>Performance & uptime monitoring</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Wi-Fi Experience</h3>
+            <ul class="checklist">
+              <li>Heat-map planning & placement</li>
+              <li>Roaming optimization</li>
+              <li>Guest splash & acceptable-use</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cloud Productivity -->
+    <section id="cloud" class="section">
+      <div class="container">
+        <h2>Cloud Productivity (Microsoft&nbsp;365 / Google)</h2>
+        <p>
+          Keep collaboration secure and tidy. We manage identities, policies, and licensing so your team can focus on the work.
+        </p>
+        <div class="grid grid-3">
+          <div class="card">
+            <h3>Identity & Security</h3>
+            <ul class="checklist">
+              <li>Azure AD / Google Workspace</li>
+              <li>MFA & Conditional Access</li>
+              <li>Baseline hardening & alerts</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Productivity Apps</h3>
+            <ul class="checklist">
+              <li>Teams/SharePoint/Drive governance</li>
+              <li>Mailbox, groups, and retention</li>
+              <li>Data loss prevention policies</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Licensing & Training</h3>
+            <ul class="checklist">
+              <li>Right-size plans & save costs</li>
+              <li>Security awareness training</li>
+              <li>Admin & user workshops</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VoIP -->
+    <section id="voip" class="section">
+      <div class="container">
+        <h2>VoIP Phones</h2>
+        <p>
+          Modern, flexible calling for office, remote, and mobile users. We design call flows, provision devices, and support your team.
+        </p>
+        <div class="grid grid-3">
+          <div class="card">
+            <h3>Setup & Migration</h3>
+            <ul class="checklist">
+              <li>Call flow & auto-attendant design</li>
+              <li>Number porting & E911 updates</li>
+              <li>Desk phone & softphone rollout</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Operations</h3>
+            <ul class="checklist">
+              <li>User adds/changes</li>
+              <li>Voicemail & transcription</li>
+              <li>QoS & monitoring</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Integrations</h3>
+            <ul class="checklist">
+              <li>Teams, mobile apps, CRM hooks</li>
+              <li>Hunt groups & reporting</li>
+              <li>Holiday schedules</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Backup & DR -->
+    <section id="backup-dr" class="section">
+      <div class="container">
+        <h2>Backup & Disaster Recovery</h2>
+        <p>
+          Backups you can trust—and restore quickly. We protect servers, cloud data, and endpoints with tested recovery plans.
+        </p>
+        <div class="grid grid-3">
+          <div class="card">
+            <h3>What We Protect</h3>
+            <ul class="checklist">
+              <li>Servers (physical/virtual)</li>
+              <li>Workstations & laptops</li>
+              <li>Microsoft 365 / Google Workspace</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>How It Works</h3>
+            <ul class="checklist">
+              <li>3-2-1 strategy with offsite copies</li>
+              <li>Encryption in transit & at rest</li>
+              <li>Automated backup verification</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Recovery-Ready</h3>
+            <ul class="checklist">
+              <li>Documented RPO/RTO targets</li>
+              <li>Periodic test restores</li>
+              <li>Runbook for major incidents</li>
+            </ul>
+          </div>
+        </div>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/contact.html">Get a backup review</a>
+          <a class="btn btn-outline" href="#top">Back to top</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ / Next steps -->
+    <section id="faq" class="section" aria-labelledby="faq-heading">
+      <div class="container">
+        <h2 id="faq-heading">Common Questions</h2>
+        <dl class="faq">
+          <dt>How do you price managed services?</dt>
+          <dd>Most plans are per-user per-month with options for servers, network gear, and specialized systems. We’ll align coverage to your environment and budget.</dd>
+          <dt>Can you work with our existing IT person?</dt>
+          <dd>Absolutely. We frequently co-manage—handling monitoring, patching, and escalations while internal IT focuses on projects and staff support.</dd>
+          <dt>What’s the onboarding process?</dt>
+          <dd>Discovery → documentation → agent & security deployment → stabilization → quarterly roadmap. Typical onboarding is 2–4 weeks depending on size.</dd>
+          <dt>Do you offer after-hours support?</dt>
+          <dd>Yes. We offer extended and 24×7 options for organizations that need it.</dd>
+        </dl>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/contact.html">Schedule a consult</a>
+          <a class="btn btn-outline" href="tel:15038787000">503-878-7000</a>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Shared footer -->
