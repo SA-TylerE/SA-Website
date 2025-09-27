@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Support | System Alternatives</title>
+  <meta name="description" content="Get help fast. Call the helpdesk or start a secure remote session with Splashtop SOS." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <script src="assets/js/includes.js" defer></script>
+</head>
+<body>
+
+  <!-- Shared header -->
+  <div data-include="partials/header.html"></div>
+
+  <main>
+    <!-- Hero -->
+    <section class="remote-hero">
+      <div class="container">
+        <h1>Support</h1>
+        <p>Need help right now? Call our helpdesk or start a secure remote session.</p>
+      </div>
+    </section>
+
+    <!-- 1) Direct Helpdesk contact -->
+    <section class="section" id="helpdesk">
+      <div class="container">
+        <article class="card" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between">
+          <div style="min-width:260px">
+            <h2 style="margin:0 0 6px 0">Contact the Helpdesk</h2>
+            <p class="lead" style="margin:0;color:var(--gray-dark)">
+              Speak with a technician or send us details—whatever’s quickest for you.
+            </p>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <a class="btn btn--primary" href="tel:+1-503-878-7000">Call 503-878-7000</a>
+
+            <!-- TOGGLE: shows the email form below -->
+            <button
+              type="button"
+              id="toggle-email-form"
+              class="btn btn--outline"
+              aria-expanded="false"
+              aria-controls="email-form-panel">
+              Email Helpdesk
+            </button>
+
+            <!-- Ticket button can stay as-is / disabled until ready -->
+            <a class="btn btn--outline" href="#" aria-disabled="true" title="Web ticketing coming soon">
+              Open a Ticket
+            </a>
+          </div>
+        </article>
+
+        <!-- Collapsible email form panel -->
+        <div id="email-form-panel" class="card collapsible" hidden>
+          <h3 style="margin-top:0">Send details to the helpdesk</h3>
+          <form id="helpdesk-email-form" class="support-form" novalidate>
+            <div class="form-grid">
+              <label>
+                <span>Name</span>
+                <input type="text" id="hd-name" name="name" autocomplete="name" required>
+              </label>
+
+              <label>
+                <span>Company</span>
+                <input type="text" id="hd-company" name="company" autocomplete="organization">
+              </label>
+
+              <label class="full">
+                <span>Email</span>
+                <input type="email" id="hd-email" name="email" autocomplete="email" required>
+              </label>
+
+              <label class="full">
+                <span>Issue</span>
+                <textarea id="hd-issue" name="issue" rows="5" placeholder="Briefly describe the problem…" required></textarea>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn--primary">Send Email</button>
+              <button type="button" class="btn btn--outline" id="cancel-email-form">Cancel</button>
+            </div>
+
+            <p class="form-note">
+              Submitting will open your email app with the details pre-filled. You can review and press send.
+            </p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 2) Remote support (Splashtop SOS) -->
+    <section class="section" id="remote">
+      <div class="container remote-grid">
+
+        <!-- Download card -->
+        <article class="card download-card">
+          <div class="download-header">
+            <a id="download-button" class="btn btn--primary" href="#" aria-label="Download Splashtop SOS">
+              <img id="platform-icon" class="platform-icon" src="" alt="" />
+              <span id="button-text">Splashtop SOS</span>
+            </a>
+            <div class="download-meta">
+              <div id="platform-message" class="platform-status">Detecting your platform…</div>
+              <div class="platform-note">Auto-detected; you can choose a different platform below.</div>
+            </div>
+          </div>
+
+          <div class="override-wrapper">
+            <strong>Choose a different platform</strong>
+            <div id="platform-buttons" class="override-group" aria-label="Manual platform selection"></div>
+          </div>
+
+          <noscript>
+            <div class="notice" style="margin-top:12px;">
+              <p><strong>JavaScript is disabled.</strong> Use the direct links:</p>
+              <ul>
+                <li><a href="https://download.splashtop.com/sos/SplashtopSOS.exe">Windows</a></li>
+                <li><a href="https://download.splashtop.com/sos/SplashtopSOS.dmg">macOS</a></li>
+                <li><a href="https://play.google.com/store/apps/details?id=com.splashtop.sos">Android</a></li>
+                <li><a href="https://apps.apple.com/app/splashtop-sos/id1230853703">iOS</a></li>
+              </ul>
+            </div>
+          </noscript>
+        </article>
+
+        <!-- How it works -->
+        <div class="card howto-card">
+          <h2>How it works</h2>
+          <ol class="howto-steps">
+            <li><strong>Download & open the app.</strong> Click the button for your platform above.</li>
+            <li><strong>Provide the 9-digit code.</strong> Share the one-time SOS code with your technician.</li>
+            <li><strong>We connect securely.</strong> Allow access when prompted; you can end any time.</li>
+          </ol>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Shared footer -->
+  <div data-include="partials/footer.html"></div>
+
+  <!-- Device-aware download script -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const downloadBtn = document.getElementById("download-button");
+      const platformMsg = document.getElementById("platform-message");
+      const platformIcon = document.getElementById("platform-icon");
+      const buttonText = document.getElementById("button-text");
+      const platformBtnsContainer = document.getElementById("platform-buttons");
+
+      const downloads = {
+        windows: {
+          name: "Windows",
+          url: "https://download.splashtop.com/sos/SplashtopSOS.exe",
+          icon: "https://img.icons8.com/ios-filled/50/000000/windows8.png"
+        },
+        mac: {
+          name: "macOS",
+          url: "https://download.splashtop.com/sos/SplashtopSOS.dmg",
+          icon: "https://img.icons8.com/ios-filled/50/000000/mac-os.png"
+        },
+        android: {
+          name: "Android",
+          url: "https://play.google.com/store/apps/details?id=com.splashtop.sos",
+          icon: "https://img.icons8.com/ios-filled/50/000000/android-os.png"
+        },
+        ios: {
+          name: "iOS",
+          url: "https://apps.apple.com/app/splashtop-sos/id1230853703",
+          icon: "https://img.icons8.com/ios-filled/50/000000/ios-logo.png"
+        }
+      };
+
+      function detectOS() {
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        if (/windows/i.test(ua)) return "windows";
+        if (/macintosh|mac os x/i.test(ua)) return "mac";
+        if (/android/i.test(ua)) return "android";
+        if (/iphone|ipad|ipod/i.test(ua)) return "ios";
+        return "unknown";
+      }
+
+      function markSelected(osKey) {
+        document.querySelectorAll('.override-download-btn').forEach(b => b.classList.toggle('selected', b.dataset.key === osKey));
+      }
+
+      function updateDownload(osKey, manual = false) {
+        const platform = downloads[osKey];
+        if (!platform) return;
+        downloadBtn.href = platform.url;
+        platformIcon.src = platform.icon;
+        platformIcon.alt = platform.name + " icon";
+        buttonText.textContent = "Splashtop SOS";
+        platformMsg.textContent = `Download the ${platform.name} version${manual ? " (selected manually)" : ""}.`;
+        downloadBtn.style.display = "inline-flex";
+        markSelected(osKey);
+      }
+
+      function buildOverrideButtons() {
+        for (let key in downloads) {
+          const platform = downloads[key];
+          const btn = document.createElement("button");
+          btn.className = "override-download-btn";
+          btn.type = "button";
+          btn.dataset.key = key;
+          btn.innerHTML = `<img src="${platform.icon}" alt="${platform.name}"> ${platform.name}`;
+          btn.addEventListener("click", () => updateDownload(key, true));
+          platformBtnsContainer.appendChild(btn);
+        }
+      }
+
+      const detectedOS = detectOS();
+      buildOverrideButtons();
+      if (downloads[detectedOS]) {
+        updateDownload(detectedOS);
+      } else {
+        platformMsg.textContent = "We couldn't detect your platform. Please choose one below.";
+        downloadBtn.style.display = "none";
+      }
+    });
+  </script>
+  <script>
+    (function(){
+      const emailAddr = 'support@systemalternatives.com';  // change if needed
+      const toggleBtn = document.getElementById('toggle-email-form');
+      const panel = document.getElementById('email-form-panel');
+      const form = document.getElementById('helpdesk-email-form');
+      const cancelBtn = document.getElementById('cancel-email-form');
+
+      function openPanel() {
+        panel.hidden = false;
+        panel.classList.add('is-open');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        document.getElementById('hd-name').focus();
+      }
+      function closePanel() {
+        panel.classList.remove('is-open');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        // wait for animation then hide
+        setTimeout(() => { panel.hidden = true; }, 280);
+      }
+
+      toggleBtn.addEventListener('click', () => {
+        const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
+        isOpen ? closePanel() : openPanel();
+      });
+      cancelBtn.addEventListener('click', closePanel);
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // basic gather + very light validation
+        const name = (document.getElementById('hd-name').value || '').trim();
+        const company = (document.getElementById('hd-company').value || '').trim();
+        const email = (document.getElementById('hd-email').value || '').trim();
+        const issue = (document.getElementById('hd-issue').value || '').trim();
+
+        if (!name || !email || !issue) {
+          alert('Please fill in your Name, Email, and Issue.');
+          return;
+        }
+
+        const subject = encodeURIComponent('Support Request');
+        const bodyLines = [
+          `Name: ${name}`,
+          `Company: ${company}`,
+          `Email: ${email}`,
+          '',
+          'Issue:',
+          issue
+        ];
+        const body = encodeURIComponent(bodyLines.join('\n'));
+
+        // Launch default mail app
+        window.location.href = `mailto:${emailAddr}?subject=${subject}&body=${body}`;
+      });
+    })();
+  </script>
+
+</body>
+</html>
