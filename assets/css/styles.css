@@ -685,20 +685,36 @@ a{ color:inherit; text-decoration:none }
 #helpdesk + .section {
   padding-top: 28px; /* reduce gap before Splashtop section */
 }
-/* Collapsible card (email form) */
-.collapsible { 
-  overflow: hidden; 
-  max-height: 0; 
-  padding-top: 0; 
-  padding-bottom: 0; 
-  transition: max-height .28s ease, padding .28s ease; 
-  margin-top: 12px; 
+/* Collapsible email form card */
+.collapsible{
+  overflow: hidden;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;                  /* no gap when closed */
+  border-width: 0 !important;     /* hide the card border when closed */
+  background: transparent;        /* hide background when closed */
+  box-shadow: none;               /* no shadow when closed */
+  transition:
+    max-height .2s ease,
+    padding .2s ease,
+    margin .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease,
+    background-color .2s ease;
 }
-.collapsible.is-open { 
-  max-height: 700px;          /* big enough for the form */
-  padding-top: 18px; 
-  padding-bottom: 18px; 
+
+.collapsible.is-open{
+  max-height: 700px;              /* tall enough for the form */
+  padding-top: 18px;
+  padding-bottom: 18px;
+  margin-top: 12px;
+  border-width: 1px !important;   /* restore card border */
+  border-color: var(--border);
+  background: #fff;               /* restore card background */
+  box-shadow: 0 10px 24px rgba(0,0,0,.06);
 }
+
 
 /* Simple form layout matching site style */
 .support-form .form-grid {
@@ -736,3 +752,14 @@ a{ color:inherit; text-decoration:none }
 
 /* Disabled look (Open a Ticket placeholder) */
 .btn[aria-disabled="true"] { opacity:.55; cursor:not-allowed; pointer-events:none; }
+/* Normalize form controls to inherit site font/colors */
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* Ensure buttons styled as .btn don't use browser default look */
+.btn {
+  -webkit-appearance: none;
+  appearance: none;
+}
