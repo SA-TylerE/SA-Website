@@ -1,0 +1,26 @@
+/* Managed Services only (deduped; uses base btn/checklist/lead) */
+
+/* Sticky in-page subnav */
+.subnav{ position:sticky; top:0; z-index:5; background:#fff; border-bottom:1px solid var(--border) }
+.subnav .container{ display:flex; gap:.6rem; overflow:auto; padding:.5rem 1rem }
+.subnav a{ white-space:nowrap; padding:.5rem .85rem; border-radius:999px; border:1px solid var(--border); font-weight:700; transition:background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease }
+.subnav a:hover, .subnav a:focus-visible{ background:var(--red); color:#fff; border-color:var(--red); transform:translateY(-1px) }
+.subnav a.is-active{ background:var(--red); color:#fff; border-color:var(--red) }
+
+/* Compact hero for this page */
+.hero{ padding:64px 0 32px; background:var(--panel); border-bottom:1px solid var(--border) }
+.lead{ line-height:1.6 } /* color comes from base */
+
+/* Section spacing just for this page */
+#helpdesk.section,#maintenance.section,#patching.section,#assets.section,#onboarding.section,#network.section,#cloud.section,#voip.section,#backup-dr.section,#faq.section{ padding-top:48px; padding-bottom:48px }
+
+/* Visual variety striping */
+main > section{ position:relative }
+main > section:nth-of-type(even){ background:var(--panel) }
+main > section:nth-of-type(3n)::before{ content:""; position:absolute; inset:0 auto 0 0; width:4px; background:linear-gradient(var(--red), var(--orange)); opacity:.45 }
+
+/* FAQ */
+.faq{ margin:0; display:grid; gap:12px }
+.faq dt{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:12px 14px; font-weight:800; position:relative }
+.faq dt::after{ content:"+"; position:absolute; right:14px; top:50%; transform:translateY(-50%); color:var(--red); font-weight:800 }
+.faq dd{ margin:-8px 0 4px 0; background:#fff; border:1px solid var(--border); border-top:0; border-radius:0 0 12px 12px; padding:12px 14px; color:var(--gray-dark) }

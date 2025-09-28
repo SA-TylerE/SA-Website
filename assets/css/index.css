@@ -1,0 +1,57 @@
+/* Homepage only */
+
+.hero__badges{ display:flex; gap:16px; margin-top:14px; padding:0; list-style:none; flex-wrap:wrap }
+.hero__badges li{
+  font-weight:600; font-size:.9rem; color:var(--black);
+  background:#fff; border:1px solid var(--border); border-radius:999px; padding:8px 12px;
+}
+
+/* Stat card in hero */
+.stat-card{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:18px; box-shadow:0 10px 24px rgba(0,0,0,.06); display:grid; gap:10px }
+.stat{ display:flex; gap:10px; align-items:baseline; color:var(--gray-dark) }
+.stat span{ font-size:1.6rem; font-weight:800; color:var(--red) }
+
+/* Feature cards */
+.feature-grid .feature{ text-align:left; background:#fff; border:1px solid var(--border); border-radius:12px; padding:18px }
+.feature__icon{ font-size:1.4rem; line-height:1; margin-bottom:6px }
+.feature p{ color:var(--gray-dark) }
+
+/* Security split */
+.security{ display:grid; grid-template-columns:1.1fr .9fr; gap:28px; align-items:center }
+.security__copy .check-list{ list-style:none; padding:0; margin:12px 0 18px }
+.security__copy .check-list li{ margin:8px 0; padding-left:18px; position:relative }
+.security__copy .check-list li::before{ content:"•"; position:absolute; left:0; color:var(--red); font-weight:900 }
+.security__panel{ display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start }
+.badge{ background:#fff; border:2px solid var(--red); color:var(--red); border-radius:999px; padding:8px 12px; font-weight:800; font-size:.9rem }
+.badge--alt{ border-color:var(--orange); color:var(--orange) }
+@media (max-width:900px){ .security{ grid-template-columns:1fr } }
+
+/* Steps */
+.steps{ counter-reset:step; display:grid; gap:14px; grid-template-columns:repeat(4,1fr); list-style:none; padding:0; margin:0 }
+.steps li{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px }
+.steps li h4{ margin:0 0 6px 0; font-size:1.05rem }
+.steps li p{ color:var(--gray-dark); margin:0 }
+.steps li::before{ counter-increment:step; content:counter(step); display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; margin-bottom:8px; background:var(--red); color:#fff; font-weight:800 }
+@media (max-width:1024px){ .steps{ grid-template-columns:1fr 1fr } }
+@media (max-width:640px){ .steps{ grid-template-columns:1fr } }
+
+/* Final call-to-action block */
+.section--cta .cta{ text-align:center }
+.section--cta .cta h2{ margin:0 0 6px 0; font-size:2rem }
+.section--cta .cta .lead{ color:var(--gray-dark); margin-bottom:12px }
+.cta__buttons{ display:inline-flex; gap:12px; flex-wrap:wrap }
+
+/* Hero variant used on homepage only */
+.hero--enhanced::before{ opacity:0.55 }
+.hero--enhanced::after{
+  background:linear-gradient(to right, rgba(0,0,0,0.24) 0%, rgba(0,0,0,0.14) 45%, rgba(0,0,0,0.06) 100%);
+}
+.hero--enhanced .kicker,
+.hero--enhanced h1,
+.hero--enhanced p,
+.hero--enhanced .hero__badges li,
+.hero--enhanced .btn{ text-shadow:0 1px 2px rgba(0,0,0,0.18) }
+.hero--enhanced .kicker{ font-size:1rem; letter-spacing:.18em }
+.hero--enhanced .hero__art{ display:flex; justify-content:flex-end }
+.hero--enhanced .stat-card{ max-width:380px; width:100%; padding:16px 18px }
+@media (max-width:980px){ .hero--enhanced .stat-card{ max-width:100% } }

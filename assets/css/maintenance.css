@@ -1,0 +1,23 @@
+/* Maintenance & Monitoring page (scoped .mm-* where needed) */
+
+/* Subtle calendar & SLA blocks */
+.mm-calendar{ display:grid; gap:12px; }
+.mm-cal__row{ display:grid; grid-template-columns: 1fr 3fr; gap:12px;
+  background:#fff; border:1px solid var(--border); border-radius: var(--radius-card); padding:14px; }
+.mm-cal__when{ color:var(--black); font-weight:700; }
+.mm-cal__what{ color:var(--gray-dark); }
+
+.mm-sla{ display:grid; gap:12px; }
+.mm-sla__row{ display:grid; grid-template-columns: 1fr 1fr;
+  background:#fff; border:1px solid var(--border); border-radius: var(--radius-card); padding:14px; }
+.mm-sla__sev{ color:var(--black); }
+.mm-sla__target{ color:var(--gray-dark); }
+@media (min-width:800px){
+  .mm-sla__row{ grid-template-columns: 2fr 3fr; }
+}
+
+/* Optional: slightly denser hero badges on this page */
+.mm-hero .hero__badges li{ background: rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.25); }
+
+/* Keep things aligned to your existing utility classes:
+   - .hero, .section, .container, .grid, .card, .tick-list, .btn, etc. are in styles.css */

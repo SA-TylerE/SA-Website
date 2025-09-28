@@ -1,0 +1,164 @@
+/* =========================================================
+   System Alternatives — Base (global)
+   ========================================================= */
+
+/* 0) Variables / Base reset */
+:root{
+  --red:#aa1e2e; --orange:#f26829; --black:#231f20;
+  --gray-dark:#58595b; --gray-light:#d1d3d4;
+  --bg:#ffffff; --panel:#f7f9fc; --border:#e6e6e6;
+  --radius-pill:50px; --radius-card:12px; --max:1200px;
+  --hero-bg:none;
+}
+*{ box-sizing:border-box }
+html,body{ margin:0; padding:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--black); background:var(--bg); -webkit-font-smoothing:antialiased }
+img{ max-width:100%; height:auto; display:block }
+a{ color:inherit; text-decoration:none }
+.container{ max-width:var(--max); margin:0 auto; padding:0 24px }
+
+/* 1) Header / Navigation (shared) */
+.nav{ position:sticky; top:0; z-index:1000; background:#fff; border-bottom:1px solid var(--border); overflow:visible }
+.nav__inner{ display:grid; grid-template-columns:auto 1fr auto; align-items:center; min-height:72px; gap:24px }
+.brand{ display:flex; align-items:center; gap:12px; color:var(--black) }
+.brand img{ height:50px; width:auto }
+.brand__text{ display:none }
+.menu{ display:flex; justify-content:center; align-items:center }
+.menu__list{ display:flex; gap:28px; list-style:none; margin:0; padding:0 }
+.menu__link{ position:relative; display:inline-block; padding:12px 6px; border-radius:4px; font-weight:700; color:var(--black); transition:color .15s ease }
+.menu__link:hover, .menu__link:focus{ color:var(--red) }
+.menu__link, .dropdown a, .submenu__link{ position:relative }
+.menu__link::after, .dropdown a::after, .submenu__link::after{
+  content:""; position:absolute; left:0; bottom:0; height:3px; width:100%; background:var(--red);
+  transform:scaleX(0); transform-origin:left; transition:transform .2s ease;
+}
+.menu__link:hover::after, .menu__link:focus-visible::after,
+.dropdown a:hover::after, .dropdown a:focus-visible::after,
+.submenu__link:hover::after, .submenu__link:focus-visible::after{ transform:scaleX(1) }
+.menu__cta{ display:flex; gap:12px }
+.has-dropdown{ position:relative; --hover-buffer:10px; padding-bottom:var(--hover-buffer); margin-bottom:calc(var(--hover-buffer) * -1) }
+.dropdown{
+  position:absolute; top:100%; left:0; min-width:260px; background:#fff; border:1px solid var(--border);
+  border-radius:8px; box-shadow:0 10px 24px rgba(0,0,0,.08); padding:8px 0; display:none; margin-top:0; z-index:1100; list-style:none; pointer-events:auto;
+}
+.dropdown li{ list-style:none }
+.dropdown a, .submenu__link{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 16px; border-radius:6px; color:var(--black); font-weight:600 }
+.dropdown a:hover, .submenu__link:hover{ background:rgba(209,211,212,.4); color:var(--red) }
+.has-subdropdown{ position:relative }
+.subdropdown{
+  position:absolute; top:0; left:calc(100% - 1px); min-width:260px; background:#fff; border:1px solid var(--border);
+  border-radius:8px; box-shadow:0 10px 24px rgba(0,0,0,.08); padding:8px 0; display:none; z-index:1101;
+}
+.submenu__link{ padding-right:28px }
+.submenu__link::before{
+  content:"›"; position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:.95rem; line-height:1; color:var(--gray-dark);
+  transition:transform .2s ease, color .2s ease, opacity .2s ease; opacity:.85;
+}
+.submenu__link:hover::before, .submenu__link:focus-visible::before{ color:var(--red); transform:translateY(-50%) translateX(2px); opacity:1 }
+.has-dropdown:hover > .dropdown, .has-dropdown:focus-within > .dropdown, .dropdown:hover, .dropdown:focus-within{ display:block }
+.has-subdropdown:hover > .subdropdown, .has-subdropdown:focus-within > .subdropdown, .subdropdown:hover, .subdropdown:focus-within{ display:block }
+
+/* 1.1 Mobile nav */
+.hamburger{ display:none; justify-self:end; flex-direction:column; gap:5px; background:none; border:0 }
+.hamburger span{ width:26px; height:2px; background:var(--black) }
+@media (max-width:980px){
+  .hamburger{ display:flex }
+  #primary-nav{ position:fixed; inset:72px 0 0 0; background:#fff; border-top:1px solid var(--border); transform:translateY(-8px); opacity:0; pointer-events:none; transition:.2s ease; padding:16px 20px }
+  #primary-nav.open{ transform:translateY(0); opacity:1; pointer-events:auto }
+  .menu__list{ flex-direction:column; gap:8px }
+  .dropdown, .subdropdown{ position:relative; left:auto; top:auto; margin-top:6px; box-shadow:none; border:0; min-width:unset }
+  .menu__cta{ margin-top:12px }
+}
+
+/* 2) Buttons (standardized) */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  border-radius:var(--radius-pill); padding:10px 20px; font-weight:700; border:2px solid transparent; transition:all .2s ease;
+}
+.btn-primary{ background:var(--red); color:#fff; border-color:transparent }
+.btn-primary:hover{ background:var(--orange) }
+.btn-outline{ background:#fff; color:var(--red); border-color:var(--red) }
+.btn-outline:hover{ background:var(--red); color:#fff }
+/* Temporary compatibility aliases (remove after HTML updated everywhere) */
+.btn--primary{ composes: btn-primary; } /* if your build supports CSS Modules; otherwise duplicate: */
+.btn--primary{ background:var(--red); color:#fff; border:2px solid transparent }
+.btn--primary:hover{ background:var(--orange) }
+.btn--outline{ background:#fff; color:var(--red); border:2px solid var(--red) }
+.btn--outline:hover{ background:var(--red); color:#fff }
+
+/* 3) Hero (shared base) */
+.hero{ position:relative; padding:84px 0; overflow:hidden }
+.hero--light{ background:#fff }
+.hero--bg::before{ content:""; position:absolute; inset:0; background-image:var(--hero-bg); background-size:cover; background-position:center; background-repeat:no-repeat; opacity:.18; pointer-events:none; z-index:0 }
+.hero--bg::after{ content:""; position:absolute; inset:0; background:linear-gradient(to right, rgba(255,255,255,.6), rgba(255,255,255,0)); pointer-events:none; z-index:0 }
+.hero__inner{ position:relative; z-index:1; display:grid; grid-template-columns:1.1fr .9fr; gap:32px; align-items:center }
+.kicker{ text-transform:uppercase; color:var(--red); font-weight:700; font-size:.8rem; letter-spacing:.12em }
+.lead{ color:var(--gray-dark) } /* shared text tone */
+
+/* 4) Sections / grids / cards (shared) */
+.section{ padding:64px 0 }
+.section--alt{ background:var(--panel) }
+.section__head{ margin-bottom:22px; text-align:center }
+.section__head h2{ margin:0 0 6px 0; font-size:2rem }
+.section__head .lead{ color:var(--gray-dark) }
+
+.grid{ display:grid; gap:28px }
+.grid--3{ grid-template-columns:repeat(3,1fr) }
+@media (max-width:1024px){ .grid--3{ grid-template-columns:1fr 1fr } }
+@media (max-width:720px){ .grid--3{ grid-template-columns:1fr } }
+.grid-2{ grid-template-columns:repeat(2,1fr) }
+.grid-3{ grid-template-columns:repeat(3,1fr) }
+@media (max-width:1024px){ .grid-3{ grid-template-columns:1fr 1fr } }
+@media (max-width:900px){ .grid-2{ grid-template-columns:1fr } }
+
+.card{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:18px; transition:transform .15s ease, box-shadow .2s ease }
+.card:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.06) }
+.card h3{ margin-top:0; font-size:1.25rem }
+
+/* 4.1 Shared list styles used on multiple pages */
+.tick-list{ list-style:none; padding:0; margin:0 0 12px 0 }
+.tick-list li{ position:relative; padding-left:22px; margin:8px 0; color:var(--black) }
+.tick-list li::before{ content:"✔"; position:absolute; left:0; top:0; color:var(--red); font-weight:800 }
+
+/* NEW: checklist appears on multiple pages → promote to base */
+.checklist{ list-style:none; padding:0; margin:.25rem 0 0 0 }
+.checklist li{ position:relative; padding-left:22px; margin:.5rem 0; color:var(--black) }
+.checklist li::before{ content:"✔"; position:absolute; left:0; top:0; color:var(--red); font-weight:800 }
+
+/* Utility link (shared) */
+.link{ color:var(--red); font-weight:700 }
+.link:hover{ color:var(--orange); text-decoration:underline }
+
+/* 5) Footer (shared) */
+.footer{ background:#fff; border-top:1px solid var(--border) }
+.footer__inner{ display:grid; grid-template-columns:1.1fr 1.4fr; gap:28px; padding:32px 0 }
+.footer__brand img{ height:130px; width:auto; margin-bottom:8px }
+.footer__brand p{ display:none }
+.footer__bar{ border-top:1px solid var(--border); font-size:.9rem; color:var(--gray-dark); padding:12px 0; text-align:center }
+.footer__nav{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px }
+.footer__nav h5{ margin:0 0 6px 0; font-size:.95rem; text-transform:uppercase; letter-spacing:.06em; color:var(--black) }
+.footer__nav ul{ list-style:none; padding:0; margin:0 }
+.footer__nav li{ margin:6px 0 }
+.footer__nav a{ color:var(--black); font-weight:600 }
+.footer__nav a:hover{ color:var(--red); text-decoration:underline }
+
+/* 6) Responsive (shared) */
+@media (max-width:980px){
+  .hero__inner{ grid-template-columns:1fr }
+  .hero{ padding:64px 0 }
+}
+
+/* 7) Scroll reveal (shared) */
+.reveal{ opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease; will-change:opacity,transform }
+.reveal.is-visible{ opacity:1; transform:none }
+@media (prefers-reduced-motion:reduce){ .reveal{ opacity:1 !important; transform:none !important } }
+.reveal.is-visible .grid > *,
+.reveal.is-visible .steps > li,
+.reveal.is-visible .security__panel > .badge{ animation:sa-reveal .6s ease both }
+.reveal.is-visible .grid > *:nth-child(1){ animation-delay:.05s }
+.reveal.is-visible .grid > *:nth-child(2){ animation-delay:.12s }
+.reveal.is-visible .grid > *:nth-child(3){ animation-delay:.19s }
+.reveal.is-visible .steps > li:nth-child(1){ animation-delay:.05s }
+.reveal.is-visible .steps > li:nth-child(2){ animation-delay:.12s }
+.reveal.is-visible .steps > li:nth-child(3){ animation-delay:.19s }
+.reveal.is-visible .steps > li:nth-child(4){ animation-delay:.26s }
+@keyframes sa-reveal{ from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none} }

@@ -1,32 +1,329 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Maintenance & Monitoring | System Alternatives</title>
-  <meta name="description" content="Managed IT, cybersecurity, and consulting for SMBs in the Portland/Vancouver area." />
+  <meta name="description" content="24/7 monitoring, maintenance windows, evidence-based reporting, and runbooks to keep your systems healthy and predictable." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/maintenance.css" />
   <script src="assets/js/includes.js" defer></script>
 </head>
 <body>
 
-  <!-- Shared header -->
+  <!-- Shared header (injected) -->
   <div data-include="partials/header.html"></div>
 
+  <!-- Hero (new, monitoring-themed) -->
+  <header class="hero hero--light hero--bg hero--enhanced mm-hero"
+          style="--hero-bg: url('/assets/img/hero-monitoring-ops.jpg');">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <span class="kicker">Proactive Care</span>
+        <h1>Maintenance &amp; Monitoring</h1>
+        <p class="lead">
+          Real-time telemetry, scheduled upkeep, and evidence-based reporting. We keep systems healthy—and prove it.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="#coverage">See coverage</a>
+          <a class="btn btn--outline" href="/contact.html">Get a quote</a>
+        </div>
+        <ul class="hero__badges">
+          <li>24/7 Observability</li>
+          <li>Defined Maintenance Windows</li>
+          <li>Monthly Health Reports</li>
+        </ul>
+      </div>
+      <div class="hero__art">
+        <div class="stat-card">
+          <div class="stat"><span>P1 &lt; 15m</span> Initial Response</div>
+          <div class="stat"><span>99.9%</span> Uptime Targets</div>
+          <div class="stat"><span>Quarterly</span> Site Checks</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sticky subnav (unique to this page) -->
+  <nav class="subnav" aria-label="Maintenance Sections">
+    <div class="container">
+      <a href="#coverage">Monitoring Coverage</a>
+      <a href="#playbook">Maintenance Playbook</a>
+      <a href="#evidence">Reporting & KPIs</a>
+      <a href="#calendar">Maintenance Calendar</a>
+      <a href="#runbooks">Runbooks & Docs</a>
+      <a href="#sla">SLAs</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </nav>
+
   <main>
-    <section class="section">
+
+    <!-- Monitoring Coverage (distinct from Managed Services content) -->
+    <section id="coverage" class="section section--alt">
       <div class="container">
-        <h1>Page Title</h1>
-        <p>Start adding your content here.</p>
+        <div class="section__head">
+          <h2>Monitoring Coverage</h2>
+          <p class="lead">We watch the signals that actually predict outages and security risk.</p>
+        </div>
+
+        <div class="grid grid--3 card-grid">
+          <article class="card">
+            <h3>Endpoints & Servers</h3>
+            <ul class="tick-list">
+              <li>Agent health & heartbeat</li>
+              <li>Disk, SMART, temp, battery/UPS</li>
+              <li>Critical service/process checks</li>
+              <li>Certificate & SSL expiry</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Network & Internet</h3>
+            <ul class="tick-list">
+              <li>Gateway, switch, AP uptime</li>
+              <li>Latency, loss, capacity alerts</li>
+              <li>Config backup verification</li>
+              <li>Public service checks (DNS, web)</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Cloud & SaaS</h3>
+            <ul class="tick-list">
+              <li>M365/Google health signals</li>
+              <li>Sign-in risk & MFA drift</li>
+              <li>Backup job status (cloud data)</li>
+              <li>License posture exceptions</li>
+            </ul>
+          </article>
+        </div>
       </div>
     </section>
+
+    <!-- Maintenance Playbook (what we do on a cadence) -->
+    <section id="playbook" class="section">
+      <div class="container">
+        <div class="section__head">
+          <h2>Maintenance Playbook</h2>
+          <p class="lead">Quiet, predictable upkeep during agreed windows—no surprises.</p>
+        </div>
+
+        <div class="grid grid--3 card-grid">
+          <article class="card">
+            <h3>Weekly</h3>
+            <ul class="tick-list">
+              <li>Patch pilot group & review</li>
+              <li>Agent drift remediation</li>
+              <li>Top alerts triage & fixes</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Monthly</h3>
+            <ul class="tick-list">
+              <li>Broad patch deployment</li>
+              <li>Third-party app updates</li>
+              <li>Backup & restore spot-tests</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Quarterly</h3>
+            <ul class="tick-list">
+              <li>Onsite physical checks</li>
+              <li>Firmware & BIOS review</li>
+              <li>Capacity & lifecycle plan</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Evidence & KPIs (unique value: show the proof) -->
+    <section id="evidence" class="section section--alt">
+      <div class="container">
+        <div class="section__head">
+          <h2>Reporting &amp; KPIs</h2>
+          <p class="lead">Health scores, patch compliance, backup success, and a simple roadmap you can act on.</p>
+        </div>
+
+        <div class="grid grid--3 card-grid">
+          <article class="card">
+            <h3>Patch Compliance</h3>
+            <ul class="tick-list">
+              <li>OS & 3rd-party coverage</li>
+              <li>Exceptions & risk notes</li>
+              <li>Remediation targets</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Backup Assurance</h3>
+            <ul class="tick-list">
+              <li>Success/Failure trend</li>
+              <li>RPO/RTO alignment</li>
+              <li>Test results & evidence</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Risk & Roadmap</h3>
+            <ul class="tick-list">
+              <li>Top findings this month</li>
+              <li>Priority actions & owners</li>
+              <li>Budget & lifecycle notes</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Maintenance Calendar (sets expectations) -->
+    <section id="calendar" class="section">
+      <div class="container">
+        <div class="section__head">
+          <h2>Maintenance Calendar</h2>
+          <p class="lead">Transparent windows and advance notice—your operations come first.</p>
+        </div>
+
+        <div class="mm-calendar">
+          <div class="mm-cal__row">
+            <div class="mm-cal__when"><strong>Weekly</strong></div>
+            <div class="mm-cal__what">Pilot patches, alert review, automation fixes</div>
+          </div>
+          <div class="mm-cal__row">
+            <div class="mm-cal__when"><strong>Monthly</strong></div>
+            <div class="mm-cal__what">Patch rollout, app updates, restore spot-tests, reports</div>
+          </div>
+          <div class="mm-cal__row">
+            <div class="mm-cal__when"><strong>Quarterly</strong></div>
+            <div class="mm-cal__what">Onsite checks, firmware review, capacity plan, roadmap</div>
+          </div>
+        </div>
+
+        <div class="cta-row">
+          <a class="btn btn--primary" href="/contact.html">Request our sample report</a>
+          <a class="btn btn--outline" href="#sla">See SLAs</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Runbooks & Documentation (distinct deliverable) -->
+    <section id="runbooks" class="section section--alt">
+      <div class="container">
+        <div class="section__head">
+          <h2>Runbooks & Documentation</h2>
+          <p class="lead">The “how” is written down. Faster fixes, consistent outcomes.</p>
+        </div>
+
+        <div class="grid grid--3 card-grid">
+          <article class="card">
+            <h3>Alert → Action</h3>
+            <ul class="tick-list">
+              <li>Defined triggers & owners</li>
+              <li>Isolation steps for threats</li>
+              <li>Escalation matrix</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Config & Diagrams</h3>
+            <ul class="tick-list">
+              <li>Network maps & logins vault</li>
+              <li>Change history & backups</li>
+              <li>Recovery checklists</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Service Catalog</h3>
+            <ul class="tick-list">
+              <li>Standard builds & images</li>
+              <li>Access requests & approvals</li>
+              <li>Joiners/Movers/Leavers SOPs</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLAs -->
+    <section id="sla" class="section">
+      <div class="container">
+        <div class="section__head">
+          <h2>Response SLAs</h2>
+          <p class="lead">Clear expectations. Faster outcomes.</p>
+        </div>
+
+        <div class="mm-sla" role="table" aria-label="Support SLAs">
+          <div class="mm-sla__row" role="row">
+            <div class="mm-sla__sev" role="cell"><strong>Critical (P1)</strong><br/>Outage/security</div>
+            <div class="mm-sla__target" role="cell">Response: &lt; 15 min<br/>Work start: &lt; 1 hr</div>
+          </div>
+          <div class="mm-sla__row" role="row">
+            <div class="mm-sla__sev" role="cell"><strong>High (P2)</strong><br/>Multiple users</div>
+            <div class="mm-sla__target" role="cell">Response: &lt; 1 hr<br/>Work start: same day</div>
+          </div>
+          <div class="mm-sla__row" role="row">
+            <div class="mm-sla__sev" role="cell"><strong>Normal (P3)</strong><br/>Single user</div>
+            <div class="mm-sla__target" role="cell">Response: &lt; 4 hrs<br/>Work start: 1–2 days</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="section section--cta">
+      <div class="container cta cta--tight">
+        <h2>FAQ</h2>
+        <dl class="faq">
+          <dt>Will this overlap with Managed Services?</dt>
+          <dd>No—this page centers on observability, scheduled upkeep, and evidence. Helpdesk/user support lives on Managed Services.</dd>
+          <dt>Can you co-manage with our IT staff?</dt>
+          <dd>Yes. We can run monitoring/maintenance and hand off alerts or changes to your team.</dd>
+          <dt>Do you support after-hours maintenance?</dt>
+          <dd>Absolutely—maintenance windows are scheduled to minimize impact.</dd>
+        </dl>
+        <div class="cta__buttons">
+          <a class="btn btn--primary" href="/contact.html">Schedule a consult</a>
+          <a class="btn btn--outline" href="tel:+1-503-878-7000">503-878-7000</a>
+        </div>
+      </div>
+    </section>
+
   </main>
 
-  <!-- Shared footer -->
+  <!-- Shared footer (injected) -->
   <div data-include="partials/footer.html"></div>
+
+  <script>
+    (function () {
+      const allSections = Array.from(document.querySelectorAll('section'));
+      const sectionsToReveal = allSections.slice(1); // hero is index 0
+      sectionsToReveal.forEach(sec => sec.classList.add('reveal'));
+
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduceMotion) {
+        sectionsToReveal.forEach(sec => sec.classList.add('is-visible'));
+        return;
+      }
+
+      const io = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+
+      sectionsToReveal.forEach(sec => io.observe(sec));
+    })();
+  </script>
 
 </body>
 </html>

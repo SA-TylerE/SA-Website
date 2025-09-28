@@ -28,5 +28,30 @@
   <!-- Shared footer -->
   <div data-include="partials/footer.html"></div>
 
+  <script>
+    (function () {
+      const allSections = Array.from(document.querySelectorAll('section'));
+      const sectionsToReveal = allSections.slice(1); // hero is index 0
+      sectionsToReveal.forEach(sec => sec.classList.add('reveal'));
+
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduceMotion) {
+        sectionsToReveal.forEach(sec => sec.classList.add('is-visible'));
+        return;
+      }
+
+      const io = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+
+      sectionsToReveal.forEach(sec => io.observe(sec));
+    })();
+  </script>
+
 </body>
 </html>
