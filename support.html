@@ -18,133 +18,135 @@
   <div data-include="partials/header.html"></div>
 
   <main>
-    <!-- Hero -->
-    <section class="remote-hero">
-      <div class="container">
+  <!-- Hero with background image (shared hero system) -->
+  <section class="hero hero--light hero--bg hero--enhanced support-hero">
+    <div class="container hero__inner">
+      <div class="hero__copy">
         <h1>Support</h1>
-        <p>Need help right now? Call our helpdesk or start a secure remote session.</p>
+        <p>Need help right now? Call our helpdesk to start a secure remote session.</p>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- 1) Direct Helpdesk contact -->
-    <section class="section" id="helpdesk">
-      <div class="container">
-        <article class="card" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between">
-          <div style="min-width:260px">
-            <h2 style="margin:0 0 6px 0">Contact the Helpdesk</h2>
-            <p class="lead" style="margin:0;color:var(--gray-dark)">
-              Speak with a technician or send us details—whatever’s quickest for you.
-            </p>
-          </div>
-
-          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-            <a class="btn btn--primary" href="tel:+1-503-878-7000">Call 503-878-7000</a>
-
-            <!-- TOGGLE: shows the email form below -->
-            <button
-              type="button"
-              id="toggle-email-form"
-              class="btn btn--outline"
-              aria-expanded="false"
-              aria-controls="email-form-panel">
-              Email Helpdesk
-            </button>
-
-            <!-- Ticket button can stay as-is / disabled until ready -->
-            <a class="btn btn--outline" href="#" aria-disabled="true" title="Web ticketing coming soon">
-              Open a Ticket
-            </a>
-          </div>
-        </article>
-
-        <!-- Collapsible email form panel -->
-        <div id="email-form-panel" class="card collapsible" hidden>
-          <h3 style="margin-top:0">Send details to the helpdesk</h3>
-          <form id="helpdesk-email-form" class="support-form" novalidate>
-            <div class="form-grid">
-              <label>
-                <span>Name</span>
-                <input type="text" id="hd-name" name="name" autocomplete="name" required>
-              </label>
-
-              <label>
-                <span>Company</span>
-                <input type="text" id="hd-company" name="company" autocomplete="organization">
-              </label>
-
-              <label class="full">
-                <span>Email</span>
-                <input type="email" id="hd-email" name="email" autocomplete="email" required>
-              </label>
-
-              <label class="full">
-                <span>Issue</span>
-                <textarea id="hd-issue" name="issue" rows="5" placeholder="Briefly describe the problem…" required></textarea>
-              </label>
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn btn--primary">Send Email</button>
-              <button type="button" class="btn btn--outline" id="cancel-email-form">Cancel</button>
-            </div>
-
-            <p class="form-note">
-              Submitting will open your email app with the details pre-filled. You can review and press send.
-            </p>
-          </form>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- 2) Remote support (Splashtop SOS) -->
-    <section class="section" id="remote">
-      <div class="container remote-grid">
-
-        <!-- Download card -->
-        <article class="card download-card">
-          <div class="download-header">
-            <a id="download-button" class="btn btn--primary" href="#" aria-label="Download Splashtop SOS">
-              <img id="platform-icon" class="platform-icon" src="" alt="" />
-              <span id="button-text">Splashtop SOS</span>
-            </a>
-            <div class="download-meta">
-              <div id="platform-message" class="platform-status">Detecting your platform…</div>
-              <div class="platform-note">Auto-detected; you can choose a different platform below.</div>
-            </div>
-          </div>
-
-          <div class="override-wrapper">
-            <strong>Choose a different platform</strong>
-            <div id="platform-buttons" class="override-group" aria-label="Manual platform selection"></div>
-          </div>
-
-          <noscript>
-            <div class="notice" style="margin-top:12px;">
-              <p><strong>JavaScript is disabled.</strong> Use the direct links:</p>
-              <ul>
-                <li><a href="https://download.splashtop.com/sos/SplashtopSOS.exe">Windows</a></li>
-                <li><a href="https://download.splashtop.com/sos/SplashtopSOS.dmg">macOS</a></li>
-                <li><a href="https://play.google.com/store/apps/details?id=com.splashtop.sos">Android</a></li>
-                <li><a href="https://apps.apple.com/app/splashtop-sos/id1230853703">iOS</a></li>
-              </ul>
-            </div>
-          </noscript>
-        </article>
-
-        <!-- How it works -->
-        <div class="card howto-card">
-          <h2>How it works</h2>
-          <ol class="howto-steps">
-            <li><strong>Download & open the app.</strong> Click the button for your platform above.</li>
-            <li><strong>Provide the 9-digit code.</strong> Share the one-time SOS code with your technician.</li>
-            <li><strong>We connect securely.</strong> Allow access when prompted; you can end any time.</li>
-          </ol>
+  <!-- 1) Direct Helpdesk contact -->
+  <section class="section" id="helpdesk">
+    <div class="container">
+      <article class="card helpdesk-card">
+        <div class="helpdesk-card__intro">
+          <h2>Contact the Helpdesk</h2>
+          <p class="lead">
+            Speak with a tech or send us details—whatever's more convenient for you.
+          </p>
         </div>
 
+        <div class="helpdesk-actions">
+          <a class="btn btn--primary" href="tel:+1-503-878-7000">Call 503-878-7000</a>
+
+          <!-- TOGGLE: shows the email form below -->
+          <button
+            type="button"
+            id="toggle-email-form"
+            class="btn btn--outline"
+            aria-expanded="false"
+            aria-controls="email-form-panel">
+            Email Helpdesk
+          </button>
+
+          <!-- Ticket button can stay as-is / disabled until ready -->
+          <a class="btn btn--outline" href="#" aria-disabled="true" title="Web ticketing coming soon">
+            Open a Ticket
+          </a>
+        </div>
+      </article>
+
+      <!-- Collapsible email form panel -->
+      <div id="email-form-panel" class="card collapsible" hidden>
+        <h3>Send details to the helpdesk</h3>
+        <form id="helpdesk-email-form" class="support-form" novalidate>
+          <div class="form-grid">
+            <label>
+              <span>Name</span>
+              <input type="text" id="hd-name" name="name" autocomplete="name" required>
+            </label>
+
+            <label>
+              <span>Company</span>
+              <input type="text" id="hd-company" name="company" autocomplete="organization">
+            </label>
+
+            <label class="full">
+              <span>Email</span>
+              <input type="email" id="hd-email" name="email" autocomplete="email" required>
+            </label>
+
+            <label class="full">
+              <span>Issue</span>
+              <textarea id="hd-issue" name="issue" rows="5" placeholder="Briefly describe the problem…" required></textarea>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary">Send Email</button>
+            <button type="button" class="btn btn--outline" id="cancel-email-form">Cancel</button>
+          </div>
+
+          <p class="form-note">
+            Submitting will open your email app with the details pre-filled. You can review and press send.
+          </p>
+        </form>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
+
+  <!-- 2) Remote support (Splashtop SOS) -->
+  <section class="section" id="remote">
+    <div class="container remote-grid">
+
+      <!-- Download card -->
+      <article class="card download-card">
+        <div class="download-header">
+          <a id="download-button" class="btn btn--primary" href="#" aria-label="Download Splashtop SOS">
+            <img id="platform-icon" class="platform-icon" src="" alt="" />
+            <span id="button-text">Splashtop SOS</span>
+          </a>
+          <div class="download-meta">
+            <div id="platform-message" class="platform-status">Detecting your platform…</div>
+            <div class="platform-note">Auto-detected; you can choose a different platform below.</div>
+          </div>
+        </div>
+
+        <div class="override-wrapper">
+          <strong>Choose a different platform</strong>
+          <div id="platform-buttons" class="override-group" aria-label="Manual platform selection"></div>
+        </div>
+
+        <noscript>
+          <div class="notice">
+            <p><strong>JavaScript is disabled.</strong> Use the direct links:</p>
+            <ul>
+              <li><a href="https://download.splashtop.com/sos/SplashtopSOS.exe">Windows</a></li>
+              <li><a href="https://download.splashtop.com/sos/SplashtopSOS.dmg">macOS</a></li>
+              <li><a href="https://play.google.com/store/apps/details?id=com.splashtop.sos">Android</a></li>
+              <li><a href="https://apps.apple.com/app/splashtop-sos/id1230853703">iOS</a></li>
+            </ul>
+          </div>
+        </noscript>
+      </article>
+
+      <!-- How it works -->
+      <div class="card howto-card">
+        <h2>How it works</h2>
+        <ol class="howto-steps">
+          <li><strong>Download & open the app.</strong> Click the button for your platform above.</li>
+          <li><strong>Provide the 9-digit code.</strong> Share the one-time SOS code with your technician.</li>
+          <li><strong>We connect securely.</strong> Allow access if prompted; you can end any time.</li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+</main>
+
 
   <!-- Shared footer -->
   <div data-include="partials/footer.html"></div>

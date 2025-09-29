@@ -1,25 +1,52 @@
-/* Support page only (deduped; uses base btn/checklist/lead) */
+/* =========================================================
+   Support page only (all overrides consolidated)
+   ========================================================= */
 
-.remote-hero{ position:relative; padding:64px 0; background:var(--panel) }
-.remote-hero h1{ margin:0 0 8px 0; font-size:2.2rem }
-.remote-hero p{ margin:0; color:var(--gray-dark); font-size:1.05rem }
+/* Support hero uses the global hero system */
+.support-hero{
+  /* point this to your support-focused image */
+  --hero-bg: url('/assets/img/support-hero.jpg');
+  padding:72px 0 72px;           /* compact to keep page 1-screen tall */
+  background:transparent;        /* image comes from ::before in base */
+}
+.support-hero .hero__inner{ grid-template-columns:1fr } /* single-column copy */
 
-/* Main grid (downloads + how-to) */
-.remote-grid{ display:grid; gap:28px; grid-template-columns:1.2fr .8fr; align-items:stretch }
+/* (optional) center the headline copy in the hero – remove if you prefer left-aligned */
+@media (max-width:980px){
+  .support-hero .hero__inner{ text-align:left } /* stays tidy on mobile */
+}
+
+
+/* 1) Section spacing (page-local only) */
+#helpdesk.section{ padding:20px 0 12px }
+#remote.section{   padding:8px 0 14px }
+
+/* 2) Helpdesk card layout */
+.helpdesk-card{
+  display:flex; flex-wrap:wrap; gap:16px;
+  align-items:center; justify-content:space-between;
+}
+.helpdesk-card__intro{ min-width:260px }
+.helpdesk-card h2{ margin:0 0 4px }
+.helpdesk-card .lead{ margin:0; color:var(--gray-dark) }
+.helpdesk-actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+
+/* No hover lift on Helpdesk */
+#helpdesk .card{ transition:none; padding:16px }
+#helpdesk .card:hover{ transform:none; box-shadow:0 10px 24px rgba(0,0,0,.06) }
+
+/* 3) Remote grid (downloads + how-to) */
+.remote-grid{ display:grid; grid-template-columns:1.2fr .8fr; gap:18px; align-items:stretch }
 @media (max-width:980px){ .remote-grid{ grid-template-columns:1fr } }
 
-/* Equal-height cards; no hover lift */
+/* Equal-height cards, tighter padding, no hover lift */
 .remote-grid > .card{ height:100%; transition:none }
-.remote-grid > .card:hover{ transform:none !important; box-shadow:0 10px 24px rgba(0,0,0,.06) }
+.remote-grid > .card:hover{ transform:none; box-shadow:0 10px 24px rgba(0,0,0,.06) }
+#remote .card{ padding:14px }
 
-/* Download card content centering */
-.remote-grid .card.download-card{ display:flex; flex-direction:column; justify-content:center }
-
-/* How-it-works card */
-.howto-card{ display:flex; flex-direction:column; justify-content:flex-start }
-
-/* Download header row */
-.download-header{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:12px }
+/* 3.1 Splashtop download card — center content vertically */
+.download-card{ display:flex; flex-direction:column; justify-content:center }
+.download-header{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:8px }
 #download-button{ display:inline-flex; align-items:center; gap:10px; padding:12px 22px }
 #download-button img.platform-icon{ width:22px; height:22px; display:block }
 
@@ -28,10 +55,10 @@
 .download-meta .platform-status{ font-weight:700 }
 .download-meta .platform-note{ color:var(--gray-dark); font-size:.95rem }
 
-/* Platform overrides */
-.override-wrapper{ margin-top:18px }
-.override-wrapper > strong{ display:block; margin-bottom:8px }
-.override-group{ display:flex; flex-wrap:wrap; gap:10px }
+/* Platform override buttons */
+.override-wrapper{ margin-top:10px }
+.override-wrapper > strong{ display:block; margin-bottom:6px }
+.override-group{ display:flex; flex-wrap:wrap; gap:8px }
 .override-download-btn{
   appearance:none; border:1px solid var(--border); background:#fff;
   padding:10px 14px; border-radius:var(--radius-pill); font-weight:700; cursor:pointer;
@@ -44,15 +71,27 @@
 .override-download-btn.selected img{ filter:brightness(0) invert(1) }
 .section__cta{ margin-top:20px }
 
-/* Helpdesk card hover safety net */
-#helpdesk .card, #helpdesk.card{ transition:none !important }
-#helpdesk .card:hover, #helpdesk.card:hover{ transform:none !important; box-shadow:0 10px 24px rgba(0,0,0,.06) }
+/* 3.2 How it works (tighter) */
+.howto-card{ display:flex; flex-direction:column; justify-content:flex-start }
+.howto-card h2{ margin:0 0 6px }
+.howto-steps{ margin:6px 0 0; padding-left:1.2rem }
+.howto-steps li{ margin:4px 0 }
 
-/* Collapsible email form */
-.collapsible{ overflow:hidden; max-height:0; padding-top:0; padding-bottom:0; margin-top:0; border-width:0 !important; background:transparent; box-shadow:none; transition:max-height .2s ease, padding .2s ease, margin .2s ease, border-color .2s ease, box-shadow .2s ease, background-color .2s ease }
-.collapsible.is-open{ max-height:700px; padding-top:18px; padding-bottom:18px; margin-top:12px; border-width:1px !important; border-color:var(--border); background:#fff; box-shadow:0 10px 24px rgba(0,0,0,.06) }
+/* 4) Collapsible email form */
+.collapsible{
+  overflow:hidden; max-height:0; padding-top:0; padding-bottom:0; margin-top:0;
+  border-width:0 !important; background:transparent; box-shadow:none;
+  transition:max-height .2s ease, padding .2s ease, margin .2s ease,
+             border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+.collapsible.is-open{
+  max-height:700px; padding-top:18px; padding-bottom:18px; margin-top:12px;
+  border-width:1px !important; border-color:var(--border); background:#fff;
+  box-shadow:0 10px 24px rgba(0,0,0,.06);
+}
+.collapsible h3{ margin-top:0 }
 
-/* Simple form layout */
+/* 5) Form layout */
 .support-form .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
 .support-form .form-grid .full{ grid-column:1 / -1 }
 .support-form label span{ display:block; font-weight:700; margin-bottom:6px }
@@ -62,6 +101,7 @@
 .support-form .form-note{ margin:10px 0 0; color:var(--gray-dark); font-size:.95rem }
 @media (max-width:720px){ .support-form .form-grid{ grid-template-columns:1fr } }
 
-/* Normalize form controls (page-local is fine) */
+/* 6) Misc */
+.notice{ margin-top:12px }
 button, input, select, textarea{ font:inherit; color:inherit }
 .btn{ -webkit-appearance:none; appearance:none }
