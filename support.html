@@ -233,60 +233,73 @@
   </script>
   <script>
     (function(){
-      const emailAddr = 'help@systemalternatives.com';  // change if needed
+      const emailAddr = 'help@systemalternatives.com';
       const toggleBtn = document.getElementById('toggle-email-form');
-      const panel = document.getElementById('email-form-panel');
-      const form = document.getElementById('helpdesk-email-form');
+      const panel     = document.getElementById('email-form-panel');
+      const form      = document.getElementById('helpdesk-email-form');
       const cancelBtn = document.getElementById('cancel-email-form');
 
-      function openPanel() {
-        panel.hidden = false;
+      let closing = false;
+
+      function openPanel(){
+        closing = false;
+        panel.hidden = false;                    // make it measurable/visible
         panel.classList.add('is-open');
-        toggleBtn.setAttribute('aria-expanded', 'true');
-        document.getElementById('hd-name').focus();
-      }
-      function closePanel() {
-        panel.classList.remove('is-open');
-        toggleBtn.setAttribute('aria-expanded', 'false');
-        // wait for animation then hide
-        setTimeout(() => { panel.hidden = true; }, 280);
+        toggleBtn.setAttribute('aria-expanded','true');
+        document.getElementById('hd-name').focus({preventScroll:true});
       }
 
-      toggleBtn.addEventListener('click', () => {
+      function closePanel(){
+        if (!panel.classList.contains('is-open')) return;
+        closing = true;
+        panel.classList.remove('is-open');
+        toggleBtn.setAttribute('aria-expanded','false');
+      }
+
+      // Hide only after the height transition finishes (no setTimeout)
+      panel.addEventListener('transitionend', (e)=>{
+        if (e.target !== panel) return;
+        if (e.propertyName !== 'max-height') return;
+        if (!panel.classList.contains('is-open') && closing){
+          panel.hidden = true;                  // remove from flow after collapse
+          closing = false;
+        }
+      });
+
+      toggleBtn.addEventListener('click', ()=>{
         const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
         isOpen ? closePanel() : openPanel();
       });
+
       cancelBtn.addEventListener('click', closePanel);
 
-      form.addEventListener('submit', (e) => {
+      form.addEventListener('submit', (e)=>{
         e.preventDefault();
-        // basic gather + very light validation
-        const name = (document.getElementById('hd-name').value || '').trim();
+        const name    = (document.getElementById('hd-name').value || '').trim();
         const company = (document.getElementById('hd-company').value || '').trim();
-        const email = (document.getElementById('hd-email').value || '').trim();
-        const issue = (document.getElementById('hd-issue').value || '').trim();
+        const email   = (document.getElementById('hd-email').value || '').trim();
+        const issue   = (document.getElementById('hd-issue').value || '').trim();
 
-        if (!name || !email || !issue) {
+        if (!name || !email || !issue){
           alert('Please fill in your Name, Email, and Issue.');
           return;
         }
 
         const subject = encodeURIComponent('Support Request');
-        const bodyLines = [
+        const body = encodeURIComponent([
           `Name: ${name}`,
           `Company: ${company}`,
           `Email: ${email}`,
           '',
           'Issue:',
           issue
-        ];
-        const body = encodeURIComponent(bodyLines.join('\n'));
+        ].join('\n'));
 
-        // Launch default mail app
         window.location.href = `mailto:${emailAddr}?subject=${subject}&body=${body}`;
       });
     })();
   </script>
+
   <script>
     (function () {
       const allSections = Array.from(document.querySelectorAll('section'));

@@ -1,5 +1,8 @@
 /* Homepage only */
 
+/* Homepage hero image only */
+.home-hero{ --hero-bg: url('/assets/img/sa-web-background.png') }
+
 .hero__badges{ display:flex; gap:16px; margin-top:14px; padding:0; list-style:none; flex-wrap:wrap }
 .hero__badges li{
   font-weight:600; font-size:.9rem; color:var(--black);

@@ -2,24 +2,26 @@
    Support page only (all overrides consolidated)
    ========================================================= */
 
-/* Support hero uses the global hero system */
+/* 0) Support hero uses the global hero system (base.css) */
 .support-hero{
   /* point this to your support-focused image */
-  --hero-bg: url('/assets/img/support-hero.jpg');
-  padding:72px 0 72px;           /* compact to keep page 1-screen tall */
-  background:transparent;        /* image comes from ::before in base */
+  --hero-bg: url('/assets/img/support-hero.png');
 }
-.support-hero .hero__inner{ grid-template-columns:1fr } /* single-column copy */
-
-/* (optional) center the headline copy in the hero – remove if you prefer left-aligned */
-@media (max-width:980px){
-  .support-hero .hero__inner{ text-align:left } /* stays tidy on mobile */
-}
+/* (Hero padding/layout, overlays, and readable text are handled in base.css) */
 
 
-/* 1) Section spacing (page-local only) */
-#helpdesk.section{ padding:20px 0 12px }
-#remote.section{   padding:8px 0 14px }
+/* 1) Section spacing — zero gap when the email panel is closed */
+#helpdesk.section{ padding:20px 0 0 }                               /* no bottom pad by default */
+#helpdesk.section:has(.collapsible.is-open){ padding-bottom:12px }   /* add bottom pad only when open */
+#helpdesk.section.has-open-panel{ padding-bottom:12px }              /* JS fallback if :has() unsupported */
+
+/* Make helpdesk inner flow control the vertical spacing precisely */
+#helpdesk .container{ display:grid; row-gap:0 }                      /* no gap by default */
+#helpdesk.section:has(.collapsible.is-open) .container{ row-gap:12px }/* only add gap when panel is open */
+#helpdesk.section.has-open-panel .container{ row-gap:12px }          /* JS fallback */
+
+/* Safety: remote section stays tight */
+#remote.section{ padding:8px 0 14px }
 
 /* 2) Helpdesk card layout */
 .helpdesk-card{
@@ -44,7 +46,7 @@
 .remote-grid > .card:hover{ transform:none; box-shadow:0 10px 24px rgba(0,0,0,.06) }
 #remote .card{ padding:14px }
 
-/* 3.1 Splashtop download card — center content vertically */
+/* 3.1 Splashtop download card — vertically centered */
 .download-card{ display:flex; flex-direction:column; justify-content:center }
 .download-header{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:8px }
 #download-button{ display:inline-flex; align-items:center; gap:10px; padding:12px 22px }
@@ -77,19 +79,40 @@
 .howto-steps{ margin:6px 0 0; padding-left:1.2rem }
 .howto-steps li{ margin:4px 0 }
 
-/* 4) Collapsible email form */
+/* 4) Collapsible email form — flicker-free and contributes zero space when closed */
+#email-form-panel[hidden]{ display:none !important }  /* ensure zero layout when hidden */
+
 .collapsible{
-  overflow:hidden; max-height:0; padding-top:0; padding-bottom:0; margin-top:0;
-  border-width:0 !important; background:transparent; box-shadow:none;
-  transition:max-height .2s ease, padding .2s ease, margin .2s ease,
-             border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+  overflow:hidden;
+  max-height:0;
+  opacity:0;
+  padding:0;               /* never animate */
+  margin:0;                /* never animate */
+  border:0;                /* avoid 1px ghost line */
+  background:transparent;
+  box-shadow:none;
+  transition:
+    max-height .24s ease,
+    opacity .18s ease,
+    border-color .24s ease,
+    box-shadow .24s ease,
+    background-color .24s ease;
+  will-change:max-height,opacity;
 }
 .collapsible.is-open{
-  max-height:700px; padding-top:18px; padding-bottom:18px; margin-top:12px;
-  border-width:1px !important; border-color:var(--border); background:#fff;
+  max-height:700px;        /* large enough for content */
+  opacity:1;
+  padding:18px;
+  margin-top:12px;         /* this only appears while open */
+  border:1px solid var(--border);
+  background:#fff;
   box-shadow:0 10px 24px rgba(0,0,0,.06);
 }
 .collapsible h3{ margin-top:0 }
+
+@media (prefers-reduced-motion:reduce){
+  .collapsible{ transition:none }
+}
 
 /* 5) Form layout */
 .support-form .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
