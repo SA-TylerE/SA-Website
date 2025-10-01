@@ -1,0 +1,22 @@
+/* Cybersecurity — page-only */
+
+/* Page hero image (reuses global hero system) */
+.cs-hero{ --hero-bg: url('/assets/img/cybersecurity-hero.png') }
+
+/* Sticky subnav (same look as MS page) */
+.subnav{ position:sticky; top:0; z-index:5; background:#fff; border-bottom:1px solid var(--border) }
+.subnav .container{ display:flex; gap:.6rem; overflow:auto; padding:.5rem 1rem }
+.subnav a{
+  white-space:nowrap; padding:.5rem .85rem; border-radius:999px; border:1px solid var(--border);
+  font-weight:700; transition:background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease
+}
+.subnav a:hover,.subnav a:focus-visible{ background:var(--red); color:#fff; border-color:var(--red); transform:translateY(-1px) }
+.subnav a.is-active{ background:var(--red); color:#fff; border-color:var(--red) }
+
+/* Tighter vertical rhythm on this page only */
+.section{ padding:48px 0 }                 /* down from 64px */
+.section + .section{ padding-top:28px }    /* reduce stacked gap further */
+.container > .cta-row{ margin:14px 0 10px }/* trims space before the next section */
+/* Alternating section backgrounds — Cybersecurity page only */
+main > section{ position:relative }
+main > section:nth-of-type(even){ background:var(--panel) }  /* light gray */

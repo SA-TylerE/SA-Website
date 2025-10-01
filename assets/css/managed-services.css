@@ -1,26 +1,125 @@
-/* Managed Services only (deduped; uses base btn/checklist/lead) */
+/* Managed Services — page only */
 
 /* Sticky in-page subnav */
 .subnav{ position:sticky; top:0; z-index:5; background:#fff; border-bottom:1px solid var(--border) }
-.subnav .container{ display:flex; gap:.6rem; overflow:auto; padding:.5rem 1rem }
-.subnav a{ white-space:nowrap; padding:.5rem .85rem; border-radius:999px; border:1px solid var(--border); font-weight:700; transition:background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease }
-.subnav a:hover, .subnav a:focus-visible{ background:var(--red); color:#fff; border-color:var(--red); transform:translateY(-1px) }
+.subnav .container{
+  display:flex; gap:.6rem; padding:.5rem 1rem;
+  overflow-x:auto; overflow-y:hidden;                 /* horizontal scroll only */
+  scroll-behavior:smooth; -webkit-overflow-scrolling:touch;
+  overscroll-behavior-x:contain; scrollbar-gutter:stable both-edges;
+}
+.subnav a{
+  white-space:nowrap; padding:.5rem .85rem; border-radius:999px;
+  border:1px solid var(--border); font-weight:700;
+  transition:background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease
+}
+.subnav a:hover, .subnav a:focus-visible{
+  background:var(--red); color:#fff; border-color:var(--red); transform:translateY(-1px)
+}
 .subnav a.is-active{ background:var(--red); color:#fff; border-color:var(--red) }
 
-/* Compact hero for this page */
-.hero{ padding:64px 0 32px; background:var(--panel); border-bottom:1px solid var(--border) }
-.lead{ line-height:1.6 } /* color comes from base */
+/* Page hero supplies the image; shared hero styling is in base.css */
+.ms-hero{ --hero-bg: url('/assets/img/managed-services-hero.png') }
 
-/* Section spacing just for this page */
-#helpdesk.section,#maintenance.section,#patching.section,#assets.section,#onboarding.section,#network.section,#cloud.section,#voip.section,#backup-dr.section,#faq.section{ padding-top:48px; padding-bottom:48px }
+/* Slightly looser body copy on this page */
+.lead{ line-height:1.6 }
 
-/* Visual variety striping */
+/* Section spacing (page-local) */
+#helpdesk.section,#maintenance.section,#patching.section,#assets.section,#onboarding.section,#network.section,#cloud.section,#voip.section,#backup-dr.section,#faq.section{
+  padding-top:48px; padding-bottom:48px;
+}
+
+/* Visual striping (page-local) */
 main > section{ position:relative }
 main > section:nth-of-type(even){ background:var(--panel) }
-main > section:nth-of-type(3n)::before{ content:""; position:absolute; inset:0 auto 0 0; width:4px; background:linear-gradient(var(--red), var(--orange)); opacity:.45 }
+main > section:nth-of-type(3n)::before{
+  content:""; position:absolute; inset:0 auto 0 0; width:4px;
+  background:linear-gradient(var(--red), var(--orange)); opacity:.45;
+}
 
-/* FAQ */
-.faq{ margin:0; display:grid; gap:12px }
-.faq dt{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:12px 14px; font-weight:800; position:relative }
-.faq dt::after{ content:"+"; position:absolute; right:14px; top:50%; transform:translateY(-50%); color:var(--red); font-weight:800 }
-.faq dd{ margin:-8px 0 4px 0; background:#fff; border:1px solid var(--border); border-top:0; border-radius:0 0 12px 12px; padding:12px 14px; color:var(--gray-dark) }
+/* Button rows on this page (breathing room) */
+.cta-row{
+  display:inline-flex; gap:12px; flex-wrap:wrap;
+  margin:16px 0 14px;                       /* space above & below */
+}
+
+/* Maintenance section helpers (page-local) */
+.mm-calendar{ display:grid; gap:12px }
+.mm-cal__row{
+  display:grid; grid-template-columns: 1fr 3fr; gap:12px;
+  background:#fff; border:1px solid var(--border); border-radius: var(--radius-card); padding:14px;
+}
+.mm-cal__when{ color:var(--black); font-weight:700 }
+.mm-cal__what{ color:var(--gray-dark) }
+
+.mm-sla{ display:grid; gap:12px }
+.mm-sla__row{
+  display:grid; grid-template-columns: 1fr 1fr;
+  background:#fff; border:1px solid var(--border); border-radius: var(--radius-card); padding:14px;
+}
+.mm-sla__sev{ color:var(--black) }
+.mm-sla__target{ color:var(--gray-dark) }
+
+@media (min-width:800px){
+  .mm-sla__row{ grid-template-columns: 2fr 3fr }
+}
+/* --- Maintenance & Monitoring cleanup (moved from inline) --- */
+
+/* Make subheads inside cards look like your card h3 and remove top gap */
+#maintenance .card h4{
+  margin-top:0;
+  font-size:1.25rem;   /* matches .card h3 in base.css */
+  font-weight:700;
+}
+
+/* Spacing above the Calendar + SLAs grid */
+.mm-cal-sla{ margin-top:14px; }
+
+/* Tight top margin on the two column titles */
+.mm-cal-sla .mm-title{ margin-top:0; }
+/* Make sure the rows can accept a min-height we set in JS */
+#maintenance .mm-cal__row,
+#maintenance .mm-sla__row{
+  /* if you already defined these elsewhere, this just reinforces them */
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 12px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding:14px;
+  min-height: auto; /* let JS override cleanly */
+}
+
+/* Optional: titles above each column with tight top spacing */
+#maintenance .mm-title{ margin-top:0 }
+/* --- Maintenance & Monitoring tweaks --- */
+
+/* 1) Vertically center the text in each Maintenance Windows row */
+#maintenance .mm-calendar .mm-cal__row{
+  align-items: center;   /* centers both the label and the description */
+}
+
+/* 2) Push SLA details to the right edge and center rows vertically */
+#maintenance .mm-sla .mm-sla__row{
+  grid-template-columns: auto 1fr; /* compact left label, flexible right column */
+  align-items: center;             /* vertical centering */
+}
+#maintenance .mm-sla__target{
+  justify-self: end;   /* move to the far right */
+  text-align: right;   /* align the two lines to the right */
+}
+
+/* 3) Mobile: stack rows and return to left-aligned text */
+@media (max-width: 900px){
+  #maintenance .mm-sla .mm-sla__row{ grid-template-columns: 1fr; }
+  #maintenance .mm-sla__target{
+    justify-self: start;
+    text-align: left;
+    margin-top: 6px;  /* small gap below the label when stacked */
+  }
+}
+/* Helpdesk spacing (page-local) */
+#helpdesk .grid{ margin-bottom:16px }          /* space below the two cards */
+#helpdesk .reveal-item{ margin-top:16px }      /* space above the “Fast answers…” card */
+#helpdesk .cta-row{ margin-top:18px }          /* space above the buttons */

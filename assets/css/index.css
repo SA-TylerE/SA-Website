@@ -3,12 +3,6 @@
 /* Homepage hero image only */
 .home-hero{ --hero-bg: url('/assets/img/sa-web-background.png') }
 
-.hero__badges{ display:flex; gap:16px; margin-top:14px; padding:0; list-style:none; flex-wrap:wrap }
-.hero__badges li{
-  font-weight:600; font-size:.9rem; color:var(--black);
-  background:#fff; border:1px solid var(--border); border-radius:999px; padding:8px 12px;
-}
-
 /* Stat card in hero */
 .stat-card{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:18px; box-shadow:0 10px 24px rgba(0,0,0,.06); display:grid; gap:10px }
 .stat{ display:flex; gap:10px; align-items:baseline; color:var(--gray-dark) }

@@ -157,6 +157,21 @@ a{ color:inherit; text-decoration:none }
 .tick-list li{ position:relative; padding-left:22px; margin:8px 0; color:var(--black) }
 .tick-list li::before{ content:"✔"; position:absolute; left:0; top:0; color:var(--red); font-weight:800 }
 
+/* 4.2 Shared badges (pill labels) */
+.badge{
+  display:inline-flex; align-items:center; gap:.4ch;
+  padding:.35rem .7rem; line-height:1; font-weight:800; font-size:.85rem;
+  border-radius:9999px; border:2px solid var(--red); color:var(--red); background:#fff;
+}
+.badge--solid{ background:var(--red); color:#fff; border-color:var(--red) }
+.badge--muted{ border-color:var(--gray-light); color:var(--gray-dark); background:#fff }
+.badge--inverted{ background:transparent; color:#fff; border-color:#fff } /* for photo heroes */
+.badge--sm{ font-size:.78rem; padding:.28rem .6rem; border-width:2px }
+.badge--lg{ font-size:.95rem; padding:.5rem .9rem }
+
+/* optional: tidy spacing when a badge sits in hero copy */
+.hero .badge{ margin-top:8px }
+
 /* NEW: checklist appears on multiple pages → promote to base */
 .checklist{ list-style:none; padding:0; margin:.25rem 0 0 0 }
 .checklist li{ position:relative; padding-left:22px; margin:.5rem 0; color:var(--black) }
@@ -214,3 +229,67 @@ a{ color:inherit; text-decoration:none }
 .hero--enhanced h1,
 .hero--enhanced p,
 .hero--enhanced .btn{ text-shadow:0 1px 2px rgba(0,0,0,.18) }
+
+/* Disabled buttons (semantic via aria-disabled="true") */
+.btn[aria-disabled="true"],
+.btn.is-disabled{
+  background:#f3f4f6;             /* soft gray */
+  color:#9aa0a6;                   /* gray text */
+  border-color:var(--gray-light);
+  cursor:not-allowed;
+  box-shadow:none;
+  pointer-events:auto;             /* keep hover so title tooltip shows */
+}
+
+.btn--outline[aria-disabled="true"],
+.btn--outline.is-disabled{
+  background:#fff;                 /* outlined look, but muted */
+  color:#9aa0a6;
+  border-color:var(--gray-light);
+}
+
+/* Lock the disabled look on hover/focus */
+.btn[aria-disabled="true"]:hover,
+.btn[aria-disabled="true"]:focus{
+  background:#f3f4f6;
+  color:#9aa0a6;
+  border-color:var(--gray-light);
+  text-decoration:none;
+  box-shadow:none;
+}
+/* FAQ (shared) — animated open/close */
+.faq{ margin:0; display:grid; gap:12px }
+.faq dt{
+  background:#fff; border:1px solid var(--border); border-radius:12px;
+  padding:12px 14px; font-weight:800; position:relative; cursor:pointer;
+}
+.faq dt::after{
+  content:"+"; position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  color:var(--red); font-weight:800; transition:transform .2s ease;
+}
+.faq dt[aria-expanded="true"]::after{ content:"–" }
+
+.faq dd{
+  margin:-8px 0 4px 0; background:#fff; border:1px solid var(--border); border-top:0;
+  border-radius:0 0 12px 12px; overflow:hidden;
+  /* start closed */
+  padding:0; max-height:0; opacity:.0; transition:max-height .35s ease, padding .25s ease, opacity .25s ease;
+}
+.faq dd.is-open{ padding:12px 14px; opacity:1 }
+
+/* inner wrapper gets height measured; added by JS */
+.faq dd > .faq__inner{ display:block }
+
+
+/* Hero badges (shared) */
+.hero__badges{
+  display:flex; gap:16px; margin-top:14px; padding:0;
+  list-style:none; flex-wrap:wrap;
+}
+.hero__badges li{
+  font-weight:600; font-size:.9rem; color:var(--black);
+  background:#fff; border:1px solid var(--border);
+  border-radius:999px; padding:8px 12px;
+}
+/* Fade-in helper for single items inside revealed sections */
+.reveal.is-visible .reveal-item { animation: sa-reveal .6s ease both }

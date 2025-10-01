@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cybersecurity | System Alternatives</title>
-  <meta name="description" content="Managed IT, cybersecurity, and consulting for SMBs in the Portland/Vancouver area." />
+  <title>Cybersecurity Services | System Alternatives</title>
+  <meta name="description" content="Security assessments, EDR/MDR, identity & access, firewalls, and SIEM—built for SMBs." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/cybersecurity.css" />
   <script src="assets/js/includes.js" defer></script>
 </head>
 <body>
@@ -16,17 +17,325 @@
   <!-- Shared header -->
   <div data-include="partials/header.html"></div>
 
+  <!-- Page hero (shared system) -->
+  <section class="hero hero--light hero--bg hero--enhanced hero--compact hero--singlecol cs-hero">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <span class="kicker">Cybersecurity Services</span>
+        <h1>Security that fits your business.</h1>
+        <p class="lead">
+          Practical, defense-in-depth security: assess risk, block threats, control access, and see what matters—without
+          slowing your team down.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="#risk">See what’s included</a>
+          <a class="btn btn--outline" href="/contact.html">Request an assessment</a>
+          <a class="btn btn--outline" href="tel:+15038788000">Call 503-878-8000</a>
+        </div>
+        <ul class="hero__badges">
+          <li>24/7 SOC (MDR)</li>
+          <li>CIS / HIPAA / Cyber-insurance aligned</li>
+          <li>Identity-first security</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sticky in-page subnav -->
+  <nav class="subnav" aria-label="Cybersecurity Sections">
+    <div class="container">
+      <a href="#risk">Risk &amp; Compliance</a>
+      <a href="#protection">Threat Protection</a>
+      <a href="#access">Access &amp; Control</a>
+      <a href="#visibility">Visibility &amp; Monitoring</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </nav>
+
   <main>
-    <section class="section">
+
+    <!-- Risk & Compliance -->
+    <section id="risk" class="section">
       <div class="container">
-        <h1>Page Title</h1>
-        <p>Start adding your content here.</p>
+        <h2>Risk &amp; Compliance</h2>
+        <p>
+          Understand exposure, prioritize fixes, and meet requirements from cyber-insurers and frameworks like CIS or HIPAA.
+        </p>
+        <div class="grid grid-3">
+          <article class="card">
+            <h3>Security Assessments</h3>
+            <ul class="checklist">
+              <li>Environment discovery &amp; gap analysis</li>
+              <li>CIS control mapping &amp; roadmap</li>
+              <li>Evidence &amp; executive summary</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Vulnerability Scanning &amp; Remediation</h3>
+            <ul class="checklist">
+              <li>Authenticated scans (endpoints/servers)</li>
+              <li>Prioritized patch &amp; config fixes</li>
+              <li>Exception tracking &amp; retests</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Policies &amp; Proof</h3>
+            <ul class="checklist">
+              <li>Baseline security policies</li>
+              <li>Backup/DR and incident templates</li>
+              <li>Insurance attestation support</li>
+            </ul>
+          </article>
+        </div>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/contact.html">Start with an assessment</a>
+        </div>
       </div>
     </section>
+
+    <!-- Threat Protection -->
+    <section id="protection" class="section">
+      <div class="container">
+        <h2>Threat Protection</h2>
+        <p>
+          Block modern threats across endpoints and email, with 24/7 monitoring and response where it counts.
+        </p>
+        <div class="grid grid-3">
+          <article class="card">
+            <h3>EDR / MDR (24/7 SOC)</h3>
+            <ul class="checklist">
+              <li>Behavioral detection &amp; isolation</li>
+              <li>Threat hunting &amp; guided response</li>
+              <li>Incident reports &amp; tuning</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Email Security &amp; Phishing</h3>
+            <ul class="checklist">
+              <li>Advanced anti-phish &amp; malware</li>
+              <li>DMARC/SPF/DKIM alignment</li>
+              <li>User reporting &amp; takedowns</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Endpoint &amp; Web Safeguards</h3>
+            <ul class="checklist">
+              <li>DNS filtering &amp; app control</li>
+              <li>Device hardening baselines</li>
+              <li>Removable media controls</li>
+            </ul>
+          </article>
+        </div>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/contact.html">Review my protections</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Access & Control -->
+    <section id="access" class="section">
+      <div class="container">
+        <h2>Access &amp; Control</h2>
+        <p>
+          Keep the right people in—and everyone else out. Identity-first controls with clean, auditable configs.
+        </p>
+        <div class="grid grid-3">
+          <article class="card">
+            <h3>Identity &amp; Access</h3>
+            <ul class="checklist">
+              <li>MFA, Conditional Access, SSO</li>
+              <li>Least-privilege roles &amp; reviews</li>
+              <li>Joiners/Movers/Leavers workflow</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Firewall &amp; Perimeter</h3>
+            <ul class="checklist">
+              <li>Secure baselines &amp; geo/IP rules</li>
+              <li>Site-to-site &amp; user VPN</li>
+              <li>Change control &amp; backups</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Data Controls</h3>
+            <ul class="checklist">
+              <li>DLP &amp; retention policies</li>
+              <li>Share/guest access governance</li>
+              <li>Device encryption posture</li>
+            </ul>
+          </article>
+        </div>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/contact.html">Tighten access</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visibility & Monitoring -->
+    <section id="visibility" class="section">
+      <div class="container">
+        <h2>Visibility &amp; Monitoring</h2>
+        <p>
+          Centralize logs and detections with a right-sized SIEM, so you can see incidents and prove improvements.
+        </p>
+        <div class="grid grid-3">
+          <article class="card">
+            <h3>Security Monitoring / SIEM</h3>
+            <ul class="checklist">
+              <li>Data sources: IdP, EDR, email, firewalls</li>
+              <li>Use cases &amp; alert tuning</li>
+              <li>Dashboards &amp; reporting</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Retention &amp; Evidence</h3>
+            <ul class="checklist">
+              <li>Log retention policies</li>
+              <li>Investigation timelines</li>
+              <li>Audit-ready exports</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Playbooks &amp; Readiness</h3>
+            <ul class="checklist">
+              <li>Alert → action runbooks</li>
+              <li>Tabletop exercises</li>
+              <li>Comms templates</li>
+            </ul>
+          </article>
+        </div>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/contact.html">Discuss monitoring options</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="section" aria-labelledby="faq-heading">
+      <div class="container">
+        <h2 id="faq-heading">Common Questions</h2>
+        <dl class="faq">
+          <dt>Can you co-manage with our IT team?</dt>
+          <dd>Yes—common split is we run EDR/MDR, email security, and identity policy while your IT handles day-to-day changes. We’ll document handoffs and SLAs.</dd>
+
+          <dt>Do we have to buy new tools?</dt>
+          <dd>Not necessarily. We prefer to standardize, but can integrate with existing EDR, firewalls, and SIEM where it makes sense and is supportable.</dd>
+
+          <dt>Will this help with cyber-insurance?</dt>
+          <dd>Absolutely. We align controls to insurer questionnaires, help close gaps, and provide evidence reports for renewals.</dd>
+
+          <dt>How fast is the MDR response?</dt>
+          <dd>Suspicious activity is investigated 24/7 with isolation actions when needed. You’ll receive incident summaries, recommendations, and any next steps.</dd>
+        </dl>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/contact.html">Talk to security</a>
+          <a class="btn btn-outline" href="#top">Back to top</a>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Shared footer -->
   <div data-include="partials/footer.html"></div>
+
+  <!-- Subnav horizontal scroll on wheel (same as Managed Services) -->
+  <script>
+    (function(){
+      const scroller = document.querySelector('.subnav .container');
+      if (!scroller) return;
+      scroller.addEventListener('wheel', (e) => {
+        const canScrollX = scroller.scrollWidth > scroller.clientWidth;
+        if (!canScrollX) return;
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          e.preventDefault();
+          scroller.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
+    })();
+  </script>
+
+  <script>
+  /* FAQ: no jump on open; smooth open/close */
+  (function(){
+    document.querySelectorAll('dl.faq').forEach(faq => {
+      let i = 0;
+      faq.querySelectorAll('dt').forEach(dt => {
+        const dd = dt.nextElementSibling;
+        if (!dd || dd.tagName !== 'DD') return;
+
+        const id = `faq-a-${++i}`;
+        dt.setAttribute('role','button');
+        dt.setAttribute('tabindex','0');
+        dt.setAttribute('aria-controls', id);
+        dt.setAttribute('aria-expanded','false');
+        dd.id = id;
+
+        // start closed
+        dd.classList.remove('is-open');
+        dd.style.maxHeight = '0';
+        dd.style.overflow = 'hidden';
+
+        const BIG = 1000; // px: safe upper bound for content height
+
+        function open(){
+          dd.classList.add('is-open');
+          dd.style.maxHeight = BIG + 'px';       // let padding/margins transition without under-measuring
+          dt.setAttribute('aria-expanded','true');
+        }
+        function close(){
+          // from 'none' (or BIG) -> exact px -> 0 for a clean reverse
+          if (dd.style.maxHeight === 'none') {
+            dd.style.maxHeight = dd.scrollHeight + 'px';
+            dd.offsetHeight; // reflow
+          }
+          dd.style.maxHeight = '0';
+          dd.classList.remove('is-open');
+          dt.setAttribute('aria-expanded','false');
+        }
+        function toggle(){ dd.classList.contains('is-open') ? close() : open(); }
+
+        dd.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return;
+          if (dd.classList.contains('is-open')) {
+            dd.style.maxHeight = 'none';        // allow natural growth once fully open
+          }
+        });
+
+        dt.addEventListener('click', toggle);
+        dt.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+        });
+      });
+    });
+  })();
+  </script>
+
+  <!-- Scroll reveal (same as other pages) -->
+  <script>
+    (function () {
+      const allSections = Array.from(document.querySelectorAll('section'));
+      const sectionsToReveal = allSections.slice(1); // hero is index 0
+      sectionsToReveal.forEach(sec => sec.classList.add('reveal'));
+
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduceMotion) {
+        sectionsToReveal.forEach(sec => sec.classList.add('is-visible'));
+        return;
+      }
+
+      const io = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+
+      sectionsToReveal.forEach(sec => io.observe(sec));
+    })();
+  </script>
 
 </body>
 </html>

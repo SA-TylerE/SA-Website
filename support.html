@@ -60,9 +60,10 @@
       </article>
 
       <!-- Collapsible email form panel -->
-      <div id="email-form-panel" class="card collapsible" hidden>
-        <h3>Send details to the helpdesk</h3>
-        <form id="helpdesk-email-form" class="support-form" novalidate>
+      <div id="email-form-panel" class="collapsible" hidden>
+        <div class="card collapsible__body">
+          <h3>Send details to the helpdesk</h3>
+          <form id="helpdesk-email-form" class="support-form" novalidate>
           <div class="form-grid">
             <label>
               <span>Name</span>
@@ -231,74 +232,99 @@
       }
     });
   </script>
-  <script>
-    (function(){
-      const emailAddr = 'help@systemalternatives.com';
-      const toggleBtn = document.getElementById('toggle-email-form');
-      const panel     = document.getElementById('email-form-panel');
-      const form      = document.getElementById('helpdesk-email-form');
-      const cancelBtn = document.getElementById('cancel-email-form');
+<script>
+  (function(){
+    const emailAddr = 'help@systemalternatives.com';
+    const toggleBtn = document.getElementById('toggle-email-form');
+    const panel     = document.getElementById('email-form-panel');
+    const form      = document.getElementById('helpdesk-email-form');
+    const cancelBtn = document.getElementById('cancel-email-form');
 
-      let closing = false;
+    let isAnimating = false;
 
-      function openPanel(){
-        closing = false;
-        panel.hidden = false;                    // make it measurable/visible
-        panel.classList.add('is-open');
-        toggleBtn.setAttribute('aria-expanded','true');
-        document.getElementById('hd-name').focus({preventScroll:true});
-      }
+    function openPanel(){
+      if (isAnimating) return;
+      isAnimating = true;
 
-      function closePanel(){
-        if (!panel.classList.contains('is-open')) return;
-        closing = true;
+      panel.hidden = false;                 // allow measuring
+      panel.classList.add('is-open');       // adds padding-top (gap) now
+      panel.style.height = '0px';
+      panel.style.opacity = '0';
+
+      // force reflow so the next height change animates
+      panel.offsetHeight;
+
+      const target = panel.scrollHeight;    // includes padding-top + inner card
+      panel.style.height = target + 'px';
+      panel.style.opacity = '1';
+      toggleBtn.setAttribute('aria-expanded','true');
+    }
+
+    function closePanel(){
+      if (isAnimating) return;
+      isAnimating = true;
+
+      // set current height to animate from
+      panel.style.height = panel.scrollHeight + 'px';
+
+      // force reflow, then collapse
+      panel.offsetHeight;
+
+      panel.style.height = '0px';
+      panel.style.opacity = '0';
+      toggleBtn.setAttribute('aria-expanded','false');
+    }
+
+    panel.addEventListener('transitionend', (e)=>{
+      if (e.propertyName !== 'height') return;
+
+      const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
+
+      if (isOpen){
+        // lock height to auto for responsiveness after opening
+        panel.style.height = 'auto';
+      }else{
+        // fully closed → remove from flow and clear styles
         panel.classList.remove('is-open');
-        toggleBtn.setAttribute('aria-expanded','false');
+        panel.hidden = true;
+        panel.style.height = '';
+      }
+      isAnimating = false;
+    });
+
+    toggleBtn.addEventListener('click', ()=>{
+      const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+      expanded ? closePanel() : openPanel();
+    });
+
+    cancelBtn.addEventListener('click', closePanel);
+
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const name    = (document.getElementById('hd-name').value || '').trim();
+      const company = (document.getElementById('hd-company').value || '').trim();
+      const email   = (document.getElementById('hd-email').value || '').trim();
+      const issue   = (document.getElementById('hd-issue').value || '').trim();
+
+      if (!name || !email || !issue){
+        alert('Please fill in your Name, Email, and Issue.');
+        return;
       }
 
-      // Hide only after the height transition finishes (no setTimeout)
-      panel.addEventListener('transitionend', (e)=>{
-        if (e.target !== panel) return;
-        if (e.propertyName !== 'max-height') return;
-        if (!panel.classList.contains('is-open') && closing){
-          panel.hidden = true;                  // remove from flow after collapse
-          closing = false;
-        }
-      });
+      const subject = encodeURIComponent('Support Request');
+      const body = encodeURIComponent([
+        `Name: ${name}`,
+        `Company: ${company}`,
+        `Email: ${email}`,
+        '',
+        'Issue:',
+        issue
+      ].join('\n'));
 
-      toggleBtn.addEventListener('click', ()=>{
-        const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
-        isOpen ? closePanel() : openPanel();
-      });
-
-      cancelBtn.addEventListener('click', closePanel);
-
-      form.addEventListener('submit', (e)=>{
-        e.preventDefault();
-        const name    = (document.getElementById('hd-name').value || '').trim();
-        const company = (document.getElementById('hd-company').value || '').trim();
-        const email   = (document.getElementById('hd-email').value || '').trim();
-        const issue   = (document.getElementById('hd-issue').value || '').trim();
-
-        if (!name || !email || !issue){
-          alert('Please fill in your Name, Email, and Issue.');
-          return;
-        }
-
-        const subject = encodeURIComponent('Support Request');
-        const body = encodeURIComponent([
-          `Name: ${name}`,
-          `Company: ${company}`,
-          `Email: ${email}`,
-          '',
-          'Issue:',
-          issue
-        ].join('\n'));
-
-        window.location.href = `mailto:${emailAddr}?subject=${subject}&body=${body}`;
-      });
-    })();
-  </script>
+      window.location.href = `mailto:${emailAddr}?subject=${subject}&body=${body}`;
+    });
+  })();
+</script>
 
   <script>
     (function () {
@@ -323,6 +349,17 @@
 
       sectionsToReveal.forEach(sec => io.observe(sec));
     })();
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('a.btn[aria-disabled="true"]').forEach(a => {
+        const block = e => { e.preventDefault(); e.stopPropagation(); };
+        a.addEventListener('click', block);
+        a.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') block(e);
+        });
+      });
+    });
   </script>
 
 </body>
