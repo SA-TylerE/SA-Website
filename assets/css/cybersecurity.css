@@ -1,22 +1,83 @@
-/* Cybersecurity — page-only */
+/* Cybersecurity — page-only ------------------------------------------------ */
 
-/* Page hero image (reuses global hero system) */
+:root{
+  --sticky-header: 72px;
+  --anchor-gap: 8px;
+}
+
+/* Page hero image */
 .cs-hero{ --hero-bg: url('/assets/img/cybersecurity-hero.png') }
 
-/* Sticky subnav (same look as MS page) */
-.subnav{ position:sticky; top:0; z-index:5; background:#fff; border-bottom:1px solid var(--border) }
-.subnav .container{ display:flex; gap:.6rem; overflow:auto; padding:.5rem 1rem }
-.subnav a{
-  white-space:nowrap; padding:.5rem .85rem; border-radius:999px; border:1px solid var(--border);
-  font-weight:700; transition:background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease
+/* Sticky in-page subnav (below the sticky header) */
+.subnav{
+  position: sticky;
+  top: var(--sticky-header, 72px);
+  z-index: 1100;
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  backdrop-filter: saturate(160%) blur(6px);
 }
-.subnav a:hover,.subnav a:focus-visible{ background:var(--red); color:#fff; border-color:var(--red); transform:translateY(-1px) }
+.subnav .container{
+  display:flex; gap:.6rem; overflow:auto; padding:.55rem 1rem;
+  scroll-snap-type:x proximity;
+  scroll-behavior: smooth;
+}
+.subnav a{
+  white-space:nowrap; padding:.55rem .9rem; border-radius:999px;
+  border:1px solid var(--border); font-weight:800; letter-spacing:.01em;
+  transition:background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease;
+  scroll-snap-align:start;
+}
+.subnav a:hover, .subnav a:focus-visible{
+  background:var(--red); color:#fff; border-color:var(--red); transform:translateY(-1px);
+}
 .subnav a.is-active{ background:var(--red); color:#fff; border-color:var(--red) }
 
-/* Tighter vertical rhythm on this page only */
-.section{ padding:48px 0 }                 /* down from 64px */
-.section + .section{ padding-top:28px }    /* reduce stacked gap further */
-.container > .cta-row{ margin:14px 0 10px }/* trims space before the next section */
-/* Alternating section backgrounds — Cybersecurity page only */
+/* Layout rhythm + variety */
+.section{ padding:56px 0 }
+.section + .section{ padding-top:28px }
 main > section{ position:relative }
-main > section:nth-of-type(even){ background:var(--panel) }  /* light gray */
+main > section:nth-of-type(even){ background:var(--panel) }
+
+/* Accent line on H2s */
+.section h2{
+  display:flex; align-items:center; gap:.55rem;
+  font-size:clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
+  margin:0 0 .35rem;
+}
+.section h2::before{
+  content:""; width:6px; height:22px; border-radius:6px;
+  background:linear-gradient(180deg, var(--red), var(--orange));
+}
+
+/* Cards (no colored left edge) */
+.card{
+  border:1px solid var(--border);
+  border-radius:var(--radius-card);
+  box-shadow:0 4px 12px rgba(0,0,0,.04);
+  transition:transform .15s ease, box-shadow .2s ease;
+  padding:18px;
+}
+.card:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.08) }
+
+/* Kill the colored stripe from .card--accent (keep class in HTML if present) */
+.card--accent::after{ content:none !important; }
+
+/* H3 emojis already in the HTML */
+.card h3{ margin:.1rem 0 .5rem; font-size:1.1rem }
+.card h3 .e{ margin-right:.4rem }
+
+/* Tighter checklists on this page */
+.checklist li{ margin:.45rem 0 }
+
+/* Anchor offset (header + subnav) */
+main [id]{
+  scroll-margin-top: calc(var(--sticky-header, 72px) + 50px + var(--anchor-gap, 8px));
+}
+/* FAQ: smooth open/close (rely on base for core styles) */
+dl.faq dd{ transition: max-height .28s ease, padding .28s ease; overflow: hidden; }
+/* Small-screen polish */
+@media (max-width: 900px){
+  .subnav .container{ padding:.6rem .8rem }
+  .subnav a{ padding:.6rem 1rem; }
+}

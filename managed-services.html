@@ -17,27 +17,25 @@
   <!-- Shared header -->
   <div data-include="partials/header.html"></div>
 
- <!-- Page hero (shared system) -->
-<section class="hero hero--light hero--bg hero--enhanced hero--compact hero--singlecol ms-hero">
-  <div class="container hero__inner">
-    <div class="hero__copy">
-      <span class="kicker">Managed IT Services</span>
-      <h1>Everything your team needs, handled.</h1>
-      <p class="lead">
-        Predictable pricing, responsive support, and rock-solid foundations. We become your IT department—keeping systems patched,
-        backed up, and secure while your team gets fast, friendly help when they need it.
-      </p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="#helpdesk">See what's included</a>
-        <a class="btn btn--outline" href="tel:+15038788000">Call 503-878-8000</a>
-        <a class="btn btn--outline" href="/contact.html">Request a quote</a>
+  <!-- Page hero -->
+  <section class="hero hero--light hero--bg hero--enhanced hero--compact hero--singlecol ms-hero">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <span class="kicker">Managed IT Services</span>
+        <h1>Everything your team needs, handled.</h1>
+        <p class="lead">
+          Predictable pricing, responsive support, and rock-solid foundations. We become your IT department—keeping systems
+          patched, backed up, and secure while your team gets fast, friendly help when they need it.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="/contact.html">Request a quote</a>
+        </div>
+        <ul class="hero__badges">
+          <li>Serving Portland–Vancouver and remote teams across the U.S.</li>
+        </ul>
       </div>
-      <ul class="hero__badges">
-        <li>Serving Portland–Vancouver and remote teams across the U.S.</li>
-      </ul>
     </div>
-  </div>
-</section>
+  </section>
 
   <!-- Sticky in-page subnav -->
   <nav class="subnav" aria-label="Managed Services Sections">
@@ -51,7 +49,7 @@
       <a href="#cloud">Cloud Productivity</a>
       <a href="#voip">VoIP</a>
       <a href="#backup-dr">Backup & DR</a>
-      <a href="#projects">IT Projects</a><!-- NEW -->
+      <a href="#projects">IT Projects</a>
       <a href="#faq">FAQ</a>
     </div>
   </nav>
@@ -60,156 +58,133 @@
 
     <!-- Helpdesk & Remote Support -->
     <section id="helpdesk" class="section">
-      <div class="container split">
-        <div>
-          <span class="badge badge--solid">Included</span>
-          <h2>Helpdesk & Remote Support</h2>
-          <p>
-            Your users get quick answers from real engineers—via email, phone, or the desktop agent. Most fixes happen
-            remotely in minutes; onsite visits are available when hands are required.
-          </p>
+      <div class="container">
+        <span class="badge badge--solid">Included</span>
+        <h2>Helpdesk & Remote Support</h2>
+        <p>
+          Your users get quick answers from real engineers—via email, phone, or the desktop agent. Most fixes happen
+          remotely in minutes; onsite visits are available when hands are required.
+        </p>
 
-          <div class="grid grid-2">
-            <div class="card">
-              <h3>What you get</h3>
-              <ul class="checklist">
-                <li>Unlimited user support during business hours</li>
-                <li>Remote remediation for Windows & macOS</li>
-                <li>Application help (M365, Google, browsers, VPN, printing)</li>
-                <li>Endpoint protection alert response</li>
-                <li>Hardware troubleshooting & vendor coordination</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Service levels</h3>
-              <ul class="checklist">
-                <li>Priority triage for outages & security events</li>
-                <li>Ticket portal + email updates</li>
-                <li>Optional after-hours coverage</li>
-                <li>Monthly service reports</li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Moved here; will fade in like other revealed items -->
-          <aside class="card reveal-item">
-            <h3>Fast answers, fewer interruptions</h3>
-            <p class="muted">We fix common issues (passwords, printers, app errors, updates) before they become team-wide problems,
-              and document the fix so next time is even faster.</p>
+        <div class="grid grid-3 ms-tiles">
+          <article class="card no-lift">
+            <h3>🧰&nbsp; What you get</h3>
             <ul class="checklist">
-              <li>Clear, plain-English communication</li>
-              <li>Root-cause analysis for recurring issues</li>
-              <li>Quarterly review to reduce ticket drivers</li>
+              <li>Unlimited user support during business hours</li>
+              <li>Remote remediation for Windows & macOS</li>
+              <li>Application help (M365, Google, VPN, printing)</li>
+            </ul>
+          </article>
+
+          <article class="card no-lift">
+            <h3>⚡&nbsp; Service levels</h3>
+            <ul class="ms-use-checks">
+              <li>Priority triage for outages & security events</li>
+              <li>Ticket portal with email updates</li>
+              <li>Monthly service reports</li>
+            </ul>
+          </article>
+
+          <aside class="card no-lift">
+            <h3>✨&nbsp; Fewer interruptions</h3>
+            <p class="muted">We fix recurring issues at the root and document the remedy so next time is faster.</p>
+            <ul class="ms-use-checks">
+              <li>Plain-English communication</li>
+              <li>Trend review each quarter</li>
             </ul>
           </aside>
+        </div>
 
-          <div class="cta-row">
-            <a class="btn btn-primary" href="tel:15038787000">Call Helpdesk: 503-878-7000</a>
-            <a class="btn btn-outline" href="/support.html">Open/Email Support</a>
-          </div>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="tel:15038787000">Call Helpdesk: 503-878-7000</a>
+          <a class="btn btn-outline" href="/support.html">Open/Email Support</a>
         </div>
       </div>
     </section>
 
     <!-- Maintenance & Monitoring -->
-    <section id="maintenance" class="section">
+    <section id="maintenance" class="section section--alt">
       <div class="container">
-        <h2>Maintenance &amp; Monitoring</h2>
+        <h2>Maintenance & Monitoring</h2>
         <p>
           24×7 monitoring watches your endpoints, servers, and key services. We remediate quietly in the background and
           alert you only when decisions are needed.
         </p>
 
-        <!-- Coverage (condensed from the old page) -->
+        <!-- Coverage -->
         <div class="grid grid-3">
-          <article class="card">
-            <h3>Endpoint Care</h3>
+          <article class="card no-lift">
+            <h3>💻&nbsp; Endpoint Care</h3>
             <ul class="checklist">
-              <li>RMM agent health &amp; heartbeat</li>
-              <li>Automated disk cleanup &amp; updates</li>
+              <li>RMM agent health & heartbeat</li>
+              <li>Automated cleanup & updates</li>
               <li>Next-gen AV/EDR (managed)</li>
-              <li>Device encryption status tracking</li>
             </ul>
           </article>
-          <article class="card">
-            <h3>Server Health</h3>
+          <article class="card no-lift">
+            <h3>🖥️&nbsp; Server Health</h3>
             <ul class="checklist">
-              <li>Resource &amp; service monitors</li>
-              <li>Backup job success verification</li>
-              <li>Certificate &amp; SSL expiry alerts</li>
-              <li>Storage &amp; RAID early-warning</li>
+              <li>Resource & service monitors</li>
+              <li>Backup job verification</li>
+              <li>Certificate & SSL expiry alerts</li>
             </ul>
           </article>
-          <article class="card">
-            <h3>Proactive Tasks</h3>
+          <article class="card no-lift">
+            <h3>🛠️&nbsp; Proactive Tasks</h3>
             <ul class="checklist">
-              <li>Automated remediation scripts</li>
-              <li>Standardized baseline policies</li>
-              <li>Quarterly cleanup &amp; tune-ups</li>
-              <li>Hardware lifecycle planning</li>
+              <li>Automated remediation</li>
+              <li>Standardized baselines</li>
+              <li>Quarterly tune-ups</li>
             </ul>
           </article>
         </div>
 
         <!-- Maintenance Playbook -->
-        <h3>Maintenance Playbook</h3>
+        <h3 class="mm-title">Maintenance Playbook</h3>
         <div class="grid grid-3">
-          <article class="card">
-            <h4>Weekly</h4>
-            <ul class="checklist">
-              <li>Patch pilot group &amp; review</li>
-              <li>Agent drift remediation</li>
-              <li>Top alerts triage &amp; fixes</li>
+          <article class="card card--tight no-lift">
+            <h4>📅&nbsp; Weekly</h4>
+            <ul class="ms-use-checks">
+              <li>Patch pilot & review</li>
+              <li>Agent drift fixes</li>
             </ul>
           </article>
-          <article class="card">
-            <h4>Monthly</h4>
-            <ul class="checklist">
+          <article class="card card--tight no-lift">
+            <h4>📆&nbsp; Monthly</h4>
+            <ul class="ms-use-checks">
               <li>Broad patch deployment</li>
-              <li>Third-party app updates</li>
-              <li>Backup &amp; restore spot-tests</li>
+              <li>Third-party updates</li>
+              <li>Restore spot-tests</li>
             </ul>
           </article>
-          <article class="card">
-            <h4>Quarterly</h4>
-            <ul class="checklist">
-              <li>Onsite physical checks</li>
-              <li>Firmware &amp; BIOS review</li>
-              <li>Capacity &amp; lifecycle plan</li>
+          <article class="card card--tight no-lift">
+            <h4>🧭&nbsp; Quarterly</h4>
+            <ul class="ms-use-checks">
+              <li>Onsite checks</li>
+              <li>Firmware & BIOS review</li>
+              <li>Capacity & roadmap</li>
             </ul>
           </article>
         </div>
 
-        <!-- Reporting & KPIs -->
-        <h3>Reporting &amp; KPIs</h3>
+        <!-- Reporting & KPIs (tightened) -->
+        <h3 class="mm-title">Reporting & KPIs</h3>
         <div class="grid grid-3">
-          <article class="card">
-            <h4>Patch Compliance</h4>
-            <ul class="checklist">
-              <li>OS &amp; 3rd-party coverage</li>
-              <li>Exceptions &amp; risk notes</li>
-              <li>Remediation targets</li>
-            </ul>
+          <article class="card card--tight no-lift">
+            <h4>📊&nbsp; Patch Compliance</h4>
+            <p class="muted">Coverage, exceptions, and remediation targets—at a glance.</p>
           </article>
-          <article class="card">
-            <h4>Backup Assurance</h4>
-            <ul class="checklist">
-              <li>Success/Failure trend</li>
-              <li>RPO/RTO alignment</li>
-              <li>Test results &amp; evidence</li>
-            </ul>
+          <article class="card card--tight no-lift">
+            <h4>💾&nbsp; Backup Assurance</h4>
+            <p class="muted">Success/Failure trend, RPO/RTO alignment, and test evidence.</p>
           </article>
-          <article class="card">
-            <h4>Risk &amp; Roadmap</h4>
-            <ul class="checklist">
-              <li>Top findings this month</li>
-              <li>Priority actions &amp; owners</li>
-              <li>Budget &amp; lifecycle notes</li>
-            </ul>
+          <article class="card card--tight no-lift">
+            <h4>🧭&nbsp; Risk & Roadmap</h4>
+            <p class="muted">Top findings with owners and a simple, budget-aware plan.</p>
           </article>
         </div>
 
-        <!-- Calendar + SLAs (compact, readable) -->
+        <!-- Calendar + SLAs -->
         <div class="grid grid-2 mm-cal-sla">
           <div>
             <h3 class="mm-title">Maintenance Windows</h3>
@@ -263,25 +238,25 @@
           reporting for frameworks like CIS, HIPAA, or cyber-insurance? We’ve got that too.
         </p>
         <div class="grid grid-3">
-          <div class="card">
-            <h3>Windows & macOS</h3>
+          <div class="card no-lift">
+            <h3>🖥️&nbsp; Windows & macOS</h3>
             <ul class="checklist">
               <li>Patch rings (pilot → broad)</li>
               <li>Deferrals & blackout windows</li>
-              <li>Rollback plans for bad updates</li>
+              <li>Rollback plans</li>
             </ul>
           </div>
-          <div class="card">
-            <h3>Third-Party Apps</h3>
+          <div class="card no-lift">
+            <h3>🧩&nbsp; Third-Party Apps</h3>
             <ul class="checklist">
               <li>Browsers, Java, Zoom, Adobe, etc.</li>
-              <li>Silent install & update enforcement</li>
+              <li>Silent install enforcement</li>
               <li>Vulnerability prioritization</li>
             </ul>
           </div>
-          <div class="card">
-            <h3>Evidence & Policy</h3>
-            <ul class="checklist">
+          <div class="card no-lift">
+            <h3>📑&nbsp; Evidence & Policy</h3>
+            <ul class="ms-use-checks">
               <li>Patch compliance reports</li>
               <li>Configuration baselines</li>
               <li>Audit-ready documentation</li>
@@ -292,38 +267,39 @@
     </section>
 
     <!-- Asset & License Management -->
-    <section id="assets" class="section">
-      <div class="container">
+    <section id="assets" class="section section--alt">
+      <div class="container panel-stack">
         <h2>Asset & License Management</h2>
-        <p>
-          Always know what you own, where it is, and who uses it. We maintain a living inventory of devices, warranties,
-          and software so budgeting and audits aren't a scramble.
-        </p>
-        <div class="grid grid-3">
-          <div class="card">
-            <h3>Hardware Inventory</h3>
-            <ul class="checklist">
+        <p>Always know what you own, where it is, and who uses it. We maintain a living inventory so budgeting and audits aren’t a scramble.</p>
+
+        <div class="grid grid-2">
+          <div class="card no-lift">
+            <h3>📦&nbsp; Hardware Inventory</h3>
+            <ul class="ms-use-checks">
               <li>Device details & location</li>
               <li>Warranty & lifecycle tracking</li>
-              <li>Spare & loaner pool management</li>
+              <li>Loaner & spare pool</li>
             </ul>
           </div>
-          <div class="card">
-            <h3>Software & Licensing</h3>
-            <ul class="checklist">
+          <div class="card no-lift">
+            <h3>🧾&nbsp; Software & Licensing</h3>
+            <ul class="ms-use-checks">
               <li>M365/Google & line-of-business apps</li>
               <li>License assignment & cleanup</li>
-              <li>Renewal reminders & right-sizing</li>
+              <li>Renewal reminders</li>
             </ul>
           </div>
-          <div class="card">
-            <h3>Procurement Help</h3>
-            <ul class="checklist">
-              <li>Standardized builds & images</li>
-              <li>Vendor quotes & order handling</li>
-              <li>Asset tagging & DOA coverage</li>
-            </ul>
-          </div>
+        </div>
+
+        <div class="card no-lift ms-callout">
+          <h3>🛒&nbsp; Procurement Help</h3>
+          <p class="muted">Quotes, standardized builds, and asset tagging—new hires start on time with the right gear.</p>
+          <ul class="pill-list">
+            <li>Standard builds</li>
+            <li>Vendor quotes</li>
+            <li>Asset tagging</li>
+            <li>DOA coverage</li>
+          </ul>
         </div>
       </div>
     </section>
@@ -332,181 +308,154 @@
     <section id="onboarding" class="section">
       <div class="container">
         <h2>User On/Offboarding</h2>
-        <p>
-          New hires ready on day one; departures handled securely. We use checklists and automation to keep accounts,
-          access, and equipment consistent.
-        </p>
-        <div class="grid grid-3">
-          <div class="card">
-            <h3>Onboarding</h3>
-            <ul class="checklist">
-              <li>Account creation & group membership</li>
-              <li>Mailbox/license assignment</li>
-              <li>Device setup & apps preloaded</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h3>Offboarding</h3>
-            <ul class="checklist">
-              <li>Account disable & retention policy</li>
-              <li>Data transfer to manager/HR</li>
-              <li>Device collection & wipe</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h3>Access Governance</h3>
-            <ul class="checklist">
-              <li>Role-based access standards</li>
-              <li>MFA & conditional access</li>
-              <li>Periodic access reviews</li>
-            </ul>
-          </div>
-        </div>
+        <p>New hires ready on day one; departures handled securely. Automation keeps accounts, access, and equipment consistent.</p>
+
+        <ol class="ms-steps">
+          <li>
+            <h4>🎒&nbsp; Onboarding</h4>
+            <p>Accounts, groups, licensing, and devices pre-loaded with apps.</p>
+          </li>
+          <li>
+            <h4>🔐&nbsp; Access Governance</h4>
+            <p>Role-based access, MFA & Conditional Access, periodic reviews.</p>
+          </li>
+          <li>
+            <h4>🧹&nbsp; Offboarding</h4>
+            <p>Disable, retain, transfer data, and wipe devices cleanly.</p>
+          </li>
+        </ol>
       </div>
     </section>
 
-    <!-- Network & Wi-Fi Management -->
-    <section id="network" class="section">
+    <!-- Network & Wi-Fi (unique layout) -->
+    <section id="network" class="section section--alt">
       <div class="container">
         <h2>Network & Wi-Fi Management</h2>
-        <p>
-          From gateway to switch to AP, we build reliable networks with clear documentation and safe defaults. Remote
-          management means quicker changes and fewer site visits.
-        </p>
-        <div class="grid grid-3">
-          <div class="card">
-            <h3>Design & Standards</h3>
-            <ul class="checklist">
-              <li>Segmentation & VLANs</li>
-              <li>Guest & IoT isolation</li>
-              <li>Secure remote access (VPN)</li>
+        <div class="split">
+          <div>
+            <p>From gateway to switch to AP, we build reliable networks with clear documentation and safe defaults.</p>
+            <h3 class="microhead">Design Standards</h3>
+            <ul class="ms-use-checks">
+              <li>Segmentation & VLANs with clear naming</li>
+              <li>Guest & IoT isolation by default</li>
+              <li>Secure VPN & admin access</li>
             </ul>
           </div>
-          <div class="card">
-            <h3>Operations</h3>
-            <ul class="checklist">
-              <li>Config backups & change logs</li>
-              <li>Firmware management</li>
-              <li>Performance & uptime monitoring</li>
+          <aside class="card no-lift panel--experience">
+            <h3>⭐&nbsp; Experience</h3>
+            <ul class="pill-list">
+              <li>Heat-map planning</li>
+              <li>Roaming tuned</li>
+              <li>Config backups</li>
+              <li>Change logs</li>
             </ul>
-          </div>
-          <div class="card">
-            <h3>Wi-Fi Experience</h3>
-            <ul class="checklist">
-              <li>Heat-map planning & placement</li>
-              <li>Roaming optimization</li>
-              <li>Guest splash & acceptable-use</li>
-            </ul>
-          </div>
+            <div class="mini-stats">
+              <div><span>99.9%</span> Uptime targets</div>
+              <div><span>&lt;24h</span> Site turn-up</div>
+            </div>
+          </aside>
         </div>
       </div>
     </section>
 
-    <!-- Cloud Productivity -->
+    <!-- Cloud Productivity (distinct icon cards) -->
     <section id="cloud" class="section">
       <div class="container">
         <h2>Cloud Productivity (Microsoft&nbsp;365 / Google)</h2>
-        <p>
-          Keep collaboration secure and tidy. We manage identities, policies, and licensing so your team can focus on the work.
-        </p>
-        <div class="grid grid-3">
-          <div class="card">
-            <h3>Identity & Security</h3>
-            <ul class="checklist">
+        <p>Keep collaboration secure and tidy. We manage identities, policies, and licensing so your team can focus on the work.</p>
+
+        <div class="grid grid-3 ms-controlpacks">
+          <article class="card no-lift">
+            <h3>🔐&nbsp; Identity & Security</h3>
+            <ul class="ms-use-checks">
               <li>Azure AD / Google Workspace</li>
               <li>MFA & Conditional Access</li>
               <li>Baseline hardening & alerts</li>
             </ul>
-          </div>
-          <div class="card">
-            <h3>Productivity Apps</h3>
-            <ul class="checklist">
-              <li>Teams/SharePoint/Drive governance</li>
-              <li>Mailbox, groups, and retention</li>
-              <li>Data loss prevention policies</li>
+          </article>
+          <article class="card no-lift">
+            <h3>📂&nbsp; Collaboration</h3>
+            <ul class="ms-use-checks">
+              <li>Teams / SharePoint / Drive governance</li>
+              <li>Mailbox, groups, retention</li>
+              <li>DLP & sharing controls</li>
             </ul>
-          </div>
-          <div class="card">
-            <h3>Licensing & Training</h3>
-            <ul class="checklist">
-              <li>Right-size plans & save costs</li>
-              <li>Security awareness training</li>
-              <li>Admin & user workshops</li>
+          </article>
+          <article class="card no-lift">
+            <h3>🧾&nbsp; Licensing & Enablement</h3>
+            <ul class="ms-use-checks">
+              <li>Right-sized plans</li>
+              <li>Security training</li>
+              <li>Admin workshops</li>
             </ul>
-          </div>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- VoIP -->
-    <section id="voip" class="section">
+    <!-- VoIP (call-flow rail) -->
+    <section id="voip" class="section section--alt">
       <div class="container">
         <h2>VoIP Phones</h2>
-        <p>
-          Modern, flexible calling for office, remote, and mobile users. We design call flows, provision devices, and support your team.
-        </p>
-        <div class="grid grid-3">
-          <div class="card">
-            <h3>Setup & Migration</h3>
-            <ul class="checklist">
-              <li>Call flow & auto-attendant design</li>
-              <li>Number porting & E911 updates</li>
-              <li>Desk phone & softphone rollout</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h3>Operations</h3>
-            <ul class="checklist">
-              <li>User adds/changes</li>
-              <li>Voicemail & transcription</li>
-              <li>QoS & monitoring</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h3>Integrations</h3>
-            <ul class="checklist">
-              <li>Teams, mobile apps, CRM hooks</li>
-              <li>Hunt groups & reporting</li>
-              <li>Holiday schedules</li>
-            </ul>
-          </div>
+        <p>Modern, flexible calling for office, remote, and mobile users. We design call flows, provision devices, and support your team.</p>
+
+        <div class="ms-callflow">
+          <div class="flow-step">Numbers &amp; E911</div>
+          <div class="flow-step">Auto-attendants</div>
+          <div class="flow-step">Hunt groups</div>
+          <div class="flow-step">Users &amp; devices</div>
+          <div class="flow-step">Reports &amp; QoS</div>
+        </div>
+
+        <div class="card no-lift panel--highlights">
+          <h3>✨&nbsp; Highlights</h3>
+          <ul class="pill-list">
+            <li>Desk phones & softphones</li>
+            <li>Transcription</li>
+            <li>Teams & CRM hooks</li>
+            <li>Holiday schedules</li>
+          </ul>
         </div>
       </div>
     </section>
 
-    <!-- Backup & DR -->
+    <!-- Backup & DR (proof banner) -->
     <section id="backup-dr" class="section">
       <div class="container">
         <h2>Backup & Disaster Recovery</h2>
-        <p>
-          Backups you can trust—and restore quickly. We protect servers, cloud data, and endpoints with tested recovery plans.
-        </p>
+        <p>Backups you can trust—and restore quickly. We protect servers, cloud data, and endpoints with tested recovery plans.</p>
+
         <div class="grid grid-3">
-          <div class="card">
-            <h3>What We Protect</h3>
-            <ul class="checklist">
+          <div class="card no-lift">
+            <h3>🛡️&nbsp; What We Protect</h3>
+            <ul class="ms-use-checks">
               <li>Servers (physical/virtual)</li>
               <li>Workstations & laptops</li>
               <li>Microsoft 365 / Google Workspace</li>
             </ul>
           </div>
-          <div class="card">
-            <h3>How It Works</h3>
-            <ul class="checklist">
+          <div class="card no-lift">
+            <h3>⚙️&nbsp; How It Works</h3>
+            <ul class="bullet-list">
               <li>3-2-1 strategy with offsite copies</li>
               <li>Encryption in transit & at rest</li>
-              <li>Automated backup verification</li>
+              <li>Automated verification</li>
             </ul>
           </div>
-          <div class="card">
-            <h3>Recovery-Ready</h3>
-            <ul class="checklist">
+          <div class="card no-lift">
+            <h3>🚀&nbsp; Recovery-Ready</h3>
+            <ul class="ms-use-checks">
               <li>Documented RPO/RTO targets</li>
               <li>Periodic test restores</li>
-              <li>Runbook for major incidents</li>
+              <li>Runbook for incidents</li>
             </ul>
           </div>
         </div>
+
+        <div class="ms-banner">
+          <strong>Prove it when it matters:</strong> we include documented test restores so your backups aren’t just “green,” they’re <em>trusted</em>.
+        </div>
+
         <div class="cta-row">
           <a class="btn btn-primary" href="/contact.html">Get a backup review</a>
         </div>
@@ -514,42 +463,36 @@
     </section>
 
     <!-- IT Projects -->
-    <section id="projects" class="section">
+    <section id="projects" class="section section--alt">
       <div class="container">
         <h2>IT Projects</h2>
-        <p>
-          Need extra hands or specialized expertise? We deliver scoped projects with clear timelines, fixed pricing options,
-          and minimal disruption to your team.
-        </p>
+        <p>Scoped projects with clear timelines, fixed pricing options, and minimal disruption.</p>
 
-        <div class="grid grid-3">
-          <article class="card">
-            <h3>Migrations &amp; Modernization</h3>
-            <ul class="checklist">
-              <li>Microsoft 365 / Google Workspace migrations</li>
-              <li>Email &amp; domain moves / cutovers</li>
-              <li>File server → SharePoint / Drive transitions</li>
-              <li>Server upgrades &amp; virtualization</li>
+        <div class="grid grid-3 ms-icon-cards">
+          <article class="card no-lift">
+            <h3>🧭&nbsp; Migrations & Modernization</h3>
+            <ul class="ms-use-checks">
+              <li>M365/Google migrations & cutovers</li>
+              <li>File server → SharePoint/Drive</li>
+              <li>Server upgrades & virtualization</li>
             </ul>
           </article>
 
-          <article class="card">
-            <h3>Network &amp; Infrastructure</h3>
-            <ul class="checklist">
-              <li>Wi-Fi redesign &amp; heat-map planning</li>
-              <li>Firewall / switch refresh &amp; segmentation</li>
-              <li>Secure remote access (VPN) rollout</li>
-              <li>New sites, office moves &amp; cabling</li>
+          <article class="card no-lift">
+            <h3>🌐&nbsp; Network & Infrastructure</h3>
+            <ul class="ms-use-checks">
+              <li>Wi-Fi redesign & heat-maps</li>
+              <li>Firewall/switch refresh & VLANs</li>
+              <li>Secure remote access (VPN)</li>
             </ul>
           </article>
 
-          <article class="card">
-            <h3>Security &amp; Continuity</h3>
-            <ul class="checklist">
-              <li>EDR/MDR deployment &amp; tuning</li>
-              <li>Identity hardening (MFA, Conditional Access)</li>
-              <li>Backup/DR improvements &amp; test restores</li>
-              <li>Compliance readiness (HIPAA/PCI)</li>
+          <article class="card no-lift">
+            <h3>🛡️&nbsp; Security & Continuity</h3>
+            <ul class="ms-use-checks">
+              <li>EDR/MDR deployment & tuning</li>
+              <li>MFA & Conditional Access</li>
+              <li>Backup/DR improvements</li>
             </ul>
           </article>
         </div>
@@ -586,142 +529,108 @@
   <!-- Shared footer -->
   <div data-include="partials/footer.html"></div>
 
+  <!-- Subnav horizontal wheel -->
   <script>
-    // 3A) Subnav: use mouse wheel to scroll horizontally while hovered
     (function(){
       const scroller = document.querySelector('.subnav .container');
       if (!scroller) return;
       scroller.addEventListener('wheel', (e) => {
-        // Only hijack if we have horizontal overflow
         const canScrollX = scroller.scrollWidth > scroller.clientWidth;
         if (!canScrollX) return;
-        // If vertical wheel input, translate to horizontal
         if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-          e.preventDefault(); // requires passive:false default; okay in inline listeners
+          e.preventDefault();
           scroller.scrollLeft += e.deltaY;
         }
       }, { passive: false });
     })();
   </script>
 
+  <!-- FAQ smooth open/close -->
   <script>
-  /* FAQ: no jump on open; smooth open/close */
-  (function(){
-    document.querySelectorAll('dl.faq').forEach(faq => {
-      let i = 0;
-      faq.querySelectorAll('dt').forEach(dt => {
-        const dd = dt.nextElementSibling;
-        if (!dd || dd.tagName !== 'DD') return;
+    (function(){
+      document.querySelectorAll('dl.faq').forEach(faq => {
+        let i = 0;
+        faq.querySelectorAll('dt').forEach(dt => {
+          const dd = dt.nextElementSibling;
+          if (!dd || dd.tagName !== 'DD') return;
 
-        const id = `faq-a-${++i}`;
-        dt.setAttribute('role','button');
-        dt.setAttribute('tabindex','0');
-        dt.setAttribute('aria-controls', id);
-        dt.setAttribute('aria-expanded','false');
-        dd.id = id;
-
-        // start closed
-        dd.classList.remove('is-open');
-        dd.style.maxHeight = '0';
-        dd.style.overflow = 'hidden';
-
-        const BIG = 1000; // px: safe upper bound for content height
-
-        function open(){
-          dd.classList.add('is-open');
-          dd.style.maxHeight = BIG + 'px';       // let padding/margins transition without under-measuring
-          dt.setAttribute('aria-expanded','true');
-        }
-        function close(){
-          // from 'none' (or BIG) -> exact px -> 0 for a clean reverse
-          if (dd.style.maxHeight === 'none') {
-            dd.style.maxHeight = dd.scrollHeight + 'px';
-            dd.offsetHeight; // reflow
-          }
-          dd.style.maxHeight = '0';
-          dd.classList.remove('is-open');
+          const id = `faq-a-${++i}`;
+          dt.setAttribute('role','button');
+          dt.setAttribute('tabindex','0');
+          dt.setAttribute('aria-controls', id);
           dt.setAttribute('aria-expanded','false');
-        }
-        function toggle(){ dd.classList.contains('is-open') ? close() : open(); }
+          dd.id = id;
 
-        dd.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return;
-          if (dd.classList.contains('is-open')) {
-            dd.style.maxHeight = 'none';        // allow natural growth once fully open
+          dd.classList.remove('is-open');
+          dd.style.maxHeight = '0';
+          dd.style.overflow = 'hidden';
+
+          const BIG = 1000;
+          function open(){
+            dd.classList.add('is-open');
+            dd.style.maxHeight = BIG + 'px';
+            dt.setAttribute('aria-expanded','true');
           }
-        });
+          function close(){
+            if (dd.style.maxHeight === 'none') {
+              dd.style.maxHeight = dd.scrollHeight + 'px';
+              dd.offsetHeight;
+            }
+            dd.style.maxHeight = '0';
+            dd.classList.remove('is-open');
+            dt.setAttribute('aria-expanded','false');
+          }
+          function toggle(){ dd.classList.contains('is-open') ? close() : open(); }
 
-        dt.addEventListener('click', toggle);
-        dt.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+          dd.addEventListener('transitionend', (e) => {
+            if (e.propertyName !== 'max-height') return;
+            if (dd.classList.contains('is-open')) {
+              dd.style.maxHeight = 'none';
+            }
+          });
+
+          dt.addEventListener('click', toggle);
+          dt.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+          });
         });
       });
-    });
-  })();
+    })();
   </script>
 
+  <!-- Match Calendar/SLA row heights (desktop only) -->
   <script>
-  /* Match the heights of Maintenance Windows rows to Response SLA rows
-    without touching your markup. Works only when the two columns are side-by-side. */
-  (function(){
-    const wrap = document.querySelector('#maintenance .mm-cal-sla');
-    if (!wrap) return;
+    (function(){
+      const wrap = document.querySelector('#maintenance .mm-cal-sla');
+      if (!wrap) return;
 
-    const calRows = Array.from(document.querySelectorAll('#maintenance .mm-calendar .mm-cal__row'));
-    const slaRows = Array.from(document.querySelectorAll('#maintenance .mm-sla .mm-sla__row'));
-    if (!calRows.length || !slaRows.length) return;
+      const calRows = Array.from(document.querySelectorAll('#maintenance .mm-calendar .mm-cal__row'));
+      const slaRows = Array.from(document.querySelectorAll('#maintenance .mm-sla .mm-sla__row'));
+      if (!calRows.length || !slaRows.length) return;
 
-    const mq = window.matchMedia('(max-width: 900px)'); // your grid stacks below 900px
+      const mq = window.matchMedia('(max-width: 900px)');
 
-    function clearHeights(){
-      calRows.forEach(r => r.style.minHeight = '');
-      slaRows.forEach(r => r.style.minHeight = '');
-    }
-
-    function syncHeights(){
-      clearHeights();
-      if (mq.matches) return; // single-column stacked; don't force heights
-
-      const n = Math.min(calRows.length, slaRows.length);
-      for (let i = 0; i < n; i++){
-        const h = Math.max(calRows[i].offsetHeight, slaRows[i].offsetHeight);
-        calRows[i].style.minHeight = slaRows[i].style.minHeight = h + 'px';
-      }
-    }
-
-    // Recompute on load, resize, and when content changes
-    window.addEventListener('load', syncHeights);
-    window.addEventListener('resize', syncHeights);
-    mq.addEventListener?.('change', syncHeights);
-
-    // If fonts or content reflow, ResizeObserver keeps things aligned
-    const ro = new ResizeObserver(syncHeights);
-    calRows.concat(slaRows).forEach(el => ro.observe(el));
-  })();
-  </script>
-
-  <script>
-    (function () {
-      const allSections = Array.from(document.querySelectorAll('section'));
-      const sectionsToReveal = allSections.slice(1); // hero is index 0
-      sectionsToReveal.forEach(sec => sec.classList.add('reveal'));
-
-      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduceMotion) {
-        sectionsToReveal.forEach(sec => sec.classList.add('is-visible'));
-        return;
+      function clearHeights(){
+        calRows.forEach(r => r.style.minHeight = '');
+        slaRows.forEach(r => r.style.minHeight = '');
       }
 
-      const io = new IntersectionObserver((entries, obs) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            obs.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.15 });
+      function syncHeights(){
+        clearHeights();
+        if (mq.matches) return;
+        const n = Math.min(calRows.length, slaRows.length);
+        for (let i = 0; i < n; i++){
+          const h = Math.max(calRows[i].offsetHeight, slaRows[i].offsetHeight);
+          calRows[i].style.minHeight = slaRows[i].style.minHeight = h + 'px';
+        }
+      }
 
-      sectionsToReveal.forEach(sec => io.observe(sec));
+      window.addEventListener('load', syncHeights);
+      window.addEventListener('resize', syncHeights);
+      mq.addEventListener?.('change', syncHeights);
+
+      const ro = new ResizeObserver(syncHeights);
+      calRows.concat(slaRows).forEach(el => ro.observe(el));
     })();
   </script>
 

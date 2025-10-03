@@ -38,3 +38,46 @@
 .section--cta .cta .lead{ color:var(--gray-dark); margin-bottom:12px }
 .cta__buttons{ display:inline-flex; gap:12px; flex-wrap:wrap }
 @media (max-width:980px){ .hero--enhanced .stat-card{ max-width:100% } }
+/* Hero stat card — right align + shrink-wrap */
+.hero__art{
+  justify-self: end;            /* push the card to the right side */
+}
+
+.hero__art .stat-card{
+  display: inline-grid;         /* shrink to content */
+  gap: 10px;
+  padding: 16px 18px;
+  inline-size: fit-content;     /* modern shrink-to-fit */
+  max-inline-size: 520px;       /* safety cap */
+  margin-inline-start: auto;    /* extra nudge to the right if needed */
+}
+
+/* On small screens let it span naturally */
+@media (max-width: 980px){
+  .hero__art{ justify-self: start; }
+  .hero__art .stat-card{
+    display: grid;
+    inline-size: auto;
+    max-inline-size: 100%;
+    margin-inline-start: 0;
+  }
+}
+/* === Home page CTA alignment (non-hero) === */
+
+/* Core Services: the "See all services" wrapper */
+.section__cta{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-top:14px;          /* space from content above */
+}
+
+/* If you ever drop multiple buttons in .section__cta */
+.section__cta .btn + .btn{ margin-left:12px; }
+
+/* Security section: center the single button only (don't affect headings/text) */
+.security__copy .btn{
+  display:block;            /* allow auto margins to center */
+  width:max-content;
+  margin:14px auto 0;       /* space above + centered */
+}

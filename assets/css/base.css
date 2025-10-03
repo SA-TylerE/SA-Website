@@ -16,33 +16,41 @@ img{ max-width:100%; height:auto; display:block }
 a{ color:inherit; text-decoration:none }
 .container{ max-width:var(--max); margin:0 auto; padding:0 24px }
 
-/* 1) Header / Navigation (shared) */
-.nav{ position:sticky; top:0; z-index:1000; background:#fff; border-bottom:1px solid var(--border); overflow:visible }
+/* 1) Header / Navigation (desktop defaults) */
+.nav{ position:sticky; top:0; z-index:1200; background:#fff; border-bottom:1px solid var(--border) }
 .nav__inner{ display:grid; grid-template-columns:auto 1fr auto; align-items:center; min-height:72px; gap:24px }
 .brand{ display:flex; align-items:center; gap:12px; color:var(--black) }
 .brand img{ height:50px; width:auto }
 .brand__text{ display:none }
+
 .menu{ display:flex; justify-content:center; align-items:center }
 .menu__list{ display:flex; gap:28px; list-style:none; margin:0; padding:0 }
+.menu__item{ position:relative }
 .menu__link{ position:relative; display:inline-block; padding:12px 6px; border-radius:4px; font-weight:700; color:var(--black); transition:color .15s ease }
-.menu__link:hover, .menu__link:focus{ color:var(--red) }
-.menu__link, .dropdown a, .submenu__link{ position:relative }
-.menu__link::after, .dropdown a::after, .submenu__link::after{
-  content:""; position:absolute; left:0; bottom:0; height:3px; width:100%; background:var(--red);
-  transform:scaleX(0); transform-origin:left; transition:transform .2s ease;
+@media (hover:hover){
+  .menu__link:hover, .menu__link:focus{ color:var(--red) }
+  .menu__link::after, .dropdown a::after, .submenu__link::after{
+    content:""; position:absolute; left:0; bottom:0; height:3px; width:100%; background:var(--red);
+    transform:scaleX(0); transform-origin:left; transition:transform .2s ease;
+  }
+  .menu__link:hover::after, .menu__link:focus-visible::after,
+  .dropdown a:hover::after, .dropdown a:focus-visible::after,
+  .submenu__link:hover::after, .submenu__link:focus-visible::after{ transform:scaleX(1) }
 }
-.menu__link:hover::after, .menu__link:focus-visible::after,
-.dropdown a:hover::after, .dropdown a:focus-visible::after,
-.submenu__link:hover::after, .submenu__link:focus-visible::after{ transform:scaleX(1) }
+
 .menu__cta{ display:flex; gap:12px }
-.has-dropdown{ position:relative; --hover-buffer:10px; padding-bottom:var(--hover-buffer); margin-bottom:calc(var(--hover-buffer) * -1) }
+
+/* Desktop dropdowns */
+.has-dropdown{ --hover-buffer:10px; padding-bottom:var(--hover-buffer); margin-bottom:calc(var(--hover-buffer) * -1) }
 .dropdown{
   position:absolute; top:100%; left:0; min-width:260px; background:#fff; border:1px solid var(--border);
-  border-radius:8px; box-shadow:0 10px 24px rgba(0,0,0,.08); padding:8px 0; display:none; margin-top:0; z-index:1100; list-style:none; pointer-events:auto;
+  border-radius:8px; box-shadow:0 10px 24px rgba(0,0,0,.08); padding:8px 0; display:none; z-index:1100; list-style:none;
 }
 .dropdown li{ list-style:none }
 .dropdown a, .submenu__link{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 16px; border-radius:6px; color:var(--black); font-weight:600 }
 .dropdown a:hover, .submenu__link:hover{ background:rgba(209,211,212,.4); color:var(--red) }
+
+/* second level flyout (desktop) */
 .has-subdropdown{ position:relative }
 .subdropdown{
   position:absolute; top:0; left:calc(100% - 1px); min-width:260px; background:#fff; border:1px solid var(--border);
@@ -54,19 +62,94 @@ a{ color:inherit; text-decoration:none }
   transition:transform .2s ease, color .2s ease, opacity .2s ease; opacity:.85;
 }
 .submenu__link:hover::before, .submenu__link:focus-visible::before{ color:var(--red); transform:translateY(-50%) translateX(2px); opacity:1 }
-.has-dropdown:hover > .dropdown, .has-dropdown:focus-within > .dropdown, .dropdown:hover, .dropdown:focus-within{ display:block }
-.has-subdropdown:hover > .subdropdown, .has-subdropdown:focus-within > .subdropdown, .subdropdown:hover, .subdropdown:focus-within{ display:block }
 
-/* 1.1 Mobile nav */
+/* open-on-hover for desktop */
+.has-dropdown:hover > .dropdown,
+.has-dropdown:focus-within > .dropdown,
+.dropdown:hover, .dropdown:focus-within{ display:block }
+.has-subdropdown:hover > .subdropdown,
+.has-subdropdown:focus-within > .subdropdown,
+.subdropdown:hover, .subdropdown:focus-within{ display:block }
+
+/* 1.1 Mobile nav (overlay drawer) */
 .hamburger{ display:none; justify-self:end; flex-direction:column; gap:5px; background:none; border:0 }
-.hamburger span{ width:26px; height:2px; background:var(--black) }
-@media (max-width:980px){
-  .hamburger{ display:flex }
-  #primary-nav{ position:fixed; inset:72px 0 0 0; background:#fff; border-top:1px solid var(--border); transform:translateY(-8px); opacity:0; pointer-events:none; transition:.2s ease; padding:16px 20px }
-  #primary-nav.open{ transform:translateY(0); opacity:1; pointer-events:auto }
-  .menu__list{ flex-direction:column; gap:8px }
-  .dropdown, .subdropdown{ position:relative; left:auto; top:auto; margin-top:6px; box-shadow:none; border:0; min-width:unset }
-  .menu__cta{ margin-top:12px }
+
+.menu__mobile-cta{ display:none } /* hidden by default, shown only in the open drawer */
+
+.body--nav-open::before{          /* dimmer so drawer clearly covers page */
+  content:""; position:fixed; inset:72px 0 0 0; background:rgba(0,0,0,.45); z-index:1100; display:none;
+}
+
+@media (max-width:900px){
+  /* bar & hamburger button */
+  .nav .menu__cta{ display:none !important; }                   /* no desktop CTAs on phones */
+  .hamburger{
+    display:flex; width:44px; height:44px; align-items:center; justify-content:center;
+    cursor:pointer; -webkit-tap-highlight-color:transparent; position:relative; z-index:1202;
+  }
+  .hamburger span{
+    position:absolute; width:26px; height:2px; background:var(--black);
+    transition:transform .22s ease, opacity .2s ease;
+  }
+  .hamburger span:nth-child(1){ transform:translateY(-6px) }
+  .hamburger span:nth-child(2){ transform:translateY(0) }
+  .hamburger span:nth-child(3){ transform:translateY(6px) }
+  .nav.nav--open .hamburger span:nth-child(1){ transform:rotate(45deg) }
+  .nav.nav--open .hamburger span:nth-child(2){ opacity:0 }
+  .nav.nav--open .hamburger span:nth-child(3){ transform:rotate(-45deg) }
+
+  /* drawer overlay under the sticky bar */
+  .body--nav-open::before{ display:block }
+
+  .nav .menu{
+    display:block;                           /* override desktop flex */
+    position:fixed; top:72px; left:0; right:0; bottom:0;
+    background:#fff; z-index:1201; overflow:auto; -webkit-overflow-scrolling:touch;
+    padding:16px 18px 28px; box-shadow:0 12px 24px rgba(0,0,0,.1);
+    transform:translateY(-8px); opacity:0; pointer-events:none; transition:.2s ease;
+  }
+  .nav.nav--open .menu{ transform:none; opacity:1; pointer-events:auto }
+
+  /* mobile CTA block at the top of drawer */
+  .nav.nav--open .menu__mobile-cta{
+    display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:6px 0 16px;
+  }
+  .menu__mobile-cta .btn--primary{ grid-column:1 / -1; padding:16px 18px }
+  .menu__mobile-cta .btn--outline{ padding:14px 18px }
+
+  /* stack the list vertically (no columns), full width */
+  .menu__list{ display:block !important; width:100% }
+  .menu__list > li{ display:block; width:100% }
+
+  /* make section headers visually distinct from leaf items */
+  .menu__list > li > a.menu__link{
+    display:block; padding:10px 0; margin-top:10px;
+    font-size:.85rem; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--gray-dark); font-weight:800;
+  }
+
+  /* flatten submenus -> show only leaf links, no group headings/chevrons */
+  .submenu__link{ display:none !important; }
+  .menu .dropdown, .menu .subdropdown{
+    position:static !important; display:block !important;
+    border:0; box-shadow:none; margin:0; padding:0; width:100%;
+  }
+
+  /* leaf links (clean list; no divider lines) */
+  .menu .dropdown > li > a,
+  .menu .subdropdown a{
+    display:block; padding:12px 0 10px 16px; background:transparent; border:0; border-radius:0; font-weight:600;
+  }
+
+  /* kill underline bars and any hover-open on mobile */
+  .menu__link::after, .dropdown a::after, .submenu__link::after{ content:none !important }
+  .menu .has-dropdown:hover > .dropdown,
+  .menu .has-subdropdown:hover > .subdropdown{ display:block !important }
+}
+
+/* Desktop: make sure the mobile CTA row never shows */
+@media (min-width:901px){
+  .menu__mobile-cta{ display:none !important }
 }
 
 /* 2) Buttons (standardized) */
@@ -78,8 +161,7 @@ a{ color:inherit; text-decoration:none }
 .btn-primary:hover{ background:var(--orange) }
 .btn-outline{ background:#fff; color:var(--red); border-color:var(--red) }
 .btn-outline:hover{ background:var(--red); color:#fff }
-/* Temporary compatibility aliases (remove after HTML updated everywhere) */
-.btn--primary{ composes: btn-primary; } /* if your build supports CSS Modules; otherwise duplicate: */
+/* Temporary compatibility aliases */
 .btn--primary{ background:var(--red); color:#fff; border:2px solid transparent }
 .btn--primary:hover{ background:var(--orange) }
 .btn--outline{ background:#fff; color:var(--red); border:2px solid var(--red) }
@@ -88,20 +170,17 @@ a{ color:inherit; text-decoration:none }
 /* 3) Hero (shared base) */
 .hero{ position:relative; padding:84px 0; overflow:hidden }
 .hero--light{ background:#fff }
-.hero--bg::before{ content:""; position:absolute; inset:0; background-image:var(--hero-bg); background-size:cover; background-position:center; background-repeat:no-repeat; opacity:.18; pointer-events:none; z-index:0 }
+.hero--bg::before{ content:""; position:absolute; inset:0; background-image:var(--hero-bg); background-size:cover; background-position:center; background-repeat:no-repeat; opacity:0.18; pointer-events:none; z-index:0 }
 .hero--bg::after{ content:""; position:absolute; inset:0; background:linear-gradient(to right, rgba(255,255,255,.6), rgba(255,255,255,0)); pointer-events:none; z-index:0 }
 .hero__inner{ position:relative; z-index:1; display:grid; grid-template-columns:1.1fr .9fr; gap:32px; align-items:center }
 .kicker{ text-transform:uppercase; color:var(--red); font-weight:700; font-size:.8rem; letter-spacing:.12em }
-.lead{ color:var(--gray-dark) } /* shared text tone */
+.lead{ color:var(--gray-dark) }
 
-/* ===== Global: readable-over-image text for all image heroes ===== */
-/* Applies to any hero that uses the background-image variant (.hero--bg) */
-
+/* Readability over image heroes */
 .hero.hero--bg .hero__copy h1,
 .hero.hero--bg .hero__copy p,
 .hero.hero--bg .hero__copy .kicker{
   color:#fff;
-  /* Fallback outline for Firefox and others without text-stroke */
   text-shadow:
     -1px -1px 0 rgba(0,0,0,.95),
      1px -1px 0 rgba(0,0,0,.95),
@@ -109,7 +188,6 @@ a{ color:inherit; text-decoration:none }
      1px  1px 0 rgba(0,0,0,.95),
      0     2px 6px rgba(0,0,0,.25);
 }
-
 @supports (-webkit-text-stroke: 1px black){
   .hero.hero--bg .hero__copy h1,
   .hero.hero--bg .hero__copy p,
@@ -118,18 +196,15 @@ a{ color:inherit; text-decoration:none }
     text-shadow: 0 2px 6px rgba(0,0,0,.25);
     paint-order: stroke fill;
   }
-  /* Slightly lighter stroke on smaller body text */
   .hero.hero--bg .hero__copy p{      -webkit-text-stroke: .75px rgba(0,0,0,.9) }
   .hero.hero--bg .hero__copy .kicker{-webkit-text-stroke: .65px rgba(0,0,0,.9) }
 }
 
-/* Opt-out: add class 'hero--no-outline' on a specific hero if you want normal text */
+/* Opt-out variant */
 .hero--no-outline .hero__copy h1,
 .hero--no-outline .hero__copy p,
 .hero--no-outline .hero__copy .kicker{
-  -webkit-text-stroke: initial;
-  text-shadow:none;
-  color:var(--black);
+  -webkit-text-stroke: initial; text-shadow:none; color:var(--black);
 }
 
 /* 4) Sections / grids / cards (shared) */
@@ -152,12 +227,12 @@ a{ color:inherit; text-decoration:none }
 .card:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.06) }
 .card h3{ margin-top:0; font-size:1.25rem }
 
-/* 4.1 Shared list styles used on multiple pages */
+/* 4.1 Shared list styles */
 .tick-list{ list-style:none; padding:0; margin:0 0 12px 0 }
 .tick-list li{ position:relative; padding-left:22px; margin:8px 0; color:var(--black) }
 .tick-list li::before{ content:"✔"; position:absolute; left:0; top:0; color:var(--red); font-weight:800 }
 
-/* 4.2 Shared badges (pill labels) */
+/* 4.2 Badges */
 .badge{
   display:inline-flex; align-items:center; gap:.4ch;
   padding:.35rem .7rem; line-height:1; font-weight:800; font-size:.85rem;
@@ -165,19 +240,19 @@ a{ color:inherit; text-decoration:none }
 }
 .badge--solid{ background:var(--red); color:#fff; border-color:var(--red) }
 .badge--muted{ border-color:var(--gray-light); color:var(--gray-dark); background:#fff }
-.badge--inverted{ background:transparent; color:#fff; border-color:#fff } /* for photo heroes */
+.badge--inverted{ background:transparent; color:#fff; border-color:#fff }
 .badge--sm{ font-size:.78rem; padding:.28rem .6rem; border-width:2px }
 .badge--lg{ font-size:.95rem; padding:.5rem .9rem }
 
-/* optional: tidy spacing when a badge sits in hero copy */
+/* Spacing when a badge sits in hero copy */
 .hero .badge{ margin-top:8px }
 
-/* NEW: checklist appears on multiple pages → promote to base */
+/* Checklist (promoted) */
 .checklist{ list-style:none; padding:0; margin:.25rem 0 0 0 }
 .checklist li{ position:relative; padding-left:22px; margin:.5rem 0; color:var(--black) }
 .checklist li::before{ content:"✔"; position:absolute; left:0; top:0; color:var(--red); font-weight:800 }
 
-/* Utility link (shared) */
+/* Utility link */
 .link{ color:var(--red); font-weight:700 }
 .link:hover{ color:var(--orange); text-decoration:underline }
 
@@ -215,49 +290,34 @@ a{ color:inherit; text-decoration:none }
 .reveal.is-visible .steps > li:nth-child(3){ animation-delay:.19s }
 .reveal.is-visible .steps > li:nth-child(4){ animation-delay:.26s }
 @keyframes sa-reveal{ from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none} }
-/* Shared enhanced hero variant (used on multiple pages) */
-.hero--enhanced::before{ opacity:.55 }  /* stronger image */
+
+/* Shared enhanced hero variant */
+.hero--enhanced::before{ opacity:1 }
 .hero--enhanced::after{
-  /* dark gradient for readability over photos */
   background:linear-gradient(to right,
     rgba(0,0,0,0.24) 0%,
     rgba(0,0,0,0.14) 45%,
     rgba(0,0,0,0.06) 100%);
 }
-/* subtle readability boost (matches homepage look) */
 .hero--enhanced .kicker,
 .hero--enhanced h1,
 .hero--enhanced p,
 .hero--enhanced .btn{ text-shadow:0 1px 2px rgba(0,0,0,.18) }
 
-/* Disabled buttons (semantic via aria-disabled="true") */
+/* Disabled buttons */
 .btn[aria-disabled="true"],
 .btn.is-disabled{
-  background:#f3f4f6;             /* soft gray */
-  color:#9aa0a6;                   /* gray text */
-  border-color:var(--gray-light);
-  cursor:not-allowed;
-  box-shadow:none;
-  pointer-events:auto;             /* keep hover so title tooltip shows */
+  background:#f3f4f6; color:#9aa0a6; border-color:var(--gray-light);
+  cursor:not-allowed; box-shadow:none; pointer-events:auto;
 }
-
 .btn--outline[aria-disabled="true"],
-.btn--outline.is-disabled{
-  background:#fff;                 /* outlined look, but muted */
-  color:#9aa0a6;
-  border-color:var(--gray-light);
-}
-
-/* Lock the disabled look on hover/focus */
+.btn--outline.is-disabled{ background:#fff; color:#9aa0a6; border-color:var(--gray-light) }
 .btn[aria-disabled="true"]:hover,
 .btn[aria-disabled="true"]:focus{
-  background:#f3f4f6;
-  color:#9aa0a6;
-  border-color:var(--gray-light);
-  text-decoration:none;
-  box-shadow:none;
+  background:#f3f4f6; color:#9aa0a6; border-color:var(--gray-light); text-decoration:none; box-shadow:none;
 }
-/* FAQ (shared) — animated open/close */
+
+/* FAQ */
 .faq{ margin:0; display:grid; gap:12px }
 .faq dt{
   background:#fff; border:1px solid var(--border); border-radius:12px;
@@ -268,28 +328,137 @@ a{ color:inherit; text-decoration:none }
   color:var(--red); font-weight:800; transition:transform .2s ease;
 }
 .faq dt[aria-expanded="true"]::after{ content:"–" }
-
 .faq dd{
   margin:-8px 0 4px 0; background:#fff; border:1px solid var(--border); border-top:0;
   border-radius:0 0 12px 12px; overflow:hidden;
-  /* start closed */
   padding:0; max-height:0; opacity:.0; transition:max-height .35s ease, padding .25s ease, opacity .25s ease;
 }
 .faq dd.is-open{ padding:12px 14px; opacity:1 }
-
-/* inner wrapper gets height measured; added by JS */
 .faq dd > .faq__inner{ display:block }
 
-
-/* Hero badges (shared) */
+/* Hero badges */
 .hero__badges{
-  display:flex; gap:16px; margin-top:14px; padding:0;
-  list-style:none; flex-wrap:wrap;
+  display:flex; gap:16px; margin-top:14px; padding:0; list-style:none; flex-wrap:wrap;
 }
 .hero__badges li{
   font-weight:600; font-size:.9rem; color:var(--black);
   background:#fff; border:1px solid var(--border);
   border-radius:999px; padding:8px 12px;
 }
-/* Fade-in helper for single items inside revealed sections */
-.reveal.is-visible .reveal-item { animation: sa-reveal .6s ease both }
+
+/* Center CTAs in content sections */
+main .section .cta-row{
+  display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; margin-top:14px;
+}
+.hero .cta-row, .hero__cta{ justify-content:flex-start; margin-top:0 }
+main .section > .container > a.btn,
+main .section > .container > button.btn{ display:block; width:max-content; margin:14px auto 0 }
+main .section > .container > .btn + .btn{ margin-left:12px }
+
+/* Variety accents & components */
+:root{
+  --accent-red: var(--red);
+  --accent-orange: var(--orange);
+  --accent-teal: #1fa2a6;
+  --accent-blue: #2a6de0;
+}
+.section--edge{ position:relative }
+.section--edge::before{ content:""; position:absolute; inset:0 auto 0 0; width:4px; background:linear-gradient(var(--red), var(--orange)); opacity:.45; border-radius:4px }
+.section--pattern{
+  background:
+    linear-gradient(0deg, rgba(255,255,255,.85), rgba(255,255,255,.85)),
+    repeating-linear-gradient(135deg, rgba(0,0,0,.04) 0 10px, rgba(0,0,0,.02) 10px 20px);
+}
+.card--icon{ padding-top:54px; position:relative }
+.card__icon{ position:absolute; left:18px; top:18px; width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; background:rgba(0,0,0,.04) }
+.card--accent{ position:relative }
+.card--accent::after{ content:""; position:absolute; left:-1px; top:-1px; bottom:-1px; width:4px; border-radius:4px 0 0 4px; background:var(--accent-red) }
+.card--accent[data-accent="orange"]::after{ background:var(--accent-orange) }
+.card--accent[data-accent="teal"]::after{ background:var(--accent-teal) }
+.card--accent[data-accent="blue"]::after{ background:var(--accent-blue) }
+.checklist--soft li::before{ content:"▸"; color:var(--orange); font-weight:900 }
+.checklist--dot  li::before{ content:"•"; color:var(--red); font-weight:900 }
+.checklist--shield li::before{ content:"🛡️"; font-size:.95rem; line-height:1 }
+.band{ background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:0 10px 24px rgba(0,0,0,.06); padding:18px; display:grid; grid-template-columns:repeat(3,1fr); gap:18px }
+.band__item{ display:flex; gap:10px; align-items:baseline; color:var(--gray-dark) }
+.band__item span{ font-size:1.6rem; font-weight:800; color:var(--red) }
+@media (max-width:900px){ .band{ grid-template-columns:1fr } }
+.section__kicker{ display:inline-block; margin-bottom:6px; padding:2px 8px; font-weight:800; color:var(--red); border:1px solid var(--border); border-radius:999px; font-size:.75rem; letter-spacing:.06em; text-transform:uppercase }
+.reveal.is-visible .grid > *{ animation:sa-reveal .6s ease both }
+.reveal.is-visible .grid > *:nth-child(1){ animation-delay:.04s }
+.reveal.is-visible .grid > *:nth-child(2){ animation-delay:.10s }
+.reveal.is-visible .grid > *:nth-child(3){ animation-delay:.16s }
+.reveal.is-visible .grid > *:nth-child(4){ animation-delay:.22s }
+
+/* Mobile: force all grids to stack on narrow screens */
+@media (max-width:720px){
+  .grid{ grid-template-columns:1fr !important }
+  .split, .grid.grid-2, .grid.grid-3{ grid-template-columns:1fr !important }
+}
+
+/* Lock page scroll when drawer is open */
+.body--nav-open{ overflow:hidden; touch-action:none }
+/* --- Anchor offset so targets don't hide under the sticky header --- */
+:root{
+  /* your header is 72px tall; add a little breathing room */
+  --sticky-header: 54px;
+  --anchor-gap: 1px;            /* tweak this to taste */
+  --anchor-offset: calc(var(--sticky-header) + var(--anchor-gap));
+}
+
+/* Any element inside <main> with an id (e.g., #helpdesk, #edr-mdr, etc.) */
+main [id]{
+  scroll-margin-top: var(--anchor-offset);
+}
+
+/* Optional smooth scrolling for hash links */
+html{ scroll-behavior: smooth; }
+
+/* Fallback for very old browsers without scroll-margin-top */
+@supports not (scroll-margin-top: 1px){
+  main [id]:target::before{
+    content:"";
+    display:block;
+    height: var(--anchor-offset);
+    margin-top: calc(var(--anchor-offset) * -1);
+  }
+}
+/* Hide footer logo on small screens */
+@media (max-width: 900px){
+  .footer__brand img{ display: none !important; }
+}
+/* Footer (mobile): hide logo + lay nav groups horizontally */
+@media (max-width: 900px){
+  /* hide the brand column */
+  .footer__brand{ display:none !important; }
+
+  /* single “row” layout for the remaining content */
+  .footer__inner{
+    grid-template-columns: 1fr;         /* no left column anymore */
+    justify-items: stretch;
+  }
+
+  /* horizontal stack of the 3 groups */
+  .footer__nav{
+    display: flex;
+    gap: 20px;
+    justify-content: center;            /* centers when total width < viewport */
+    align-items: flex-start;
+    overflow-x: auto;                    /* scroll if needed on small phones */
+    padding: 4px 12px 10px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;       /* nice snap between groups */
+  }
+  .footer__nav > *{
+    flex: 0 0 auto;                      /* prevent shrinking */
+    min-width: 100px;                    /* tweak as you like (200–260 works well) */
+    scroll-snap-align: start;
+    text-align: center;                  /* center each group’s text */
+  }
+
+  /* tidy headings/links in this centered layout */
+  .footer__nav h5{ margin: 0 0 6px; }
+  .footer__nav ul{ margin: 0; padding: 0; list-style: none; }
+  .footer__nav li{ margin: 6px 0; }
+}
+

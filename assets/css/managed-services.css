@@ -1,125 +1,205 @@
-/* Managed Services — page only */
+/* =========================================================
+   Managed Services (page-scoped only; plays nice with base.css)
+   ========================================================= */
 
-/* Sticky in-page subnav */
-.subnav{ position:sticky; top:0; z-index:5; background:#fff; border-bottom:1px solid var(--border) }
+/* --- Sticky in-page subnav --- */
+.subnav{
+  position: sticky; top: 0; z-index: 5;
+  background: #fff; border-bottom: 1px solid var(--border);
+}
 .subnav .container{
-  display:flex; gap:.6rem; padding:.5rem 1rem;
-  overflow-x:auto; overflow-y:hidden;                 /* horizontal scroll only */
-  scroll-behavior:smooth; -webkit-overflow-scrolling:touch;
-  overscroll-behavior-x:contain; scrollbar-gutter:stable both-edges;
+  display: flex; gap: .6rem; padding: .5rem 1rem;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain; scrollbar-gutter: stable both-edges;
+  scroll-snap-type: x proximity;
 }
 .subnav a{
-  white-space:nowrap; padding:.5rem .85rem; border-radius:999px;
-  border:1px solid var(--border); font-weight:700;
-  transition:background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease
+  white-space: nowrap; padding: .5rem .85rem; border-radius: 999px;
+  border: 1px solid var(--border); font-weight: 700;
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease;
+  scroll-snap-align: start;
 }
 .subnav a:hover, .subnav a:focus-visible{
-  background:var(--red); color:#fff; border-color:var(--red); transform:translateY(-1px)
+  background: var(--red); color: #fff; border-color: var(--red); transform: translateY(-1px);
 }
-.subnav a.is-active{ background:var(--red); color:#fff; border-color:var(--red) }
+.subnav a.is-active{ background: var(--red); color: #fff; border-color: var(--red); }
 
-/* Page hero supplies the image; shared hero styling is in base.css */
-.ms-hero{ --hero-bg: url('/assets/img/managed-services-hero.png') }
+/* --- Page hero image var (all other hero rules come from base.css) --- */
+.ms-hero{ --hero-bg: url('/assets/img/managed-services-hero.png'); }
 
-/* Slightly looser body copy on this page */
-.lead{ line-height:1.6 }
-
-/* Section spacing (page-local) */
-#helpdesk.section,#maintenance.section,#patching.section,#assets.section,#onboarding.section,#network.section,#cloud.section,#voip.section,#backup-dr.section,#faq.section{
-  padding-top:48px; padding-bottom:48px;
+/* --- Section rhythm (page only) --- */
+#helpdesk.section,#maintenance.section,#patching.section,#assets.section,#onboarding.section,
+#network.section,#cloud.section,#voip.section,#backup-dr.section,#faq.section{
+  padding-top: 48px; padding-bottom: 48px;
 }
+/* subtle striping to break sameness */
+main > section:nth-of-type(even){ background: var(--panel); }
 
-/* Visual striping (page-local) */
-main > section{ position:relative }
-main > section:nth-of-type(even){ background:var(--panel) }
-main > section:nth-of-type(3n)::before{
-  content:""; position:absolute; inset:0 auto 0 0; width:4px;
-  background:linear-gradient(var(--red), var(--orange)); opacity:.45;
-}
+/* --- Local CTA row spacing --- */
+.cta-row{ display: inline-flex; gap: 12px; flex-wrap: wrap; margin: 16px 0 14px; }
 
-/* Button rows on this page (breathing room) */
-.cta-row{
-  display:inline-flex; gap:12px; flex-wrap:wrap;
-  margin:16px 0 14px;                       /* space above & below */
-}
+/* --- Opt-out of hover "lift" from base.css when needed --- */
+.no-lift{ transition: transform .18s ease, box-shadow .18s ease; }
+.no-lift:hover{ transform: none !important; box-shadow: 0 10px 24px rgba(0,0,0,.06); }
 
-/* Maintenance section helpers (page-local) */
-.mm-calendar{ display:grid; gap:12px }
+/* =========================================================
+   Maintenance & Monitoring
+   ========================================================= */
+.mm-cal-sla{ margin-top: 14px; }
+#maintenance .mm-title{ margin: 16px 0 10px; font-size: 1.05rem; color: var(--gray-dark); }
+
+/* Calendar rows */
+.mm-calendar{ display: grid; gap: 12px; }
 .mm-cal__row{
-  display:grid; grid-template-columns: 1fr 3fr; gap:12px;
-  background:#fff; border:1px solid var(--border); border-radius: var(--radius-card); padding:14px;
+  display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 12px;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-card); padding: 14px;
 }
-.mm-cal__when{ color:var(--black); font-weight:700 }
-.mm-cal__what{ color:var(--gray-dark) }
+.mm-cal__when{ font-weight: 700; color: var(--black); }
+.mm-cal__what{ color: var(--gray-dark); }
 
-.mm-sla{ display:grid; gap:12px }
+/* SLA rows */
+.mm-sla{ display: grid; gap: 12px; }
 .mm-sla__row{
-  display:grid; grid-template-columns: 1fr 1fr;
-  background:#fff; border:1px solid var(--border); border-radius: var(--radius-card); padding:14px;
+  display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 12px;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-card); padding: 14px;
 }
-.mm-sla__sev{ color:var(--black) }
-.mm-sla__target{ color:var(--gray-dark) }
-
-@media (min-width:800px){
-  .mm-sla__row{ grid-template-columns: 2fr 3fr }
-}
-/* --- Maintenance & Monitoring cleanup (moved from inline) --- */
-
-/* Make subheads inside cards look like your card h3 and remove top gap */
-#maintenance .card h4{
-  margin-top:0;
-  font-size:1.25rem;   /* matches .card h3 in base.css */
-  font-weight:700;
-}
-
-/* Spacing above the Calendar + SLAs grid */
-.mm-cal-sla{ margin-top:14px; }
-
-/* Tight top margin on the two column titles */
-.mm-cal-sla .mm-title{ margin-top:0; }
-/* Make sure the rows can accept a min-height we set in JS */
-#maintenance .mm-cal__row,
-#maintenance .mm-sla__row{
-  /* if you already defined these elsewhere, this just reinforces them */
-  display: grid;
-  grid-template-columns: 1fr 3fr;
-  gap: 12px;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius: var(--radius-card);
-  padding:14px;
-  min-height: auto; /* let JS override cleanly */
-}
-
-/* Optional: titles above each column with tight top spacing */
-#maintenance .mm-title{ margin-top:0 }
-/* --- Maintenance & Monitoring tweaks --- */
-
-/* 1) Vertically center the text in each Maintenance Windows row */
-#maintenance .mm-calendar .mm-cal__row{
-  align-items: center;   /* centers both the label and the description */
-}
-
-/* 2) Push SLA details to the right edge and center rows vertically */
-#maintenance .mm-sla .mm-sla__row{
-  grid-template-columns: auto 1fr; /* compact left label, flexible right column */
-  align-items: center;             /* vertical centering */
-}
-#maintenance .mm-sla__target{
-  justify-self: end;   /* move to the far right */
-  text-align: right;   /* align the two lines to the right */
-}
-
-/* 3) Mobile: stack rows and return to left-aligned text */
+.mm-sla__sev{ color: var(--black); }
+.mm-sla__target{ color: var(--gray-dark); justify-self: end; text-align: right; }
 @media (max-width: 900px){
-  #maintenance .mm-sla .mm-sla__row{ grid-template-columns: 1fr; }
-  #maintenance .mm-sla__target{
-    justify-self: start;
-    text-align: left;
-    margin-top: 6px;  /* small gap below the label when stacked */
-  }
+  .mm-sla__row{ grid-template-columns: 1fr; }
+  .mm-sla__target{ justify-self: start; text-align: left; margin-top: 6px; }
 }
-/* Helpdesk spacing (page-local) */
-#helpdesk .grid{ margin-bottom:16px }          /* space below the two cards */
-#helpdesk .reveal-item{ margin-top:16px }      /* space above the “Fast answers…” card */
-#helpdesk .cta-row{ margin-top:18px }          /* space above the buttons */
+
+/* Tight cards used in playbook & KPIs */
+.card--tight{ padding: 14px; }
+.card--tight h4{ margin: 0 0 6px 0; }
+/* Keep maintenance card subheads consistent */
+#maintenance .card h4{ margin-top: 0; font-size: 1.25rem; font-weight: 700; }
+
+/* =========================================================
+   Assets / Network / VoIP refinements (page-scoped)
+   ========================================================= */
+
+/* Assets: stack panels with breathing room when needed */
+#assets .panel-stack{ display: grid; gap: 16px; }
+
+/* Network: compact “Experience” card below standards list */
+#network .panel--experience{
+  display: inline-block; width: auto; max-width: 100%;
+  margin-top: 12px; padding: 14px 16px;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-card);
+}
+/* mini stats pills in the Experience card */
+.mini-stats{ display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+.mini-stats div{
+  background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
+  color: var(--gray-dark);
+}
+.mini-stats span{ font-weight: 800; color: var(--red); padding-right: 6px; }
+
+/* VoIP: call-flow rail + compact highlights */
+.ms-callflow{ display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 12px 0 18px; }
+.ms-callflow .flow-step{
+  padding: 10px 12px; border-radius: 999px; background: #fff;
+  border: 2px solid var(--border); font-weight: 700;
+}
+#voip .panel--highlights{
+  display: inline-block; width: auto; max-width: 100%;
+  margin-top: 10px; padding: 14px 16px;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-card);
+}
+
+/* Shared chip list used in Assets/Network/VoIP */
+.pill-list{ display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 10px 0 0; list-style: none; }
+.pill-list li{ padding: 6px 10px; border: 1px solid var(--border); border-radius: 999px; background: #fff; font-weight: 600; font-size: .9rem; }
+
+/* Simple bullet list (used intentionally in Backup > How it works) */
+.bullet-list{ list-style: disc; padding-left: 20px; margin: 10px 0 0; }
+.bullet-list li{ margin: 6px 0; color: var(--gray-dark); }
+
+/* Use checkmarks on generic ULs where you add .ms-use-checks */
+.ms-use-checks, .ms-use-checks ul{ list-style: none; margin: 12px 0; padding: 0; }
+.ms-use-checks li{ position: relative; padding-left: 22px; margin: 8px 0; }
+.ms-use-checks li::before{
+  content: "✔"; position: absolute; left: 0; top: 0;
+  color: var(--red); font-weight: 800; line-height: 1;
+}
+
+/* On/Offboarding: numbered steps (restores the design) */
+.ms-steps{
+  counter-reset: step;
+  list-style: none; padding: 0; margin: 12px 0 0;
+  display: grid; gap: 14px; grid-template-columns: repeat(3, 1fr);
+}
+@media (max-width: 900px){ .ms-steps{ grid-template-columns: 1fr; } }
+.ms-steps li{
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; position: relative;
+}
+.ms-steps li::before{
+  counter-increment: step; content: counter(step);
+  position: absolute; left: 12px; top: 12px;
+  width: 28px; height: 28px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--red); color: #fff; font-weight: 800;
+}
+.ms-steps h4{ margin: 0 0 6px 36px; }
+.ms-steps p{ margin: 0 0 0 36px; color: var(--gray-dark); }
+/* Backup proof banner (bubble) */
+.ms-banner{
+  margin: 12px 0 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(170,30,46,.10), rgba(242,104,41,.08));
+  border: 1px solid var(--border);
+}
+.ms-banner strong{ color: var(--black); }
+.ms-banner em{ color: var(--gray-dark); }
+
+/* =========================================================
+   FAQ (animation uses base.css; we add the transition)
+   ========================================================= */
+dl.faq dd{ transition: max-height .28s ease, padding .28s ease; overflow: hidden; }
+/* --- Services page: heading accent + anchor offset --- */
+:root{
+  --sticky-header: 72px;   /* fallback if not set in base.css */
+  --anchor-gap: 8px;
+}
+
+/* Accent line at left of H2 (matches Cybersecurity) */
+.section h2{
+  display:flex; align-items:center; gap:.55rem;
+  font-size:clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
+  margin:0 0 .35rem;
+}
+.section h2::before{
+  content:""; width:6px; height:22px; border-radius:6px;
+  background:linear-gradient(180deg, var(--red), var(--orange));
+}
+
+/* --- Sticky in-page subnav --- */
+.subnav{
+  position: sticky;
+  top: var(--sticky-header, 72px);   /* stick below the header */
+  z-index: 1100;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: saturate(160%) blur(6px);
+}
+.subnav .container{
+  display: flex; gap: .6rem; padding: .55rem 1rem;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain; scrollbar-gutter: stable both-edges;
+}
+.subnav a{
+  white-space: nowrap; padding: .55rem .9rem; border-radius: 999px;
+  border: 1px solid var(--border); font-weight: 800; letter-spacing:.01em;
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease;
+}
+.subnav a:hover, .subnav a:focus-visible{
+  background: var(--red); color: #fff; border-color: var(--red); transform: translateY(-1px);
+}
+.subnav a.is-active{ background: var(--red); color: #fff; border-color: var(--red); }
+
