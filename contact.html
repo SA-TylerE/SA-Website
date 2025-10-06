@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact | System Alternatives</title>
+  <meta name="description" content="Call, text, or email System Alternatives. Mailing address and office map (visits by appointment)." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/contact.css" />
+  <script src="assets/js/includes.js" defer></script>
+</head>
+<body>
+
+  <!-- Shared header -->
+  <div data-include="partials/header.html"></div>
+
+  <!-- Hero -->
+  <section class="hero hero--light hero--bg hero--enhanced hero--compact hero--singlecol contact-hero">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <span class="kicker">Contact</span>
+        <h1>We’re here to help.</h1>
+        <p class="lead">
+          Call, text, or email—whatever’s easiest. Our office map is provided for scheduled visits or deliveries.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="tel:+15038788000">Call 503-878-8000</a>
+        </div>
+        <ul class="hero__badges">
+          <li>Fast, friendly support</li>
+          <li>Portland–Vancouver & beyond</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <main>
+
+    <!-- Contact options -->
+    <section class="section" id="contact-options">
+      <div class="container">
+        <h2>Get in touch</h2>
+        <div class="grid grid-3 contact-cards">
+          <article class="card contact-card no-lift">
+            <h3>📞 Call</h3>
+            <p class="muted">Give us a call, we're here to help.</p>
+            <a class="btn btn--primary" href="tel:+15038788000">Call 503-878-8000</a>
+          </article>
+
+          <article class="card contact-card no-lift">
+            <h3>💬 Text</h3>
+            <p class="muted">Quick questions? Send a text.</p>
+            <a class="btn btn--outline" href="sms:+15038787000">Text 503-878-7000</a>
+          </article>
+
+          <article class="card contact-card no-lift">
+            <h3>✉️ Email</h3>
+            <p class="muted">Send details, screenshots, or requests.</p>
+            <a class="btn btn--outline" href="mailto:techs@systemalternatives.net">techs@systemalternatives.net</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mailing address + office map -->
+    <section class="section section--alt" id="visit">
+      <div class="container">
+        <div class="grid grid-2 contact-visit">
+          <!-- Left column: title + address (centered vertically on desktop) -->
+          <div class="visit-info">
+            <h2 class="visit-title">
+              Mailing address <span class="muted small-note">(office visits by appointment)</span>
+            </h2>
+
+            <address class="mailing-address">
+              <strong>System Alternatives</strong><br>
+              PO Box 152<br>
+              Scappoose, OR 97056
+            </address>
+
+            <!-- <p class="muted">
+              For scheduled office visits or deliveries, use the map. We primarily work remotely and on-site with clients.
+            </p> -->
+          </div>
+
+          <!-- Map (office location) -->
+          <div class="map-wrap">
+            <iframe
+              title="Map to System Alternatives office"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              src="https://www.google.com/maps?q=36061+Construction+Way,+St+Helens,+Oregon+97051&output=embed">
+            </iframe>
+          </div>
+
+          <!-- Mobile-only: Open in Maps (below the map on phones) -->
+          <div class="map-cta">
+            <a id="open-maps-btn" class="btn btn--primary only-mobile" href="#" rel="noopener">
+              Open in Maps
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Shared footer -->
+  <div data-include="partials/footer.html"></div>
+
+  <!-- Mobile-only deep link to office location -->
+  <script>
+    (function(){
+      const btn = document.getElementById('open-maps-btn');
+      if (!btn) return;
+
+      const officeAddr = "36061 Construction Way, St. Helens, OR 97051";
+      const ua = navigator.userAgent || "";
+      const isIOS = /iPhone|iPad|iPod/i.test(ua);
+      const isAndroid = /Android/i.test(ua);
+
+      let href = "https://www.google.com/maps?q=" + encodeURIComponent(officeAddr);
+      if (isIOS) {
+        href = "http://maps.apple.com/?q=" + encodeURIComponent(officeAddr);
+      } else if (isAndroid) {
+        href = "geo:0,0?q=" + encodeURIComponent(officeAddr);
+      }
+      btn.setAttribute("href", href);
+    })();
+  </script>
+
+  <!-- Structured data (mailing address) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "System Alternatives",
+    "telephone": "+1-503-878-8000",
+    "email": "techs@systemalternatives.net",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "PO Box 152",
+      "addressLocality": "Scappoose",
+      "addressRegion": "OR",
+      "postalCode": "97056",
+      "addressCountry": "US"
+    },
+    "url": "https://systemalternatives.net"
+  }
+  </script>
+
+</body>
+</html>

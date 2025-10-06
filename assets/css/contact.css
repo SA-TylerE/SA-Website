@@ -1,0 +1,71 @@
+/* Contact — page-only */
+
+/* Hero image */
+.contact-hero{ --hero-bg: url('/assets/img/contact-hero.png'); }
+
+/* Section rhythm */
+#contact-options.section, #visit.section{
+  padding-top: 48px; padding-bottom: 48px;
+}
+
+/* Cards */
+.contact-cards .contact-card{ text-align: left; }
+.contact-card__icon{ font-size: 2rem; line-height: 1; margin-bottom: 6px; }
+
+/* ===== Mailing address + map layout ===== */
+.contact-visit{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "info map";
+  align-items: center;          /* center columns vertically vs. map */
+  gap: 16px;
+}
+
+.visit-info{ grid-area: info; }
+.map-wrap{ grid-area: map; }
+.map-cta{ grid-area: btn; display: none; }  /* shown on mobile */
+
+.visit-title{ margin: 0 0 8px; }
+.mailing-address{ font-style: normal; color: var(--gray-dark); margin: 6px 0 10px; }
+.small-note{ font-weight: 600; font-size: .9rem; color: var(--gray-dark); }
+
+/* Center the left column contents vertically on desktop */
+@media (min-width: 901px){
+  .visit-info{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100%;
+  }
+}
+
+/* Responsive map with rounded corners */
+.map-wrap{
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden; background: #fff;
+}
+.map-wrap iframe{ width: 100%; height: 100%; border: 0; display: block; }
+
+/* Mobile-only utility */
+.only-mobile{ display: none; }
+
+/* Mobile stack: Address -> Map -> button */
+@media (max-width: 900px){
+  .contact-visit{
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "info"
+      "map"
+      "btn";
+  }
+
+  .map-cta{ display: block; }
+  .only-mobile{ display: inline-flex; }
+
+  /* small breathing room between pieces */
+  .visit-info{ margin-bottom: 10px; }
+  .map-cta{ margin-top: 10px; }
+}
