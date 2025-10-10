@@ -4,16 +4,49 @@ declare(strict_types=1);
 require_once __DIR__.'/mail_common.php';
 
 /**
- * Helpdesk (Support) endpoint
- * - Accepts application/json or multipart/form-data (with attachments)
- * - Requires: name, email, issue  (company optional)
- * - Subject: "Support Form: <provided subject OR first 80 chars of issue>"
- * - Attachments: up to 5 files, 5MB each, allowlisted types; optional AV scan via ClamAV
- * - Appends a scan report to the email
- * - Uses "SA Website" as sender name (set in mail_common.php)
+ * Helpdesk (Support) endpoint — queues the request immediately and responds,
+ * then a background worker scans attachments & sends the email.
+ *
+ * Requires: name, email, issue (company optional).
+ * Subject in email: "Support Form: <derived>" (worker composes final).
  */
 
-// ===== Helpers =====
+const QUEUE_DIR          = __DIR__ . '/queue';
+const MAX_FILES          = 5;
+const MAX_SIZE_BYTES     = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_EXT_REGEX  = '/\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i';
+const ALLOWED_MIME       = [
+  'image/png','image/jpeg','application/pdf','text/plain',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/csv'
+];
+
+function is_windows(): bool {
+  return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+}
+function ensure_queue_dir(): void {
+  if (!is_dir(QUEUE_DIR)) {
+    @mkdir(QUEUE_DIR, 0700, true);
+  }
+  if (!is_dir(QUEUE_DIR) || !is_writable(QUEUE_DIR)) {
+    json_fail('Server queue unavailable');
+  }
+}
+function spawn_worker(string $jobPath): void {
+  $php = PHP_BINARY ?: 'php';
+  $script = __DIR__ . '/mail_worker.php';
+  if (is_windows()) {
+    // Windows: detach with 'start /B'
+    $cmd = 'start /B "" ' . escapeshellarg($php) . ' ' . escapeshellarg($script) . ' ' . escapeshellarg($jobPath) . ' > NUL 2>&1';
+  } else {
+    // Linux: background with &
+    $cmd = escapeshellarg($php) . ' ' . escapeshellarg($script) . ' ' . escapeshellarg($jobPath) . ' > /dev/null 2>&1 &';
+  }
+  // Fire and forget
+  @exec($cmd);
+}
 
 function get_request_data(): array {
   $ctype = $_SERVER['CONTENT_TYPE'] ?? '';
@@ -24,28 +57,6 @@ function get_request_data(): array {
     return $data;
   }
   return $_POST;
-}
-
-// MIME detection (works even if fileinfo is disabled)
-function detect_mime_safely(string $tmpPath, string $name): string {
-  if (class_exists('finfo')) {
-    $fi = new finfo(FILEINFO_MIME_TYPE);
-    $m  = $fi->file($tmpPath);
-    if (is_string($m) && $m !== '') return $m;
-  }
-  if (function_exists('mime_content_type')) {
-    $m = mime_content_type($tmpPath);
-    if (is_string($m) && $m !== '') return $m;
-  }
-  $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-  $map = [
-    'png'=>'image/png','jpg'=>'image/jpeg','jpeg'=>'image/jpeg','pdf'=>'application/pdf',
-    'txt'=>'text/plain','log'=>'text/plain','doc'=>'application/msword',
-    'docx'=>'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'xlsx'=>'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'csv'=>'text/csv'
-  ];
-  return $map[$ext] ?? 'application/octet-stream';
 }
 
 // Normalize $_FILES[...] to a simple array (single/multiple safe)
@@ -73,223 +84,70 @@ function normalize_files_array(array $files): array {
   return $out;
 }
 
-// Antivirus wrapper: returns detail
-// status: 'clean' | 'infected' | 'error' | 'unavailable'
-function antivirus_scan_detail(string $path): array {
-  // Absolute paths avoid PATH issues under www-data
-  $clamdscan = '/usr/bin/clamdscan';
-  $clamscan  = '/usr/bin/clamscan';
-
-  // Build commands (no-summary keeps output short; --fdpass lets clamdscan read the file even if perms are tight)
-  $candidates = [];
-  if (is_executable($clamdscan)) {
-    $candidates[] = [$clamdscan, "$clamdscan --no-summary --fdpass ".escapeshellarg($path), 'clamdscan'];
-  }
-  if (is_executable($clamscan)) {
-    $candidates[] = [$clamscan,  "$clamscan --no-summary ".escapeshellarg($path),       'clamscan'];
-  }
-  if (!$candidates) {
-    return ['status'=>'unavailable','engine'=>null,'code'=>2,'stdout'=>'','stderr'=>'no scanner binary'];
-  }
-
-  foreach ($candidates as [$bin,$cmd,$engine]) {
-    // Capture stdout+stderr and exit code
-    $descriptors = [
-      1 => ['pipe','w'], // stdout
-      2 => ['pipe','w'], // stderr
-    ];
-    $proc = proc_open($cmd, $descriptors, $pipes);
-    if (!is_resource($proc)) continue;
-
-    stream_set_blocking($pipes[1], true);
-    stream_set_blocking($pipes[2], true);
-    $stdout = stream_get_contents($pipes[1]); fclose($pipes[1]);
-    $stderr = stream_get_contents($pipes[2]); fclose($pipes[2]);
-    $status = proc_get_status($proc);
-    $code   = $status['exitcode'];
-    proc_close($proc);
-
-    // Normalize
-    if ($code === 0) return ['status'=>'clean',    'engine'=>$engine, 'code'=>$code, 'stdout'=>$stdout, 'stderr'=>$stderr];
-    if ($code === 1) return ['status'=>'infected', 'engine'=>$engine, 'code'=>$code, 'stdout'=>$stdout, 'stderr'=>$stderr];
-    // code 2 or anything else = error
-    // Try next engine (fallback from clamdscan -> clamscan). If this *is* the last, return error detail.
-    if ($engine === 'clamscan' || count($candidates) === 1) {
-      return ['status'=>'error', 'engine'=>$engine, 'code'=>$code, 'stdout'=>$stdout, 'stderr'=>$stderr];
-    }
-  }
-
-  return ['status'=>'error','engine'=>null,'code'=>2,'stdout'=>'','stderr'=>'proc open failed'];
-}
-
-// ===== Validate request =====
-
 $data    = get_request_data();
 $name    = trim($data['name']    ?? '');
 $company = trim($data['company'] ?? '');
 $email   = trim($data['email']   ?? '');
 $issue   = trim($data['issue']   ?? '');
-$postedSubject = trim($data['subject'] ?? ''); // client may send a derived subject
-$hp      = trim($data['website_honeypot'] ?? ''); // spam trap
+$hp      = trim($data['website_honeypot'] ?? '');
 
-if ($hp !== '') { echo json_encode(['ok'=>true]); exit; } // quietly accept bots
+if ($hp !== '') { echo json_encode(['ok'=>true]); exit; } // silently accept bots
 if ($name === '' || $email === '' || $issue === '') json_fail('Missing required fields');
 
 $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'n/a';
 
-// Build subject (derive if missing)
-$subjectRaw = $postedSubject !== '' ? $postedSubject : mb_substr(preg_replace('/\s+/', ' ', $issue), 0, 80);
-$emailSubject = 'Support Form: ' . ($subjectRaw !== '' ? $subjectRaw : '(no subject)');
-$safe = fn(string $s) => htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+ensure_queue_dir();
 
-$htmlIssue = nl2br($safe($issue));
-$htmlHeader = $safe($emailSubject);
-
-// ===== Build HTML & text =====
-
-$html = '
-  <div style="font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:#231f20;">
-    <div style="padding:16px 18px; border:1px solid #e6e6e6; border-radius:12px;">
-      <h2 style="margin:0 0 12px">'.$htmlHeader.'</h2>
-      <table role="presentation" cellspacing="0" cellpadding="0" style="width:100%; border-collapse:collapse; margin:0 0 12px">
-        <tr><td style="padding:6px 0; font-weight:700; width:120px;">From</td><td style="padding:6px 0;">'.$safe($name).'</td></tr>
-        <tr><td style="padding:6px 0; font-weight:700;">Company</td><td style="padding:6px 0;">'.$safe($company).'</td></tr>
-        <tr><td style="padding:6px 0; font-weight:700;">Email</td><td style="padding:6px 0;"><a href="mailto:'.$safe($email).'" style="color:#aa1e2e">'.$safe($email).'</a></td></tr>
-        <tr><td style="padding:6px 0; font-weight:700;">IP</td><td style="padding:6px 0;">'.$safe($ip).'</td></tr>
-      </table>
-      <div style="border-top:1px solid #e6e6e6; margin:10px 0 12px"></div>
-      <div>
-        <div style="font-weight:700; margin:0 0 6px">Issue</div>
-        <div style="white-space:pre-wrap; line-height:1.5">'.$htmlIssue.'</div>
-      </div>
-    </div>
-  </div>';
-
-$text = $emailSubject."\n"
-      . "From: $name\n"
-      . "Company: $company\n"
-      . "Email: $email\n"
-      . "IP: $ip\n\n"
-      . "$issue\n";
-
-// ===== Attachments (validate + AV scan + report) =====
-
-$attachments = [];
-$scanReport  = [];
-
+// Stage attachments to queue dir
+$staged = []; // each: ['name','path','size','client_type']
 if (!empty($_FILES['attachments'])) {
-  $MAX_FILES  = 5;
-  $MAX_SIZE   = 5 * 1024 * 1024; // 5 MB
-  $allowedExt = '/\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i';
-  $allowedMime = [
-    'image/png','image/jpeg','application/pdf','text/plain',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'text/csv'
-  ];
-
   $flat = normalize_files_array($_FILES['attachments']);
-  $nonEmpty = array_values(array_filter($flat, fn($f) => ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE));
-  if (count($nonEmpty) > $MAX_FILES) json_fail("Too many files (max $MAX_FILES)");
+  $flat = array_values(array_filter($flat, fn($f)=> ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE));
+  if (count($flat) > MAX_FILES) json_fail('Too many files (max 5)');
 
   foreach ($flat as $idx => $f) {
-    if (($f['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) continue;
-
-    // upload checks
-    if ($f['error'] !== UPLOAD_ERR_OK || empty($f['tmp_name']) || !is_uploaded_file($f['tmp_name'])) {
+    if (($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
       json_fail('Upload error on file '.$idx);
     }
-
-    $tmp  = $f['tmp_name'];
-    $name = $f['name'] ?? 'file';
+    $nameBase = basename($f['name'] ?? 'file');
+    if (!preg_match(ALLOWED_EXT_REGEX, $nameBase)) { continue; }
     $size = (int)($f['size'] ?? 0);
+    if ($size > MAX_SIZE_BYTES) { continue; }
+    if (empty($f['tmp_name']) || !is_uploaded_file($f['tmp_name'])) { continue; }
 
-    $verdict = 'attached';
-    $reason  = '';
-
-    if ($size > $MAX_SIZE) { $verdict='blocked'; $reason='too large'; }
-    if (!preg_match($allowedExt, $name)) { $verdict='blocked'; $reason='type not allowed'; }
-
-    $mime = detect_mime_safely($tmp, $name);
-    if ($verdict !== 'blocked' && !in_array($mime, $allowedMime, true)) { $verdict='blocked'; $reason='MIME check failed'; }
-
-    $av = ['status'=>'unavailable','engine'=>null,'code'=>null,'stdout'=>'','stderr'=>''];
-
-    if ($verdict !== 'blocked') {
-      $av = antivirus_scan_detail($tmp);
-
-      if ($av['status'] === 'infected') {
-        $verdict = 'blocked';
-        $reason  = 'virus detected';
-      } elseif ($av['status'] === 'error') {
-        // SAFER policy: block when AV is unavailable or errors out
-        $verdict = 'blocked';
-        $reason  = "AV error ({$av['engine']}) code={$av['code']}";
-        error_log("AV ERROR: engine={$av['engine']} code={$av['code']} stdout=".
-                  substr((string)$av['stdout'],0,500).
-                  " stderr=".substr((string)$av['stderr'],0,500));
-      }
-    }
-
-    $sha256 = function_exists('hash_file') ? hash_file('sha256', $tmp) : null;
-
-    $scanReport[] = [
-      'name'   => $name,
-      'size'   => $size,
-      'mime'   => $mime,
-      'sha256' => $sha256,
-      'engine' => $av['engine'],
-      'av'     => $av['status'],
-      'action' => ($verdict === 'blocked' ? 'blocked' : 'attached'),
-      'note'   => $reason
+    $safeName = preg_replace('/[^A-Za-z0-9._-]+/', '_', $nameBase);
+    // unique filename in queue
+    $uniq = bin2hex(random_bytes(4));
+    $dest = QUEUE_DIR . DIRECTORY_SEPARATOR . "att_{$uniq}_" . $safeName;
+    if (!@move_uploaded_file($f['tmp_name'], $dest)) { continue; }
+    @chmod($dest, 0600);
+    $staged[] = [
+      'name'        => $safeName,
+      'path'        => $dest,
+      'size'        => $size,
+      'client_type' => (string)($f['type'] ?? ''),
     ];
-
-    if ($verdict !== 'blocked') {
-      $cleanName = preg_replace('/[^A-Za-z0-9._-]+/', '_', basename($name));
-      $attachments[] = ['path'=>$tmp, 'name'=>$cleanName];
-    }
   }
 }
 
-// Append scan report
-if (!empty($scanReport)) {
-  $html .= '<div style="height:10px"></div>'
-        .  '<div style="padding:12px; border:1px solid #e6e6e6; border-radius:10px; background:#fafafa">'
-        .  '<div style="font-weight:800; margin:0 0 8px; color:#58595b">Attachment scan report</div>'
-        .  '<table role="presentation" cellpadding="6" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:0.95rem">'
-        .  '<tr style="background:#fff"><th align="left">File</th><th align="left">Size</th><th align="left">MIME</th><th align="left">AV</th><th align="left">Action</th></tr>';
-  foreach ($scanReport as $r) {
-    $sizeKB = number_format($r['size']/1024, 1).' KB';
-    $avLabel = $r['av'];
-    if ($r['engine']) $avLabel .= ' ('.$r['engine'].')';
-    if ($r['note'])   $avLabel .= ' — '.$r['note'];
-    $sha = $r['sha256'] ? '<br><span style="color:#9aa0a6;font-size:0.85em">sha256: '.htmlspecialchars($r['sha256']).'</span>' : '';
-    $html .= '<tr style="background:#fff"><td>'.htmlspecialchars($r['name']).$sha.'</td>'
-          .  '<td>'.$sizeKB.'</td><td>'.htmlspecialchars($r['mime']).'</td>'
-          .  '<td>'.htmlspecialchars($avLabel).'</td>'
-          .  '<td>'.htmlspecialchars($r['action']).'</td></tr>';
-  }
-  $html .= '</table></div>';
-
-  $text .= "\n--- Attachment scan report ---\n";
-  foreach ($scanReport as $r) {
-    $sizeKB = number_format($r['size']/1024, 1).' KB';
-    $avLabel = $r['av'].($r['engine'] ? " ({$r['engine']})" : '').($r['note'] ? " — {$r['note']}" : '');
-    $text .= "{$r['name']} | {$sizeKB} | {$r['mime']} | {$avLabel} | {$r['action']}";
-    if (!empty($r['sha256'])) $text .= " | sha256: {$r['sha256']}";
-    $text .= "\n";
-  }
+// Create job file
+$job = [
+  'type'        => 'helpdesk',
+  'when'        => date('c'),
+  'ip'          => $ip,
+  'name'        => $name,
+  'company'     => $company,
+  'email'       => $email,
+  'issue'       => $issue,
+  'attachments' => $staged,
+];
+$jobPath = QUEUE_DIR . DIRECTORY_SEPARATOR . 'job_' . date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.json';
+if (@file_put_contents($jobPath, json_encode($job, JSON_UNESCAPED_SLASHES)) === false) {
+  json_fail('Server queue write failed');
 }
+@chmod($jobPath, 0600);
 
-// Send
-send_mail_smtp2go(
-  HELP_DESK_TO,    // e.g., helpdesk@systemalternatives.net
-  $email,          // reply-to
-  $emailSubject,
-  $html,
-  $text,
-  $attachments
-);
-
-echo json_encode(['ok'=>true,'message'=>'Sent to helpdesk'], JSON_UNESCAPED_SLASHES);
+// Spawn worker & ACK immediately
+spawn_worker($jobPath);
+header('Content-Type: application/json; charset=utf-8');
+echo json_encode(['ok'=>true,'message'=>'Accepted'], JSON_UNESCAPED_SLASHES);
