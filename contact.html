@@ -89,7 +89,7 @@
 
                 <label>
                   <span>Phone<span class="req" aria-hidden="true">*</span></span>
-                  <input type="tel" id="ct-phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="(555) 123-4567" required aria-required="true">
+                  <input type="tel" id="ct-phone" name="phone" autocomplete="tel" inputmode="tel" maxlength="14" pattern="^\(\d{3}\) \d{3}-\d{4}$" placeholder="(555) 123-4567" required aria-required="true">
                 </label>                
 
                 <label class="full">
@@ -170,6 +170,74 @@
       if (isIOS) href = "http://maps.apple.com/?q=" + encodeURIComponent(officeAddr);
       else if (isAndroid) href = "geo:0,0?q=" + encodeURIComponent(officeAddr);
       btn.setAttribute("href", href);
+    })();
+  </script>
+
+  <!-- Phone input live formatter -->
+  <script>
+    // === Phone input formatter for (###) ###-#### with smart caret ===
+    (function initPhoneMask(){
+      const input = document.getElementById('ct-phone');
+      if (!input) return;
+
+      function formatUS(digits) {
+        const d = digits.slice(0, 10);
+        if (d.length === 0) return '';
+        if (d.length < 4)  return `(${d}`;
+        if (d.length < 7)  return `(${d.slice(0,3)}) ${d.slice(3)}`;
+        return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
+      }
+      function digitCountUpTo(str, pos) {
+        let cnt = 0;
+        for (let i = 0; i < pos && i < str.length; i++) if (/\d/.test(str[i])) cnt++;
+        return cnt;
+      }
+      function caretPosForDigitIndex(str, digitIndex) {
+        if (digitIndex <= 0) return 0;
+        let cnt = 0;
+        for (let i = 0; i < str.length; i++) {
+          if (/\d/.test(str[i])) cnt++;
+          if (cnt >= digitIndex) return i + 1;
+        }
+        return str.length;
+      }
+      function setValidityForPartial(val) {
+        if (val && !/^\(\d{3}\) \d{3}-\d{4}$/.test(val)) {
+          input.setCustomValidity('Please enter a full 10-digit US number, e.g. (555) 123-4567.');
+        } else {
+          input.setCustomValidity('');
+        }
+      }
+
+      input.addEventListener('input', () => {
+        const oldVal = input.value;
+        const oldPos = input.selectionStart ?? oldVal.length;
+        const digitsBefore = digitCountUpTo(oldVal, oldPos);
+
+        const onlyDigits = oldVal.replace(/\D/g, '').slice(0, 10);
+        const newVal = formatUS(onlyDigits);
+        const newPos = caretPosForDigitIndex(newVal, digitsBefore);
+
+        if (newVal !== oldVal) {
+          input.value = newVal;
+          queueMicrotask(() => input.setSelectionRange(newPos, newPos));
+        }
+        setValidityForPartial(input.value);
+      });
+
+      input.addEventListener('blur', () => {
+        setValidityForPartial(input.value);
+      });
+
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text') || '';
+        const digits = pasted.replace(/\D/g, '').slice(0, 10);
+        input.value = formatUS(digits);
+        const end = input.value.length;
+        input.setSelectionRange(end, end);
+        setValidityForPartial(input.value);
+      });
     })();
   </script>
 
