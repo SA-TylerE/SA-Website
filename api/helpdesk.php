@@ -76,20 +76,50 @@ function normalize_files_array(array $files): array {
 // Antivirus wrapper: returns detail
 // status: 'clean' | 'infected' | 'error' | 'unavailable'
 function antivirus_scan_detail(string $path): array {
-  $cmd = null; $engine = null;
-  if (trim(shell_exec('command -v clamdscan 2>/dev/null') ?? '') !== '') {
-    $cmd = 'clamdscan --no-summary '.escapeshellarg($path);
-    $engine = 'clamdscan';
-  } elseif (trim(shell_exec('command -v clamscan 2>/dev/null') ?? '') !== '') {
-    $cmd = 'clamscan --no-summary '.escapeshellarg($path);
-    $engine = 'clamscan';
-  } else {
-    return ['status'=>'unavailable','engine'=>null];
+  // Absolute paths avoid PATH issues under www-data
+  $clamdscan = '/usr/bin/clamdscan';
+  $clamscan  = '/usr/bin/clamscan';
+
+  // Build commands (no-summary keeps output short; --fdpass lets clamdscan read the file even if perms are tight)
+  $candidates = [];
+  if (is_executable($clamdscan)) {
+    $candidates[] = [$clamdscan, "$clamdscan --no-summary --fdpass ".escapeshellarg($path), 'clamdscan'];
   }
-  exec($cmd, $out, $code);
-  if ($code === 0) return ['status'=>'clean', 'engine'=>$engine];
-  if ($code === 1) return ['status'=>'infected', 'engine'=>$engine];
-  return ['status'=>'error', 'engine'=>$engine];
+  if (is_executable($clamscan)) {
+    $candidates[] = [$clamscan,  "$clamscan --no-summary ".escapeshellarg($path),       'clamscan'];
+  }
+  if (!$candidates) {
+    return ['status'=>'unavailable','engine'=>null,'code'=>2,'stdout'=>'','stderr'=>'no scanner binary'];
+  }
+
+  foreach ($candidates as [$bin,$cmd,$engine]) {
+    // Capture stdout+stderr and exit code
+    $descriptors = [
+      1 => ['pipe','w'], // stdout
+      2 => ['pipe','w'], // stderr
+    ];
+    $proc = proc_open($cmd, $descriptors, $pipes);
+    if (!is_resource($proc)) continue;
+
+    stream_set_blocking($pipes[1], true);
+    stream_set_blocking($pipes[2], true);
+    $stdout = stream_get_contents($pipes[1]); fclose($pipes[1]);
+    $stderr = stream_get_contents($pipes[2]); fclose($pipes[2]);
+    $status = proc_get_status($proc);
+    $code   = $status['exitcode'];
+    proc_close($proc);
+
+    // Normalize
+    if ($code === 0) return ['status'=>'clean',    'engine'=>$engine, 'code'=>$code, 'stdout'=>$stdout, 'stderr'=>$stderr];
+    if ($code === 1) return ['status'=>'infected', 'engine'=>$engine, 'code'=>$code, 'stdout'=>$stdout, 'stderr'=>$stderr];
+    // code 2 or anything else = error
+    // Try next engine (fallback from clamdscan -> clamscan). If this *is* the last, return error detail.
+    if ($engine === 'clamscan' || count($candidates) === 1) {
+      return ['status'=>'error', 'engine'=>$engine, 'code'=>$code, 'stdout'=>$stdout, 'stderr'=>$stderr];
+    }
+  }
+
+  return ['status'=>'error','engine'=>null,'code'=>2,'stdout'=>'','stderr'=>'proc open failed'];
 }
 
 // ===== Validate request =====
@@ -184,11 +214,22 @@ if (!empty($_FILES['attachments'])) {
     $mime = detect_mime_safely($tmp, $name);
     if ($verdict !== 'blocked' && !in_array($mime, $allowedMime, true)) { $verdict='blocked'; $reason='MIME check failed'; }
 
-    $av = ['status'=>'unavailable','engine'=>null];
+    $av = ['status'=>'unavailable','engine'=>null,'code'=>null,'stdout'=>'','stderr'=>''];
+
     if ($verdict !== 'blocked') {
       $av = antivirus_scan_detail($tmp);
-      if ($av['status'] === 'infected') { $verdict='blocked'; $reason='virus detected'; }
-      elseif ($av['status'] === 'error') { $reason='AV error (proceeded)'; } // proceed but note
+
+      if ($av['status'] === 'infected') {
+        $verdict = 'blocked';
+        $reason  = 'virus detected';
+      } elseif ($av['status'] === 'error') {
+        // SAFER policy: block when AV is unavailable or errors out
+        $verdict = 'blocked';
+        $reason  = "AV error ({$av['engine']}) code={$av['code']}";
+        error_log("AV ERROR: engine={$av['engine']} code={$av['code']} stdout=".
+                  substr((string)$av['stdout'],0,500).
+                  " stderr=".substr((string)$av['stderr'],0,500));
+      }
     }
 
     $sha256 = function_exists('hash_file') ? hash_file('sha256', $tmp) : null;
