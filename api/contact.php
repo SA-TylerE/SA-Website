@@ -27,6 +27,7 @@ $data    = get_request_data();
 $name    = trim($data['name']    ?? '');
 $company = trim($data['company'] ?? '');
 $email   = trim($data['email']   ?? '');
+$phone   = trim($data['phone']   ?? '');
 $subject = trim($data['subject'] ?? '');
 $message = trim($data['message'] ?? '');
 $hp      = trim($data['website_honeypot'] ?? ''); // spam trap
@@ -34,7 +35,7 @@ $hp      = trim($data['website_honeypot'] ?? ''); // spam trap
 // Honeypot: quietly succeed for bots
 if ($hp !== '') { echo json_encode(['ok'=>true]); exit; }
 
-if ($name === '' || $email === '' || $subject === '' || $message === '') {
+if ($name === '' || $email === '' || $subject === '' || $message === '' || $phone === '') {
   json_fail('Missing required fields');
 }
 
@@ -65,6 +66,10 @@ $html = '
           <td style="padding:6px 0;"><a href="mailto:'.$safe($email).'" style="color:#aa1e2e">'.$safe($email).'</a></td>
         </tr>
         <tr>
+          <td style="padding:6px 0; font-weight:700;">Phone</td>
+          <td style="padding:6px 0;">'.($phone !== '' ? $safe($phone) : '<span style="color:#9aa0a6">n/a</span>').'</td>
+        </tr>
+        <tr>
           <td style="padding:6px 0; font-weight:700;">IP</td>
           <td style="padding:6px 0;">'.$safe($ip).'</td>
         </tr>
@@ -82,6 +87,7 @@ $text = $emailSubject."\n"
       . "From: $name\n"
       . "Company: $company\n"
       . "Email: $email\n"
+      . "Phone: " . ($phone !== '' ? $phone : 'n/a') . "\n"
       . "IP: $ip\n\n"
       . "$message\n";
 
