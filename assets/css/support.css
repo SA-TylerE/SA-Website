@@ -1,91 +1,82 @@
-/* =========================================================
-   Support page only (scoped; no cross-page overrides)
-   ========================================================= */
+/* Support — page-only */
 
-/* 0) Support hero uses the global hero system in base.css */
-.support-hero{
-  --hero-bg: url('/assets/img/support-hero.png'); /* update path if needed */
-}
-/* (All hero padding/overlay/readability is in base.css) */
+/* Support hero */
+.support-hero{ --hero-bg: url('/assets/img/support-hero.png'); }
 
-
-/* 1) Section spacing — tight layout with no gap when panel is closed */
-#helpdesk.section{ padding:20px 0 0 }  /* NO bottom padding by default */
+/* Sections */
+#helpdesk.section{ padding:20px 0 0 }
 #remote.section{   padding:8px 0 14px }
-
-/* Ensure the card above the panel doesn't add extra spacing */
-.helpdesk-card{ margin:0 }
-
-/* 2) Helpdesk card layout */
-.helpdesk-card{
-  display:flex; flex-wrap:wrap; gap:16px;
-  align-items:center; justify-content:space-between;
-}
+.helpdesk-card{ margin:0; display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between; }
 .helpdesk-card__intro{ min-width:260px }
 .helpdesk-card h2{ margin:0 0 4px }
 .helpdesk-card .lead{ margin:0; color:var(--gray-dark) }
 .helpdesk-actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap }
-
-/* No hover lift on Helpdesk */
 #helpdesk .card{ transition:none; padding:16px }
 #helpdesk .card:hover{ transform:none; box-shadow:0 10px 24px rgba(0,0,0,.06) }
 
-/* Collapsible email form — height animation, no leftover gap */
-#email-form-panel[hidden]{ display:none !important }  /* removed from flow when closed */
-
+/* Collapsible */
+#email-form-panel[hidden]{ display:none !important }
 .collapsible{
-  display:block;
-  overflow:hidden;
-  height:0;                 /* we animate this */
-  opacity:0;                /* fade in/out */
-  padding:0;                /* no margins (avoid collapse) */
-  border:0;
-  background:transparent;
-  box-shadow:none;
-  transition: height .28s ease, opacity .2s ease,
-              background-color .24s ease, border-color .24s ease, box-shadow .24s ease;
+  display:block; overflow:hidden; height:0; opacity:0; padding:0; border:0; background:transparent; box-shadow:none;
+  transition: height .28s ease, opacity .2s ease, background-color .24s ease, border-color .24s ease, box-shadow .24s ease;
   will-change: height, opacity;
 }
-
-/* Apply the "gap above card" as top padding WHILE OPEN so it becomes part of height */
-.collapsible.is-open{
-  padding-top:12px;         /* replaces the old margin-top gap */
-}
-
-/* Card styling stays on the inner wrapper (avoids border/padding flashing during animation) */
+.collapsible.is-open{ padding-top:12px; }
 .collapsible__body{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:18px;
+  background:#fff; border:1px solid var(--border); border-radius:12px; padding:18px;
   box-shadow:0 10px 24px rgba(0,0,0,.06);
 }
 
-@media (prefers-reduced-motion:reduce){
-  .collapsible{ transition:none }
+/* Form grid */
+.support-form .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
+.support-form .form-grid .full{ grid-column:1 / -1 }
+.support-form label span{ display:block; font-weight:700; margin-bottom:6px }
+.support-form input, .support-form textarea{
+  width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font:inherit;
 }
+.support-form input:focus, .support-form textarea:focus{ outline:2px solid rgba(170,30,46,.25); border-color:var(--red) }
+@media (max-width:720px){ .support-form .form-grid{ grid-template-columns:1fr } }
 
-/* 4) Remote (Splashtop) section */
+/* Attachments widget */
+.attach-row{ display:flex; gap:10px; align-items:center; margin: 2px 0 6px; }
+.attach-btn{
+  appearance:none; border:1px solid var(--border); background:#fff;
+  padding:10px 14px; border-radius:var(--radius-pill); font-weight:700; cursor:pointer;
+  display:inline-flex; gap:10px; align-items:center; transition:all .15s ease;
+}
+.attach-btn:hover{ border-color:var(--red); box-shadow:0 4px 10px rgba(0,0,0,.08); transform:translateY(-1px) }
+.attach-btn:active{ transform:translateY(0); box-shadow:0 2px 6px rgba(0,0,0,.06) }
+.attach-btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
+.attach-btn .icon-plus{ width:18px; height:18px; }
+
+.attach-list{ display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 2px; }
+.file-chip{
+  display:inline-flex; align-items:center; gap:8px;
+  background:#fff; border:1px solid var(--border); border-radius:999px; padding:6px 10px;
+}
+.file-chip__name{ max-width:28ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.file-chip__size{ color:var(--gray-dark); opacity:.8; font-size:.9rem }
+.file-chip__remove{
+  appearance:none; border:0; background:transparent; cursor:pointer; padding:0 4px; font-size:1.1rem; line-height:1;
+}
+.file-chip__remove:hover{ color:var(--red) }
+
+/* Muted note under attachments */
+.attachments .attach-note{ color: var(--gray-dark); opacity:.7; font-size:.92rem }
+
+/* Remote section layout */
 .remote-grid{ display:grid; grid-template-columns:1.2fr .8fr; gap:18px; align-items:stretch }
 @media (max-width:980px){ .remote-grid{ grid-template-columns:1fr } }
-
-/* Equal-height cards, tighter padding, no hover lift */
 .remote-grid > .card{ height:100%; transition:none }
 .remote-grid > .card:hover{ transform:none; box-shadow:0 10px 24px rgba(0,0,0,.06) }
 #remote .card{ padding:14px }
-
-/* Download card — vertically centered */
 .download-card{ display:flex; flex-direction:column; justify-content:center }
 .download-header{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:8px }
 #download-button{ display:inline-flex; align-items:center; gap:10px; padding:12px 22px }
 #download-button img.platform-icon{ width:22px; height:22px; display:block }
-
-/* Meta */
 .download-meta{ display:grid; gap:2px }
 .download-meta .platform-status{ font-weight:700 }
 .download-meta .platform-note{ color:var(--gray-dark); font-size:.95rem }
-
-/* Platform override buttons */
 .override-wrapper{ margin-top:10px }
 .override-wrapper > strong{ display:block; margin-bottom:6px }
 .override-group{ display:flex; flex-wrap:wrap; gap:8px }
@@ -99,40 +90,3 @@
 .override-download-btn.selected{ background:var(--red); color:#fff; border-color:var(--red); box-shadow:0 4px 12px rgba(170,30,46,.3) }
 .override-download-btn img{ width:18px; height:18px; display:block }
 .override-download-btn.selected img{ filter:brightness(0) invert(1) }
-.section__cta{ margin-top:20px }
-
-/* How it works (tighter) */
-.howto-card{ display:flex; flex-direction:column; justify-content:flex-start }
-.howto-card h2{ margin:0 0 6px }
-.howto-steps{ margin:6px 0 0; padding-left:1.2rem }
-.howto-steps li{ margin:4px 0 }
-
-/* 5) Form layout */
-.support-form .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
-.support-form .form-grid .full{ grid-column:1 / -1 }
-.support-form label span{ display:block; font-weight:700; margin-bottom:6px }
-.support-form input, .support-form textarea{ width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font:inherit }
-.support-form input:focus, .support-form textarea:focus{ outline:2px solid rgba(170,30,46,.25); border-color:var(--red) }
-.support-form .form-actions{ display:flex; gap:12px; margin-top:8px }
-.support-form .form-note{ margin:10px 0 0; color:var(--gray-dark); font-size:.95rem }
-@media (max-width:720px){ .support-form .form-grid{ grid-template-columns:1fr } }
-
-/* 6) Misc */
-.notice{ margin-top:12px }
-button, input, select, textarea{ font:inherit; color:inherit }
-.btn{ -webkit-appearance:none; appearance:none }
-/* Support page: make the hero taller so the headset icon is fully visible */
-.support-hero{
-  /* desktop default */
-  padding: 150px 0 150px;
-}
-
-/* Extra roomy on large screens */
-@media (min-width: 1200px){
-  .support-hero{ padding: 180px 0 140px; }
-}
-
-/* Keep it reasonable on tablets/phones */
-@media (max-width: 980px){
-  .support-hero{ padding: 100px 0 90px; }
-}

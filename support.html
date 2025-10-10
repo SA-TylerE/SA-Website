@@ -13,146 +13,155 @@
   <script src="assets/js/includes.js" defer></script>
 </head>
 <body>
-
   <!-- Shared header -->
   <div data-include="partials/header.html"></div>
 
   <main>
-  <!-- Hero with background image (shared hero system) -->
-  <section class="hero hero--light hero--bg hero--enhanced support-hero">
-    <div class="container hero__inner">
-      <div class="hero__copy">
-        <h1>Support</h1>
-        <p>Need help right now? Call our helpdesk to start a secure remote session.</p>
+    <!-- Hero -->
+    <section class="hero hero--light hero--bg hero--enhanced support-hero">
+      <div class="container hero__inner">
+        <div class="hero__copy">
+          <h1>Support</h1>
+          <p>Need help right now? Call our helpdesk to start a secure remote session.</p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- 1) Direct Helpdesk contact -->
-  <section class="section" id="helpdesk">
-    <div class="container">
-      <article class="card helpdesk-card">
-        <div class="helpdesk-card__intro">
-          <h2>Contact the Helpdesk</h2>
-          <p class="lead">
-            Speak with a tech or send us details—whatever's more convenient.
-          </p>
-        </div>
-
-        <div class="helpdesk-actions">
-          <a class="btn btn--primary" href="tel:+1-503-878-7000">Call/Text 503-878-7000</a>
-
-          <!-- TOGGLE: shows the email form below -->
-          <button
-            type="button"
-            id="toggle-email-form"
-            class="btn btn--outline"
-            aria-expanded="false"
-            aria-controls="email-form-panel">
-            Email Helpdesk
-          </button>
-
-          <!-- Ticket button can stay as-is / disabled until ready -->
-          <a class="btn btn--outline" href="#" aria-disabled="true" title="Web ticketing coming soon">
-            Open a Ticket
-          </a>
-        </div>
-      </article>
-
-      <!-- Collapsible email form panel -->
-      <div id="email-form-panel" class="collapsible" hidden>
-        <div class="card collapsible__body">
-          <h3>Send details to the helpdesk</h3>
-          <form id="helpdesk-email-form" class="support-form" novalidate>
-          <div class="form-grid">
-            <label>
-              <span>Name</span>
-              <input type="text" id="hd-name" name="name" autocomplete="name" required>
-            </label>
-
-            <label>
-              <span>Company</span>
-              <input type="text" id="hd-company" name="company" autocomplete="organization">
-            </label>
-
-            <label class="full">
-              <span>Email</span>
-              <input type="email" id="hd-email" name="email" autocomplete="email" required>
-            </label>
-
-            <label class="full">
-              <span>Issue</span>
-              <textarea id="hd-issue" name="issue" rows="5" placeholder="Briefly describe the problem…" required></textarea>
-            </label>
+    <!-- Helpdesk -->
+    <section class="section" id="helpdesk">
+      <div class="container">
+        <article class="card helpdesk-card">
+          <div class="helpdesk-card__intro">
+            <h2>Contact the Helpdesk</h2>
+            <p class="lead">Speak with a tech or send us details—whatever's more convenient.</p>
           </div>
 
-          <div class="form-actions">
-            <button type="submit" class="btn btn--primary">Send Email</button>
-            <button type="button" class="btn btn--outline" id="cancel-email-form">Cancel</button>
+          <div class="helpdesk-actions">
+            <a class="btn btn--primary" href="tel:+1-503-878-7000">Call/Text 503-878-7000</a>
+            <button
+              type="button"
+              id="toggle-email-form"
+              class="btn btn--outline"
+              aria-expanded="false"
+              aria-controls="email-form-panel">
+              Email Helpdesk
+            </button>
+            <a class="btn btn--outline" href="#" aria-disabled="true" title="Web ticketing coming soon">
+              Open a Ticket
+            </a>
           </div>
+        </article>
 
-          <p class="form-note">
-            Submitting will open your email app with the details pre-filled. You can review and press send.
-          </p>
-        </form>
+        <!-- Collapsible email form panel -->
+        <div id="email-form-panel" class="collapsible" hidden>
+          <div class="card collapsible__body">
+            <h3>Send details to the helpdesk</h3>
+
+            <form id="helpdesk-email-form" class="support-form" novalidate enctype="multipart/form-data">
+              <div class="form-grid">
+                <label>
+                  <span>Name<span class="req" aria-hidden="true">*</span></span>
+                  <input type="text" id="hd-name" name="name" autocomplete="name" required aria-required="true">
+                </label>
+
+                <label>
+                  <span>Company<span class="req" aria-hidden="true">*</span></span>
+                  <input type="text" id="hd-company" name="company" autocomplete="organization" required aria-required="true">
+                </label>
+
+                <label class="full">
+                  <span>Email<span class="req" aria-hidden="true">*</span></span>
+                  <input type="email" id="hd-email" name="email" autocomplete="email" required aria-required="true">
+                </label>
+
+                <label class="full">
+                  <span>Issue<span class="req" aria-hidden="true">*</span></span>
+                  <textarea id="hd-issue" name="issue" rows="5" placeholder="Briefly describe the problem…" required aria-required="true"></textarea>
+                </label>
+
+                <!-- Attachments widget -->
+                <div class="full attachments">
+                  <div class="attach-row">
+                    <button type="button" id="hd-add-files" class="attach-btn" title="Add up to 5 files">
+                      <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                      Add files
+                    </button>
+                  </div>
+                  <div id="hd-file-list" class="attach-list"></div>
+                  <input type="file" id="hd-files" name="attachments[]" multiple hidden
+                         accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
+                  <div class="attach-note">Up to 5 files, max 5&nbsp;MB each. Allowed: PNG, JPG, PDF, TXT/LOG, DOC/DOCX, XLSX, CSV.</div>
+                </div>
+
+                <!-- Honeypot -->
+                <input type="text" id="hd-hp" name="website_honeypot" autocomplete="off" tabindex="-1" style="display:none">
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn--primary" id="hd-send">Send</button>
+                <button type="button" class="btn btn--outline" id="cancel-email-form">Cancel</button>
+                <span id="hd-status" class="form-status" role="status" aria-live="polite"></span>
+                <span class="form-required-note"><span class="req" aria-hidden="true">*</span> Required</span>
+              </div>
+            </form>
+          </div>
+        </div>
+
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- 2) Remote support (Splashtop SOS) -->
-  <section class="section" id="remote">
-    <div class="container remote-grid">
-
-      <!-- Download card -->
-      <article class="card download-card">
-        <div class="download-header">
-          <a id="download-button" class="btn btn--primary" href="#" aria-label="Download Splashtop SOS">
-            <img id="platform-icon" class="platform-icon" src="" alt="" />
-            <span id="button-text">Splashtop SOS</span>
-          </a>
-          <div class="download-meta">
-            <div id="platform-message" class="platform-status">Detecting your platform…</div>
-            <div class="platform-note">Auto-detected; you can choose a different platform below.</div>
+    <!-- Remote support (Splashtop SOS) -->
+    <section class="section" id="remote">
+      <div class="container remote-grid">
+        <article class="card download-card">
+          <div class="download-header">
+            <a id="download-button" class="btn btn--primary" href="#" aria-label="Download Splashtop SOS">
+              <img id="platform-icon" class="platform-icon" src="" alt="" />
+              <span id="button-text">Splashtop SOS</span>
+            </a>
+            <div class="download-meta">
+              <div id="platform-message" class="platform-status">Detecting your platform…</div>
+              <div class="platform-note">Auto-detected; you can choose a different platform below.</div>
+            </div>
           </div>
-        </div>
 
-        <div class="override-wrapper">
-          <strong>Choose a different platform</strong>
-          <div id="platform-buttons" class="override-group" aria-label="Manual platform selection"></div>
-        </div>
-
-        <noscript>
-          <div class="notice">
-            <p><strong>JavaScript is disabled.</strong> Use the direct links:</p>
-            <ul>
-              <li><a href="https://download.splashtop.com/sos/SplashtopSOS.exe">Windows</a></li>
-              <li><a href="https://download.splashtop.com/sos/SplashtopSOS.dmg">macOS</a></li>
-              <li><a href="https://play.google.com/store/apps/details?id=com.splashtop.sos">Android</a></li>
-              <li><a href="https://apps.apple.com/app/splashtop-sos/id1230853703">iOS</a></li>
-            </ul>
+          <div class="override-wrapper">
+            <strong>Choose a different platform</strong>
+            <div id="platform-buttons" class="override-group" aria-label="Manual platform selection"></div>
           </div>
-        </noscript>
-      </article>
 
-      <!-- How it works -->
-      <div class="card howto-card">
-        <h2>How it works</h2>
-        <ol class="howto-steps">
-          <li><strong>Download & open the app.</strong> Click the button for your platform above.</li>
-          <li><strong>Provide the 9-digit code.</strong> Share the one-time SOS code with your technician.</li>
-          <li><strong>We connect securely.</strong> Allow access if prompted; you can end any time.</li>
-        </ol>
+          <noscript>
+            <div class="notice">
+              <p><strong>JavaScript is disabled.</strong> Use the direct links:</p>
+              <ul>
+                <li><a href="https://download.splashtop.com/sos/SplashtopSOS.exe">Windows</a></li>
+                <li><a href="https://download.splashtop.com/sos/SplashtopSOS.dmg">macOS</a></li>
+                <li><a href="https://play.google.com/store/apps/details?id=com.splashtop.sos">Android</a></li>
+                <li><a href="https://apps.apple.com/app/splashtop-sos/id1230853703">iOS</a></li>
+              </ul>
+            </div>
+          </noscript>
+        </article>
+
+        <div class="card howto-card">
+          <h2>How it works</h2>
+          <ol class="howto-steps">
+            <li><strong>Download & open the app.</strong> Click the button for your platform above.</li>
+            <li><strong>Provide the 9-digit code.</strong> Share the one-time SOS code with your technician.</li>
+            <li><strong>We connect securely.</strong> Allow access if prompted; you can end any time.</li>
+          </ol>
+        </div>
       </div>
-
-    </div>
-  </section>
-</main>
-
+    </section>
+  </main>
 
   <!-- Shared footer -->
   <div data-include="partials/footer.html"></div>
 
-  <!-- Device-aware download script -->
+  <!-- Scripts -->
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const downloadBtn = document.getElementById("download-button");
@@ -162,29 +171,13 @@
       const platformBtnsContainer = document.getElementById("platform-buttons");
 
       const downloads = {
-        windows: {
-          name: "Windows",
-          url: "https://download.splashtop.com/sos/SplashtopSOS.exe",
-          icon: "https://img.icons8.com/ios-filled/50/000000/windows8.png"
-        },
-        mac: {
-          name: "macOS",
-          url: "https://download.splashtop.com/sos/SplashtopSOS.dmg",
-          icon: "https://img.icons8.com/ios-filled/50/000000/mac-os.png"
-        },
-        android: {
-          name: "Android",
-          url: "https://play.google.com/store/apps/details?id=com.splashtop.sos",
-          icon: "https://img.icons8.com/ios-filled/50/000000/android-os.png"
-        },
-        ios: {
-          name: "iOS",
-          url: "https://apps.apple.com/app/splashtop-sos/id1230853703",
-          icon: "https://img.icons8.com/ios-filled/50/000000/ios-logo.png"
-        }
+        windows:{name:"Windows",url:"https://download.splashtop.com/sos/SplashtopSOS.exe",icon:"https://img.icons8.com/ios-filled/50/000000/windows8.png"},
+        mac:{name:"macOS",url:"https://download.splashtop.com/sos/SplashtopSOS.dmg",icon:"https://img.icons8.com/ios-filled/50/000000/mac-os.png"},
+        android:{name:"Android",url:"https://play.google.com/store/apps/details?id=com.splashtop.sos",icon:"https://img.icons8.com/ios-filled/50/000000/android-os.png"},
+        ios:{name:"iOS",url:"https://apps.apple.com/app/splashtop-sos/id1230853703",icon:"https://img.icons8.com/ios-filled/50/000000/ios-logo.png"}
       };
 
-      function detectOS() {
+      function detectOS(){
         const ua = navigator.userAgent || navigator.vendor || window.opera;
         if (/windows/i.test(ua)) return "windows";
         if (/macintosh|mac os x/i.test(ua)) return "mac";
@@ -192,31 +185,28 @@
         if (/iphone|ipad|ipod/i.test(ua)) return "ios";
         return "unknown";
       }
-
-      function markSelected(osKey) {
-        document.querySelectorAll('.override-download-btn').forEach(b => b.classList.toggle('selected', b.dataset.key === osKey));
+      function markSelected(osKey){
+        document.querySelectorAll('.override-download-btn')
+          .forEach(b => b.classList.toggle('selected', b.dataset.key === osKey));
       }
-
-      function updateDownload(osKey, manual = false) {
-        const platform = downloads[osKey];
-        if (!platform) return;
-        downloadBtn.href = platform.url;
-        platformIcon.src = platform.icon;
-        platformIcon.alt = platform.name + " icon";
+      function updateDownload(osKey, manual = false){
+        const p = downloads[osKey]; if (!p) return;
+        downloadBtn.href = p.url;
+        platformIcon.src = p.icon;
+        platformIcon.alt = p.name + " icon";
         buttonText.textContent = "Splashtop SOS";
-        platformMsg.textContent = `Download the ${platform.name} version${manual ? " (selected manually)" : ""}.`;
+        platformMsg.textContent = `Download the ${p.name} version${manual ? " (selected manually)" : ""}.`;
         downloadBtn.style.display = "inline-flex";
         markSelected(osKey);
       }
-
-      function buildOverrideButtons() {
-        for (let key in downloads) {
-          const platform = downloads[key];
+      function buildOverrideButtons(){
+        for (let key in downloads){
+          const p = downloads[key];
           const btn = document.createElement("button");
           btn.className = "override-download-btn";
           btn.type = "button";
           btn.dataset.key = key;
-          btn.innerHTML = `<img src="${platform.icon}" alt="${platform.name}"> ${platform.name}`;
+          btn.innerHTML = `<img src="${p.icon}" alt="${p.name}"> ${p.name}`;
           btn.addEventListener("click", () => updateDownload(key, true));
           platformBtnsContainer.appendChild(btn);
         }
@@ -224,143 +214,242 @@
 
       const detectedOS = detectOS();
       buildOverrideButtons();
-      if (downloads[detectedOS]) {
-        updateDownload(detectedOS);
-      } else {
-        platformMsg.textContent = "We couldn't detect your platform. Please choose one below.";
-        downloadBtn.style.display = "none";
-      }
-    });
-  </script>
-<script>
-  (function(){
-    const emailAddr = 'help@systemalternatives.com';
-    const toggleBtn = document.getElementById('toggle-email-form');
-    const panel     = document.getElementById('email-form-panel');
-    const form      = document.getElementById('helpdesk-email-form');
-    const cancelBtn = document.getElementById('cancel-email-form');
-
-    let isAnimating = false;
-
-    function openPanel(){
-      if (isAnimating) return;
-      isAnimating = true;
-
-      panel.hidden = false;                 // allow measuring
-      panel.classList.add('is-open');       // adds padding-top (gap) now
-      panel.style.height = '0px';
-      panel.style.opacity = '0';
-
-      // force reflow so the next height change animates
-      panel.offsetHeight;
-
-      const target = panel.scrollHeight;    // includes padding-top + inner card
-      panel.style.height = target + 'px';
-      panel.style.opacity = '1';
-      toggleBtn.setAttribute('aria-expanded','true');
-    }
-
-    function closePanel(){
-      if (isAnimating) return;
-      isAnimating = true;
-
-      // set current height to animate from
-      panel.style.height = panel.scrollHeight + 'px';
-
-      // force reflow, then collapse
-      panel.offsetHeight;
-
-      panel.style.height = '0px';
-      panel.style.opacity = '0';
-      toggleBtn.setAttribute('aria-expanded','false');
-    }
-
-    panel.addEventListener('transitionend', (e)=>{
-      if (e.propertyName !== 'height') return;
-
-      const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
-
-      if (isOpen){
-        // lock height to auto for responsiveness after opening
-        panel.style.height = 'auto';
-      }else{
-        // fully closed → remove from flow and clear styles
-        panel.classList.remove('is-open');
-        panel.hidden = true;
-        panel.style.height = '';
-      }
-      isAnimating = false;
+      if (downloads[detectedOS]) updateDownload(detectedOS);
+      else { platformMsg.textContent = "We couldn't detect your platform. Please choose one below."; downloadBtn.style.display = "none"; }
     });
 
-    toggleBtn.addEventListener('click', ()=>{
-      const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-      expanded ? closePanel() : openPanel();
-    });
+    const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    cancelBtn.addEventListener('click', closePanel);
+    // Attachment widget with explicit reset()
+    function setupAttachmentWidget({ addBtnId, inputId, listId, limits }){
+      const addBtn = document.getElementById(addBtnId);
+      const input  = document.getElementById(inputId);
+      const listEl = document.getElementById(listId);
+      let files  = [];
 
-    form.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const name    = (document.getElementById('hd-name').value || '').trim();
-      const company = (document.getElementById('hd-company').value || '').trim();
-      const email   = (document.getElementById('hd-email').value || '').trim();
-      const issue   = (document.getElementById('hd-issue').value || '').trim();
+      const allowed   = limits.allowed;
+      const MAX_FILES = limits.maxFiles;
+      const MAX_SIZE  = limits.maxSize;
 
-      if (!name || !email || !issue){
-        alert('Please fill in your Name, Email, and Issue.');
-        return;
+      const fmtMB = (n)=> (n/(1024*1024)).toFixed(2)+' MB';
+      const key   = (f)=> `${f.name}|${f.size}|${f.lastModified}`;
+
+      function setBtnState(){
+        if (files.length >= MAX_FILES){
+          addBtn.disabled = true;
+          addBtn.title = `Limit reached (${MAX_FILES} files)`;
+        }else{
+          addBtn.disabled = false;
+          addBtn.title = `Add up to ${MAX_FILES} files`;
+        }
       }
 
-      const subject = encodeURIComponent('Support Request');
-      const body = encodeURIComponent([
-        `Name: ${name}`,
-        `Company: ${company}`,
-        `Email: ${email}`,
-        '',
-        'Issue:',
-        issue
-      ].join('\n'));
-
-      window.location.href = `mailto:${emailAddr}?subject=${subject}&body=${body}`;
-    });
-  })();
-</script>
-
-  <script>
-    (function () {
-      const allSections = Array.from(document.querySelectorAll('section'));
-      const sectionsToReveal = allSections.slice(1); // hero is index 0
-      sectionsToReveal.forEach(sec => sec.classList.add('reveal'));
-
-      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduceMotion) {
-        sectionsToReveal.forEach(sec => sec.classList.add('is-visible'));
-        return;
-      }
-
-      const io = new IntersectionObserver((entries, obs) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            obs.unobserve(entry.target);
-          }
+      function render(){
+        listEl.innerHTML = '';
+        files.forEach((f, idx)=>{
+          const chip = document.createElement('span');
+          chip.className = 'file-chip';
+          chip.innerHTML = `
+            <span class="file-chip__name" title="${f.name}">${f.name}</span>
+            <span class="file-chip__size">(${fmtMB(f.size)})</span>
+            <button class="file-chip__remove" type="button" aria-label="Remove ${f.name}">×</button>
+          `;
+          chip.querySelector('.file-chip__remove').addEventListener('click', ()=>{
+            files.splice(idx, 1);
+            render();
+            setBtnState();
+          });
+          listEl.appendChild(chip);
         });
-      }, { threshold: 0.15 });
+        setBtnState();
+      }
 
-      sectionsToReveal.forEach(sec => io.observe(sec));
+      addBtn.addEventListener('click', ()=> input.click());
+
+      input.addEventListener('change', ()=>{
+        const picked = Array.from(input.files || []);
+        for (const f of picked){
+          if (files.length >= MAX_FILES) break;
+          if (f.size > MAX_SIZE){ alert(`${f.name} is larger than 5 MB.`); continue; }
+          const okType = allowed.includes(f.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(f.name);
+          if (!okType){ alert(`${f.name} is not an allowed file type.`); continue; }
+          if (!files.some(existing => key(existing) === key(f))) files.push(f);
+        }
+        input.value = ''; // allow re-selecting same file later
+        render();
+      });
+
+      function reset(){ files = []; listEl.innerHTML = ''; input.value = ''; setBtnState(); }
+
+      // expose API
+      return { get: ()=> files.slice(), reset };
+    }
+
+    (function(){
+      const toggleBtn = document.getElementById('toggle-email-form');
+      const panel     = document.getElementById('email-form-panel');
+      const form      = document.getElementById('helpdesk-email-form');
+      const cancelBtn = document.getElementById('cancel-email-form');
+      const statusEl  = document.getElementById('hd-status');
+      const sendBtn   = document.getElementById('hd-send');
+
+      let isAnimating = false;
+
+      // Status timers
+      let fadeTimer = null;   // for fade-out delay
+      let resetTimer = null;  // for DOM reset after fade
+
+      function cancelStatusTimers(){
+        if (fadeTimer)  { clearTimeout(fadeTimer);  fadeTimer = null; }
+        if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
+      }
+
+      function setStatusSending(){
+        cancelStatusTimers();
+        statusEl.className = 'form-status form-status--progress is-visible';
+        statusEl.innerHTML = `<span class="spinner" aria-hidden="true"></span>Sending...`;
+      }
+      function setStatusOK(msg){
+        cancelStatusTimers();
+        statusEl.className = 'form-status form-status--ok is-visible';
+        statusEl.innerHTML =
+          `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>${msg}`;
+        fadeTimer = setTimeout(()=>{
+          statusEl.classList.remove('is-visible');
+          resetTimer = setTimeout(()=>{
+            statusEl.className = 'form-status';
+            statusEl.textContent = '';
+          }, 300);
+        }, 7000);
+      }
+      function setStatusError(msg){
+        cancelStatusTimers();
+        statusEl.className = 'form-status form-status--error is-visible';
+        statusEl.textContent = msg;
+      }
+      function clearStatus(){
+        cancelStatusTimers();
+        statusEl.classList.remove('is-visible');
+        resetTimer = setTimeout(()=>{
+          statusEl.className = 'form-status';
+          statusEl.textContent = '';
+        }, 250);
+      }
+
+      function openPanel(){
+        if (isAnimating) return;
+        isAnimating = true;
+        panel.hidden = false;
+        panel.classList.add('is-open');
+        panel.style.height = '0px';
+        panel.style.opacity = '0';
+        panel.offsetHeight;
+        panel.style.height = panel.scrollHeight + 'px';
+        panel.style.opacity = '1';
+        toggleBtn.setAttribute('aria-expanded','true');
+      }
+      function closePanel(){
+        if (isAnimating) return;
+        isAnimating = true;
+        panel.style.height = panel.scrollHeight + 'px';
+        panel.offsetHeight;
+        panel.style.height = '0px';
+        panel.style.opacity = '0';
+        toggleBtn.setAttribute('aria-expanded','false');
+      }
+      panel.addEventListener('transitionend', (e)=>{
+        if (e.propertyName !== 'height') return;
+        const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
+        if (isOpen){
+          panel.style.height = 'auto';
+        }else{
+          panel.classList.remove('is-open');
+          panel.hidden = true;
+          panel.style.height = '';
+        }
+        isAnimating = false;
+      });
+      toggleBtn.addEventListener('click', ()=>{
+        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+        expanded ? closePanel() : openPanel();
+      });
+
+      // Attachments
+      const widget = setupAttachmentWidget({
+        addBtnId: 'hd-add-files',
+        inputId : 'hd-files',
+        listId  : 'hd-file-list',
+        limits  : {
+          maxFiles: 5,
+          maxSize : 5 * 1024 * 1024,
+          allowed : [
+            'image/png','image/jpeg','application/pdf','text/plain','application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv'
+          ]
+        }
+      });
+
+      function resetFormAndFiles(){
+        form.reset();
+        widget.reset();
+      }
+
+      cancelBtn.addEventListener('click', ()=>{
+        resetFormAndFiles();
+        clearStatus();
+        closePanel();
+      });
+
+      form.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        clearStatus();
+
+        if (!form.reportValidity()){
+          setStatusError('Please complete all required fields.');
+          return;
+        }
+
+        // Disable while sending (Send, Cancel, Add files)
+        sendBtn.disabled = true;
+        cancelBtn.disabled = true;
+        const addBtn = document.getElementById('hd-add-files');
+        addBtn.disabled = true;
+
+        setStatusSending();
+
+        const name    = (document.getElementById('hd-name').value||'').trim();
+        const company = (document.getElementById('hd-company').value||'').trim();
+        const email   = (document.getElementById('hd-email').value||'').trim();
+        const issue   = (document.getElementById('hd-issue').value||'').trim();
+        const hp      = (document.getElementById('hd-hp').value||'').trim();
+
+        try{
+          const fd = new FormData();
+          fd.set('name',name);
+          fd.set('company',company);
+          fd.set('email',email);
+          fd.set('issue',issue);
+          fd.set('website_honeypot',hp);
+          for (const f of widget.get()) fd.append('attachments[]', f, f.name);
+
+          const resp = await fetch(API('api/helpdesk.php'), { method:'POST', body: fd });
+          const text = await resp.text();
+          let data; try{ data = JSON.parse(text); }catch{ throw new Error('Non-JSON'); }
+          if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Send failed');
+
+          setStatusOK('Sent');
+          resetFormAndFiles();
+        }catch(err){
+          console.error('Helpdesk send failed:', err);
+          setStatusError('Send failed — please try again.');
+        }finally{
+          sendBtn.disabled = false;
+          cancelBtn.disabled = false;
+          document.getElementById('hd-add-files').disabled = false;
+        }
+      });
     })();
   </script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('a.btn[aria-disabled="true"]').forEach(a => {
-        const block = e => { e.preventDefault(); e.stopPropagation(); };
-        a.addEventListener('click', block);
-        a.addEventListener('keydown', e => {
-          if (e.key === 'Enter' || e.key === ' ') block(e);
-        });
-      });
-    });
-  </script>
-
 </body>
 </html>

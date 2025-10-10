@@ -151,6 +151,22 @@ a{ color:inherit; text-decoration:none }
 @media (min-width:901px){
   .menu__mobile-cta{ display:none !important }
 }
+/* --- Button/font normalization (keep buttons using Inter like the page) --- */
+button, input, select, textarea { 
+  font: inherit;           /* inherit family, size, weight, line-height */
+  color: inherit; 
+}
+
+/* Ensure our .btn components (both <a> and <button>) share the same typography */
+.btn, a.btn, button.btn {
+  font-family: inherit;    /* Inter from body */
+  font-weight: 700;
+  font-size: 1rem;         /* match your base text size */
+  line-height: 1; 
+  letter-spacing: .01em;
+  -webkit-appearance: none;
+  appearance: none;
+}
 
 /* 2) Buttons (standardized) */
 .btn{
@@ -461,4 +477,247 @@ html{ scroll-behavior: smooth; }
   .footer__nav ul{ margin: 0; padding: 0; list-style: none; }
   .footer__nav li{ margin: 6px 0; }
 }
+/* =========================================================
+   Shared: collapsible panels + form styling (used by Support & Contact)
+   ========================================================= */
 
+/* Ensure hidden collapsibles are removed from flow */
+.collapsible[hidden]{ display:none !important; }
+
+/* Collapsible container (animated height + fade) */
+.collapsible{
+  display:block;
+  overflow:hidden;
+  height:0;
+  opacity:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  box-shadow:none;
+  transition: height .28s ease, opacity .2s ease,
+              background-color .24s ease, border-color .24s ease, box-shadow .24s ease;
+  will-change: height, opacity;
+}
+
+/* Add a gap above the inner card only while open */
+.collapsible.is-open{ padding-top:12px; }
+
+/* Inner card stays visually stable during animation */
+.collapsible__body{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:18px;
+  box-shadow:0 10px 24px rgba(0,0,0,.06);
+}
+
+@media (prefers-reduced-motion:reduce){
+  .collapsible{ transition:none }
+}
+
+/* Shared form layout */
+.support-form .form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.support-form .form-grid .full{ grid-column:1 / -1; }
+.support-form label span{ display:block; font-weight:700; margin-bottom:6px; }
+.support-form input,
+.support-form textarea{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px 12px;
+  font:inherit;
+}
+.support-form input:focus,
+.support-form textarea:focus{
+  outline:2px solid rgba(170,30,46,.25);
+  border-color:var(--red);
+}
+.support-form .form-actions{ display:flex; gap:12px; margin-top:8px; }
+.support-form .form-note{ margin:10px 0 0; color:var(--gray-dark); font-size:.95rem; }
+
+@media (max-width:720px){
+  .support-form .form-grid{ grid-template-columns:1fr; }
+}
+/* Shared: no hover lift on cards inside any collapsible panel */
+.collapsible .card{ transition:none; }
+.collapsible .card:hover{ transform:none; box-shadow:0 10px 24px rgba(0,0,0,.06); }
+/* === Shared: Attachment chips === */
+.attachments { display:grid; gap:8px; }
+.attach-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.file-chip {
+  display:inline-flex; align-items:center; gap:8px;
+  background:#fff; border:1px solid var(--border);
+  border-radius:999px; padding:6px 10px; max-width:100%;
+}
+.file-chip__name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:42ch; }
+.file-chip__size { color:var(--gray-dark); font-size:.9em; }
+.file-chip__remove {
+  appearance:none; border:0; background:#f3f4f6; color:#9aa0a6;
+  width:22px; height:22px; border-radius:50%; font-weight:800; line-height:1;
+  display:inline-flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.file-chip__remove:hover { background:#ffe9ec; color:var(--red); }
+/* disabled state + pointer for add button */
+/* Attachment add button: theme-aware icon */
+.attach-btn{
+  position:relative; display:inline-flex; align-items:center; gap:.6ch;
+  border:1px dashed var(--border); background:#fff; padding:8px 12px;
+  border-radius:999px; font-weight:700; cursor:pointer;
+  color: var(--red);                     /* icon + label color */
+}
+.attach-btn:hover{ border-color: var(--red); }
+.attach-btn:focus-visible{ outline:2px solid rgba(170,30,46,.25); outline-offset:2px; }
+
+/* the icon */
+.attach-btn .icon-plus{ width:18px; height:18px; flex-shrink:0; display:inline-block; }
+
+/* disabled state */
+.attach-btn[disabled]{
+  opacity:.55; cursor:not-allowed; border-color: var(--gray-light);
+  color:#9aa0a6;
+}
+
+/* list stays the same */
+.attach-list{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+/* Inline form status */
+.form-status{
+  display:inline-flex; gap:6px; align-items:center; margin-left:8px;
+  font-weight:800; min-height:24px; vertical-align:middle;
+}
+.form-status svg{ width:18px; height:18px; }
+.form-status--ok{ color:#1a7f37; }       /* accessible green */
+.form-status--error{ color:#aa1e2e; }
+/* Required marker */
+.req{ color: var(--red); font-weight: 800; margin-left: 0.25ch; }
+
+/* Screen-reader only text */
+.sr-only{
+  position:absolute !important; width:1px !important; height:1px !important;
+  padding:0 !important; margin:-1px !important; overflow:hidden !important;
+  clip:rect(0,0,0,0) !important; white-space:nowrap !important; border:0 !important;
+}
+/* inline required marker next to label text */
+.support-form .req{
+  display:inline;            /* ensure it doesn't wrap to a new line */
+  color: var(--red);
+  font-weight:800;
+  margin-left: 0.25ch;
+}
+
+/* actions row: keep buttons left, note on the far right */
+.support-form .form-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.support-form .form-actions .form-required-note{
+  margin-left:auto;           /* push to right edge */
+  color: var(--gray-dark);
+  font-size:.95rem;
+  white-space:nowrap;
+}
+/* --- Disabled buttons: gray-out and no hover --- */
+.btn:disabled,
+.btn[disabled]{
+  background:#f3f4f6 !important;
+  color:#9aa0a6 !important;
+  border-color: var(--gray-light) !important;
+  cursor:not-allowed !important;
+  box-shadow:none !important;
+  pointer-events:none !important;
+}
+.btn--outline:disabled,
+.btn--outline[disabled]{
+  background:#fff !important;
+  color:#9aa0a6 !important;
+  border-color: var(--gray-light) !important;
+}
+
+/* --- Form status placement and fade --- */
+.form-status{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-height:1.25em;
+  margin-left:8px;
+  opacity:0;
+  visibility:hidden;
+  transition: opacity .25s ease, visibility .25s ease;
+}
+.form-status.is-visible{
+  opacity:1;
+  visibility:visible;
+}
+
+/* States */
+.form-status--ok{ color:#1a7f37; }     /* green */
+.form-status--error{ color:#b42318; }  /* red */
+.form-status--progress{ color: var(--gray-dark); }
+
+/* Icons */
+.form-status svg{ width:18px; height:18px; display:inline-block }
+
+/* Little spinner used for progress */
+.spinner{
+  width:16px; height:16px; display:inline-block; border-radius:50%;
+  border:2px solid currentColor; border-right-color: transparent;
+  animation: sa-spin .8s linear infinite;
+}
+@keyframes sa-spin{ to{ transform: rotate(360deg); } }
+
+/* Attachment note: actually muted */
+.attachments .attach-note,
+.attach-note.muted{
+  color: var(--gray-dark);
+  opacity: .7;
+  font-size: .92rem;
+}
+/* ===== Shared form utilities ===== */
+
+/* Disabled buttons visibly gray out */
+.btn:disabled,
+.btn[disabled]{
+  background:#f3f4f6 !important;
+  color:#9aa0a6 !important;
+  border-color: var(--gray-light) !important;
+  cursor:not-allowed !important;
+  box-shadow:none !important;
+  pointer-events:none !important;
+}
+.btn--outline:disabled,
+.btn--outline[disabled]{
+  background:#fff !important;
+  color:#9aa0a6 !important;
+  border-color: var(--gray-light) !important;
+}
+
+/* Required star */
+.req{ color:var(--red); margin-left:.25ch }
+
+/* Actions row + right-aligned "* Required" */
+.form-actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+.form-required-note{ margin-left:auto; color:var(--gray-dark); opacity:.8; font-size:.95rem }
+
+/* Status chip with fade */
+.form-status{
+  display:inline-flex; align-items:center; gap:8px; min-height:1.25em;
+  margin-left:8px; opacity:0; visibility:hidden;
+  transition: opacity .25s ease, visibility .25s ease;
+}
+.form-status.is-visible{ opacity:1; visibility:visible }
+.form-status--ok{ color:#1a7f37 }
+.form-status--error{ color:#b42318 }
+.form-status--progress{ color:var(--gray-dark) }
+.form-status svg{ width:18px; height:18px; display:inline-block }
+
+/* Small spinner */
+.spinner{
+  width:16px; height:16px; display:inline-block; border-radius:50%;
+  border:2px solid currentColor; border-right-color: transparent;
+  animation: sa-spin .8s linear infinite;
+}
+@keyframes sa-spin{ to{ transform: rotate(360deg); } }

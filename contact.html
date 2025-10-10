@@ -13,7 +13,6 @@
   <script src="assets/js/includes.js" defer></script>
 </head>
 <body>
-
   <!-- Shared header -->
   <div data-include="partials/header.html"></div>
 
@@ -23,9 +22,7 @@
       <div class="hero__copy">
         <span class="kicker">Contact</span>
         <h1>We’re here to help.</h1>
-        <p class="lead">
-          Call, text, or email—whatever’s easiest. Our office map is provided for scheduled visits or deliveries.
-        </p>
+        <p class="lead">Call, text, or email—whatever’s easiest. Our office map is provided for scheduled visits or deliveries.</p>
         <div class="hero__cta">
           <a class="btn btn--primary" href="tel:+15038788000">Call 503-878-8000</a>
         </div>
@@ -38,7 +35,6 @@
   </section>
 
   <main>
-
     <!-- Contact options -->
     <section class="section" id="contact-options">
       <div class="container">
@@ -59,9 +55,62 @@
           <article class="card contact-card no-lift">
             <h3>✉️ Email</h3>
             <p class="muted">Send details, screenshots, or requests.</p>
-            <a class="btn btn--outline" href="mailto:techs@systemalternatives.net">techs@systemalternatives.net</a>
+            <button type="button"
+                    id="toggle-contact-form"
+                    class="btn btn--outline"
+                    aria-expanded="false"
+                    aria-controls="contact-form-panel">
+              Email our team
+            </button>
           </article>
         </div>
+
+        <!-- Collapsible email form -->
+        <div id="contact-form-panel" class="collapsible" hidden>
+          <div class="card collapsible__body">
+            <h3>Send us a message</h3>
+
+            <form id="contact-email-form" class="support-form" novalidate>
+              <div class="form-grid">
+                <label>
+                  <span>Name<span class="req" aria-hidden="true">*</span></span>
+                  <input type="text" id="ct-name" name="name" autocomplete="name" required aria-required="true">
+                </label>
+
+                <label>
+                  <span>Company</span>
+                  <input type="text" id="ct-company" name="company" autocomplete="organization">
+                </label>
+
+                <label class="full">
+                  <span>Email<span class="req" aria-hidden="true">*</span></span>
+                  <input type="email" id="ct-email" name="email" autocomplete="email" required aria-required="true">
+                </label>
+
+                <label class="full">
+                  <span>Subject<span class="req" aria-hidden="true">*</span></span>
+                  <input type="text" id="ct-subject" name="subject" required aria-required="true">
+                </label>
+
+                <label class="full">
+                  <span>Message<span class="req" aria-hidden="true">*</span></span>
+                  <textarea id="ct-message" name="message" rows="6" required aria-required="true"></textarea>
+                </label>
+
+                <!-- Honeypot -->
+                <input type="text" id="ct-hp" name="website_honeypot" autocomplete="off" tabindex="-1" style="display:none">
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn--primary" id="ct-send">Send</button>
+                <button type="button" class="btn btn--outline" id="cancel-contact-form">Cancel</button>
+                <span id="ct-status" class="form-status" role="status" aria-live="polite"></span>
+                <span class="form-required-note"><span class="req" aria-hidden="true">*</span> Required</span>
+              </div>
+            </form>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -69,24 +118,17 @@
     <section class="section section--alt" id="visit">
       <div class="container">
         <div class="grid grid-2 contact-visit">
-          <!-- Left column: title + address (centered vertically on desktop) -->
           <div class="visit-info">
             <h2 class="visit-title">
               Mailing address <span class="muted small-note">(office visits by appointment)</span>
             </h2>
-
             <address class="mailing-address">
               <strong>System Alternatives</strong><br>
               PO Box 152<br>
               Scappoose, OR 97056
             </address>
-
-            <!-- <p class="muted">
-              For scheduled office visits or deliveries, use the map. We primarily work remotely and on-site with clients.
-            </p> -->
           </div>
 
-          <!-- Map (office location) -->
           <div class="map-wrap">
             <iframe
               title="Map to System Alternatives office"
@@ -96,7 +138,6 @@
             </iframe>
           </div>
 
-          <!-- Mobile-only: Open in Maps (below the map on phones) -->
           <div class="map-cta">
             <a id="open-maps-btn" class="btn btn--primary only-mobile" href="#" rel="noopener">
               Open in Maps
@@ -111,46 +152,153 @@
   <!-- Shared footer -->
   <div data-include="partials/footer.html"></div>
 
-  <!-- Mobile-only deep link to office location -->
+  <!-- Scripts -->
   <script>
     (function(){
-      const btn = document.getElementById('open-maps-btn');
-      if (!btn) return;
-
+      const btn = document.getElementById('open-maps-btn'); if (!btn) return;
       const officeAddr = "36061 Construction Way, St. Helens, OR 97051";
       const ua = navigator.userAgent || "";
       const isIOS = /iPhone|iPad|iPod/i.test(ua);
       const isAndroid = /Android/i.test(ua);
 
       let href = "https://www.google.com/maps?q=" + encodeURIComponent(officeAddr);
-      if (isIOS) {
-        href = "http://maps.apple.com/?q=" + encodeURIComponent(officeAddr);
-      } else if (isAndroid) {
-        href = "geo:0,0?q=" + encodeURIComponent(officeAddr);
-      }
+      if (isIOS) href = "http://maps.apple.com/?q=" + encodeURIComponent(officeAddr);
+      else if (isAndroid) href = "geo:0,0?q=" + encodeURIComponent(officeAddr);
       btn.setAttribute("href", href);
     })();
   </script>
 
-  <!-- Structured data (mailing address) -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "name": "System Alternatives",
-    "telephone": "+1-503-878-8000",
-    "email": "techs@systemalternatives.net",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "PO Box 152",
-      "addressLocality": "Scappoose",
-      "addressRegion": "OR",
-      "postalCode": "97056",
-      "addressCountry": "US"
-    },
-    "url": "https://systemalternatives.net"
-  }
-  </script>
+  <script>
+    const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
+    (function(){
+      const toggleBtn = document.getElementById('toggle-contact-form');
+      const panel     = document.getElementById('contact-form-panel');
+      const form      = document.getElementById('contact-email-form');
+      const cancelBtn = document.getElementById('cancel-contact-form');
+      const statusEl  = document.getElementById('ct-status');
+      const sendBtn   = document.getElementById('ct-send');
+
+      let isAnimating = false;
+
+      // Status timers
+      let fadeTimer = null;   // for fade-out delay
+      let resetTimer = null;  // for DOM reset after fade
+
+      function cancelStatusTimers(){
+        if (fadeTimer)  { clearTimeout(fadeTimer);  fadeTimer = null; }
+        if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
+      }
+
+      function setStatusSending(){
+        cancelStatusTimers();
+        statusEl.className = 'form-status form-status--progress is-visible';
+        statusEl.innerHTML = `<span class="spinner" aria-hidden="true"></span>Sending...`;
+      }
+      function setStatusOK(msg){
+        cancelStatusTimers();
+        statusEl.className = 'form-status form-status--ok is-visible';
+        statusEl.innerHTML =
+          `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>${msg}`;
+        fadeTimer = setTimeout(()=>{
+          statusEl.classList.remove('is-visible');
+          resetTimer = setTimeout(()=>{
+            statusEl.className = 'form-status';
+            statusEl.textContent = '';
+          }, 300);
+        }, 7000);
+      }
+      function setStatusError(msg){
+        cancelStatusTimers();
+        statusEl.className = 'form-status form-status--error is-visible';
+        statusEl.textContent = msg;
+      }
+      function clearStatus(){
+        cancelStatusTimers();
+        statusEl.classList.remove('is-visible');
+        resetTimer = setTimeout(()=>{
+          statusEl.className = 'form-status';
+          statusEl.textContent = '';
+        }, 250);
+      }
+
+      function openPanel(){
+        if (isAnimating) return;
+        isAnimating = true;
+        panel.hidden = false;
+        panel.classList.add('is-open');
+        panel.style.height = '0px';
+        panel.style.opacity = '0';
+        panel.offsetHeight;
+        panel.style.height = panel.scrollHeight + 'px';
+        panel.style.opacity = '1';
+        toggleBtn.setAttribute('aria-expanded','true');
+      }
+      function closePanel(){
+        if (isAnimating) return;
+        isAnimating = true;
+        panel.style.height = panel.scrollHeight + 'px';
+        panel.offsetHeight;
+        panel.style.height = '0px';
+        panel.style.opacity = '0';
+        toggleBtn.setAttribute('aria-expanded','false');
+      }
+      panel.addEventListener('transitionend', (e)=>{
+        if (e.propertyName !== 'height') return;
+        const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
+        if (isOpen){
+          panel.style.height = 'auto';
+        }else{
+          panel.classList.remove('is-open');
+          panel.hidden = true;
+          panel.style.height = '';
+        }
+        isAnimating = false;
+      });
+      toggleBtn.addEventListener('click', ()=>{
+        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+        expanded ? closePanel() : openPanel();
+      });
+
+      cancelBtn.addEventListener('click', ()=>{
+        form.reset();
+        clearStatus();
+        closePanel();
+      });
+
+      form.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        clearStatus();
+
+        if (!form.reportValidity()){
+          setStatusError('Please complete all required fields.');
+          return;
+        }
+
+        // Disable while sending
+        sendBtn.disabled = true;
+        cancelBtn.disabled = true;
+        setStatusSending();
+
+        const fd = new FormData(form);
+
+        try{
+          const resp = await fetch(API('api/contact.php'), { method:'POST', body: fd });
+          const text = await resp.text();
+          let data; try{ data = JSON.parse(text); } catch { throw new Error('Non-JSON'); }
+          if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Send failed');
+
+          setStatusOK('Sent');
+          form.reset();
+        }catch(err){
+          console.error('Contact send failed:', err);
+          setStatusError('Send failed — please try again.');
+        }finally{
+          sendBtn.disabled = false;
+          cancelBtn.disabled = false;
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
