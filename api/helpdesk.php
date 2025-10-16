@@ -50,14 +50,6 @@ require_once $ROOT . '/mail_common.php'; // must not print anything
 // SMALL HELPERS
 ///////////////////////
 
-function json_fail(string $msg, int $code = 400): void {
-  http_response_code($code);
-  header('Content-Type: application/json; charset=utf-8');
-  // reset output buffer to ensure only JSON goes out
-  while (ob_get_level()) { ob_end_clean(); }
-  echo json_encode(['ok'=>false,'error'=>$msg], JSON_UNESCAPED_SLASHES);
-  exit;
-}
 function write_json_file(string $path, array $data): void {
   ensure_dir(dirname($path));
   @file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES), LOCK_EX);
