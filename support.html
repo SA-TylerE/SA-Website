@@ -220,7 +220,7 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    // Attachment widget with explicit reset()
+    // Attachment widget with per-file progress
     function setupAttachmentWidget({ addBtnId, inputId, listId, limits }){
       const addBtn = document.getElementById(addBtnId);
       const input  = document.getElementById(inputId);
@@ -252,8 +252,16 @@
           chip.innerHTML = `
             <span class="file-chip__name" title="${f.name}">${f.name}</span>
             <span class="file-chip__size">(${fmtMB(f.size)})</span>
+            <span class="file-chip__bar" aria-hidden="true"><span data-fill></span></span>
+            <span class="file-chip__pct" data-pct>0%</span>
             <button class="file-chip__remove" type="button" aria-label="Remove ${f.name}">×</button>
           `;
+          // cache elements for fast updates
+          f._el = {
+            fill: chip.querySelector('[data-fill]'),
+            pct:  chip.querySelector('[data-pct]'),
+            chip
+          };
           chip.querySelector('.file-chip__remove').addEventListener('click', ()=>{
             files.splice(idx, 1);
             render();
@@ -276,13 +284,76 @@
           if (!files.some(existing => key(existing) === key(f))) files.push(f);
         }
         input.value = ''; // allow re-selecting same file later
-        render();
+        render(); // chips appear immediately at 0%
       });
+
+      // Per-file progress mapping (from overall uploaded bytes)
+      let cumSizes = []; // [{acc, size}]
+      function recalcCumulative(){
+        cumSizes = [];
+        let acc = 0;
+        for (const f of files){ cumSizes.push({acc, size: f.size}); acc += f.size; }
+        return acc; // total bytes
+      }
+      function setOverallProgress(loaded){
+        for (let i=0; i<files.length; i++){
+          const f = files[i];
+          const start = cumSizes[i].acc;
+          const end   = start + f.size;
+          const bytesForThis = Math.max(0, Math.min(loaded - start, f.size));
+          const pct = Math.max(0, Math.min(100, Math.round((bytesForThis / Math.max(1,f.size)) * 100)));
+          if (f._el){
+            f._el.fill.style.width = pct + '%';
+            f._el.pct.textContent = pct + '%';
+          }
+        }
+      }
 
       function reset(){ files = []; listEl.innerHTML = ''; input.value = ''; setBtnState(); }
 
-      // expose API
-      return { get: ()=> files.slice(), reset };
+      return {
+        get: ()=> files.slice(),
+        reset,
+        recalcCumulative,
+        setOverallProgress,
+      };
+    }
+
+    // Upload helper using XHR so we can tap into upload progress
+    async function uploadWithProgress(url, formData, {
+      onProgress = ()=>{},
+      onDone = ()=>{},
+      onError = ()=>{}
+    } = {}){
+      return new Promise((resolve, reject)=>{
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.responseType = 'json';
+
+        xhr.upload.onprogress = (e)=>{
+          if (!e.lengthComputable) return;
+          const percent = Math.min(100, Math.round((e.loaded / e.total) * 100));
+          onProgress(percent, e.loaded, e.total);
+        };
+
+        xhr.onload = ()=>{
+          let data = xhr.response;
+          if (!data && xhr.responseText){
+            try { data = JSON.parse(xhr.responseText); } catch {}
+          }
+          if (xhr.status >= 200 && xhr.status < 300 && data && data.ok){
+            onDone(data);
+            resolve(data);
+          } else {
+            const err = (data && data.error) ? data.error : `HTTP ${xhr.status}`;
+            onError(err);
+            reject(new Error(err));
+          }
+        };
+
+        xhr.onerror = ()=>{ onError('Network error'); reject(new Error('Network error')); };
+        xhr.send(formData);
+      });
     }
 
     (function(){
@@ -296,8 +367,8 @@
       let isAnimating = false;
 
       // Status timers
-      let fadeTimer = null;   // for fade-out delay
-      let resetTimer = null;  // for DOM reset after fade
+      let fadeTimer = null;
+      let resetTimer = null;
 
       function cancelStatusTimers(){
         if (fadeTimer)  { clearTimeout(fadeTimer);  fadeTimer = null; }
@@ -374,7 +445,7 @@
         expanded ? closePanel() : openPanel();
       });
 
-      // Attachments
+      // Attachments with per-file progress
       const widget = setupAttachmentWidget({
         addBtnId: 'hd-add-files',
         inputId : 'hd-files',
@@ -431,12 +502,23 @@
           fd.set('email',email);
           fd.set('issue',issue);
           fd.set('website_honeypot',hp);
-          for (const f of widget.get()) fd.append('attachments[]', f, f.name);
+          const selected = widget.get();
+          for (const f of selected) fd.append('attachments[]', f, f.name);
 
-          const resp = await fetch(API('api/helpdesk.php'), { method:'POST', body: fd });
-          const text = await resp.text();
-          let data; try{ data = JSON.parse(text); }catch{ throw new Error('Non-JSON'); }
-          if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Send failed');
+          // Prepare per-file progress mapping before sending
+          const totalBytes = widget.recalcCumulative();
+
+          const data = await uploadWithProgress(API('api/helpdesk.php'), fd, {
+            onProgress: (percent, loaded, total)=>{
+              const loadedBytes = (typeof total === 'number' && total > 0)
+                                  ? loaded
+                                  : Math.round((percent/100) * totalBytes);
+              widget.setOverallProgress(loadedBytes);
+            },
+            onDone: ()=>{
+              widget.setOverallProgress(totalBytes); // snap to 100%
+            }
+          });
 
           setStatusOK('Sent');
           resetFormAndFiles();
