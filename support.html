@@ -220,284 +220,268 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    // ========= Inline Web Worker (reads files off the main thread with FileReaderSync) =========
+    // -------- Inline worker (reads off main thread) --------
     function createIngestWorker(){
-      const workerSrc = `
+      const src = `
         const jobs = new Map();
-        function readFileInChunks(id, file, chunk){
-          try{
-            const reader = new FileReaderSync();
-            let offset = 0;
-            const total = file.size || 1;
-            while (offset < total){
-              const job = jobs.get(id);
-              if (!job || job.cancel) { self.postMessage({id, type:'aborted'}); jobs.delete(id); return; }
-              const end = Math.min(offset + chunk, total);
-              const slice = file.slice(offset, end);
-              reader.readAsArrayBuffer(slice); // blocks worker thread only
-              offset = end;
-              const pct = Math.round((offset/total)*100);
-              self.postMessage({id, type:'progress', pct, loaded: offset, total});
-            }
-            self.postMessage({id, type:'done'});
-            jobs.delete(id);
-          }catch(err){
-            self.postMessage({id, type:'error', message: String(err && err.message || err)});
-            jobs.delete(id);
-          }
-        }
         self.onmessage = (e)=>{
-          const {cmd, id, file, chunk=524288} = e.data || {};
-          if (cmd === 'ingest'){
+          const {cmd, id, file, chunk=524288} = e.data||{};
+          if (cmd==='ingest'){
             jobs.set(id, {cancel:false});
-            readFileInChunks(id, file, chunk);
-          } else if (cmd === 'abort'){
-            const j = jobs.get(id);
-            if (j) j.cancel = true;
+            try{
+              const reader = new FileReaderSync();
+              let offset = 0, total = file.size||1;
+              while(offset < total){
+                const job = jobs.get(id);
+                if (!job || job.cancel){ postMessage({id,type:'aborted'}); jobs.delete(id); return; }
+                const end = Math.min(offset+chunk, total);
+                reader.readAsArrayBuffer(file.slice(offset,end));
+                offset = end;
+                postMessage({id,type:'progress',pct:Math.round((offset/total)*100)});
+              }
+              postMessage({id,type:'done'});
+              jobs.delete(id);
+            }catch(err){
+              postMessage({id,type:'error',message:String(err&&err.message||err)});
+              jobs.delete(id);
+            }
+          }else if(cmd==='abort'){
+            const j = jobs.get(id); if (j) j.cancel = true;
           }
         };
       `;
-      const blob = new Blob([workerSrc], { type: 'application/javascript' });
+      const blob = new Blob([src], {type:'application/javascript'});
       const url  = URL.createObjectURL(blob);
       const w    = new Worker(url);
-      // Clean up blob URL when worker terminates
-      w.addEventListener('error', ()=> URL.revokeObjectURL(url));
-      w.addEventListener('messageerror', ()=> URL.revokeObjectURL(url));
+      w._revokeURL = ()=> URL.revokeObjectURL(url);
       return w;
     }
 
-    // ========= Attachment widget using the worker for per-file progress =========
+    // ========= Attachment widget (instant chips + reliable remove + worker off-main-thread) =========
     function setupAttachmentWidget({ addBtnId, inputId, listId, limits }){
       const addBtn = document.getElementById(addBtnId);
       const input  = document.getElementById(inputId);
       const listEl = document.getElementById(listId);
 
-      // Ready-to-send files
-      let readyFiles = [];
-      // Map of active chips
-      const active = new Map(); // id -> { els, file, remove, cancel, mode: 'worker'|'sim' }
+      // Ready list is [{id, file}]
+      const ready = [];
+      // Active map is id -> {file, els, state: 'queued'|'working', mode: 'worker'|'sim'}
+      const active = new Map();
 
-      // Single worker + simple queue so we don't overwhelm memory
+      // Simple queue so we process one at a time (predictable CPU/mem)
+      const q = [];
+      let busy = false;
+
       let worker = null;
-      let queue = [];         // [{id, file}]
-      let busy  = false;
 
       const MAX_FILES = limits.maxFiles;
       const MAX_SIZE  = limits.maxSize;
       const allowed   = limits.allowed;
 
-      const fmtMB = (n)=> (n/(1024*1024)).toFixed(2)+' MB';
-      const fkey  = (f)=> `${f.name}|${f.size}|${f.lastModified}`;
+      const fmtMB = n => (n/(1024*1024)).toFixed(2)+' MB';
+      const sig = f => `${f.name}|${f.size}|${f.lastModified}`;
 
       function setBtnState(){
-        const count = readyFiles.length + active.size;
+        const count = ready.length + active.size;
         addBtn.disabled = count >= MAX_FILES;
         addBtn.title = addBtn.disabled ? `Limit reached (${MAX_FILES} files)` : `Add up to ${MAX_FILES} files`;
       }
 
-      function createChip(f){
+      function chipFor(file, id){
         const chip = document.createElement('span');
         chip.className = 'file-chip is-loading';
+        chip.dataset.id = id;
         chip.innerHTML = `
-          <span class="file-chip__name" title="${f.name}">${f.name}</span>
-          <span class="file-chip__size">(${fmtMB(f.size)})</span>
-          <span class="file-chip__bar" aria-hidden="true"><span data-fill></span></span>
+          <span class="file-chip__name" title="${file.name}">${file.name}</span>
+          <span class="file-chip__size">(${fmtMB(file.size)})</span>
+          <span class="file-chip__bar" aria-hidden="true"><span data-fill style="width:0%"></span></span>
           <span class="file-chip__pct" data-pct>0%</span>
-          <button class="file-chip__remove" type="button" aria-label="Remove ${f.name}">×</button>
+          <button class="file-chip__remove" type="button" aria-label="Remove ${file.name}">×</button>
         `;
         listEl.appendChild(chip);
         return {
           chip,
           fill: chip.querySelector('[data-fill]'),
-          pct:  chip.querySelector('[data-pct]'),
-          removeBtn: chip.querySelector('.file-chip__remove'),
+          pct: chip.querySelector('[data-pct]'),
+          removeBtn: chip.querySelector('.file-chip__remove')
         };
       }
 
-      function finishReady(id){
+      function markReady(id){
         const entry = active.get(id);
         if (!entry) return;
+        entry.els.fill.style.width = '100%';
+        entry.els.pct.textContent = '100%';
         entry.els.chip.classList.remove('is-loading');
         entry.els.chip.classList.add('is-ready');
-        readyFiles.push(entry.file);
+        ready.push({id, file: entry.file});
         active.delete(id);
         setBtnState();
-        pumpQueue(); // proceed to next file, if any
+        pump();
       }
 
-      function removeEntry(id){
+      function removeId(id){
+        // If active: abort and remove
         const entry = active.get(id);
-        if (!entry) return;
-        try { entry.remove(); } catch {}
-        active.delete(id);
+        if (entry){
+          if (entry.mode === 'worker' && worker){
+            try { worker.postMessage({cmd:'abort', id}); } catch {}
+          }
+          try { entry.els.chip.remove(); } catch {}
+          active.delete(id);
+        } else {
+          // If ready: remove from ready array
+          const idx = ready.findIndex(r => r.id === id);
+          if (idx >= 0){
+            try {
+              const el = listEl.querySelector(`.file-chip[data-id="${id}"]`);
+              if (el) el.remove();
+            } catch {}
+            ready.splice(idx,1);
+          }
+        }
         setBtnState();
+        pump();
       }
 
-      // ---- worker pipeline ----
+      function onRemoveClick(e){
+        const btn = e.target.closest('.file-chip__remove');
+        if (!btn) return;
+        const chip = btn.closest('.file-chip');
+        if (!chip) return;
+        const id = chip.dataset.id;
+        removeId(id);
+      }
+      listEl.addEventListener('click', onRemoveClick);
+
       function ensureWorker(){
         if (worker) return;
-        try{
+        try {
           worker = createIngestWorker();
-          worker.onmessage = (e)=>{
-            const {id, type, pct} = e.data || {};
+          worker.onmessage = (ev)=>{
+            const {id, type, pct} = ev.data || {};
             const entry = active.get(id);
             if (!entry) return;
             if (type === 'progress'){
-              if (typeof pct === 'number'){
-                entry.els.fill.style.width = pct + '%';
-                entry.els.pct.textContent  = pct + '%';
-              }
+              entry.els.fill.style.width = pct + '%';
+              entry.els.pct.textContent  = pct + '%';
             } else if (type === 'done'){
-              entry.els.fill.style.width = '100%';
-              entry.els.pct.textContent  = '100%';
               busy = false;
-              finishReady(id);
+              markReady(id);
             } else if (type === 'aborted'){
               busy = false;
-              removeEntry(id);
+              removeId(id);
             } else if (type === 'error'){
+              // fall back to ready (or remove); here we remove to be safe
               busy = false;
-              // Fallback gracefully: remove chip (or we could switch to simulated)
-              removeEntry(id);
+              removeId(id);
             }
           };
-          worker.onerror = ()=>{ busy = false; /* fallback on next pump */ };
-        }catch(e){
-          worker = null; // fallback to simulation
+          worker.onerror = ()=>{ busy = false; };
+        } catch (e) {
+          worker = null;
         }
       }
 
-      function pumpQueue(){
+      function pump(){
         if (busy) return;
-        if (queue.length === 0) return;
-        const job = queue.shift();
-        // If worker OK, use it; otherwise simulate
+        if (q.length === 0) return;
+        const job = q.shift();
+        const entry = active.get(job.id);
+        if (!entry) { pump(); return; }
+
+        // If worker available, start off-main-thread read
         if (worker){
           busy = true;
-          try{
-            worker.postMessage({ cmd:'ingest', id: job.id, file: job.file, chunk: 512*1024 });
-          }catch(e){
-            busy = false;
-            // Worker rejected (e.g., structured clone blocked) -> simulate
-            startSim(job.id, job.file);
-          }
+          entry.state = 'working';
+          entry.mode = 'worker';
+          // Defer posting so the chip renders first
+          setTimeout(()=> {
+            try { worker.postMessage({cmd:'ingest', id: job.id, file: job.file, chunk: 512*1024}); }
+            catch { busy = false; removeId(job.id); }
+          }, 0);
         } else {
-          startSim(job.id, job.file);
+          // No worker: simulated progress with requestAnimationFrame (no file reads)
+          const dur = Math.max(600, Math.min(2200, 450 + (job.file.size/(1024*1024))*350));
+          const t0 = performance.now();
+          entry.state = 'working';
+          entry.mode = 'sim';
+          busy = true;
+
+          const tick = (now)=>{
+            if (!active.has(job.id)) { busy=false; pump(); return; }
+            const t = Math.min(1, (now - t0) / dur);
+            const pct = Math.round((1 - Math.pow(1 - t, 3)) * 100);
+            entry.els.fill.style.width = pct + '%';
+            entry.els.pct.textContent  = pct + '%';
+            if (t < 1){
+              requestAnimationFrame(tick);
+            } else {
+              busy = false;
+              markReady(job.id);
+            }
+          };
+          requestAnimationFrame(tick);
         }
       }
 
-      // ---- simulated fallback (no file reads) ----
-      const simState = new Map(); // id -> { rafId, start, dur, canceled }
-      function startSim(id, file){
-        // ~0.6–2.2s based on size
-        const dur = Math.max(600, Math.min(2200, 450 + (file.size/(1024*1024))*350));
-        const t0  = performance.now();
-        const entry = active.get(id);
-        if (!entry) return;
-        simState.set(id, { rafId: 0, start: t0, dur, canceled: false });
+      function addFile(file){
+        // Guardrails
+        if (ready.length + active.size >= MAX_FILES) return;
+        if (file.size > MAX_SIZE) { alert(`${file.name} is larger than 5 MB.`); return; }
+        const okType = allowed.includes(file.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(file.name);
+        if (!okType) { alert(`${file.name} is not an allowed file type.`); return; }
 
-        const tick = (now)=>{
-          const st = simState.get(id);
-          if (!st || st.canceled) { simState.delete(id); return; }
-          const t = Math.min(1, (now - st.start) / st.dur);
-          const pct = Math.round((1 - Math.pow(1 - t, 3)) * 100);
-          entry.els.fill.style.width = pct + '%';
-          entry.els.pct.textContent  = pct + '%';
+        // Deduplicate across active+ready by signature
+        const signature = sig(file);
+        for (const [_, v] of active) if (sig(v.file) === signature) return;
+        if (ready.some(r => sig(r.file) === signature)) return;
 
-          if (t < 1){
-            st.rafId = requestAnimationFrame(tick);
-          } else {
-            simState.delete(id);
-            finishReady(id);
-          }
-        };
-        simState.get(id).rafId = requestAnimationFrame(tick);
-      }
+        // Create ID + chip immediately so it shows up with no delay
+        const id = (self.crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+        const els = chipFor(file, id);
 
-      // ---- public flow ----
-      function addFile(f){
-        if ((readyFiles.length + active.size) >= MAX_FILES) return;
-        if (f.size > MAX_SIZE){ alert(`${f.name} is larger than 5 MB.`); return; }
-        const okType = allowed.includes(f.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(f.name);
-        if (!okType){ alert(`${f.name} is not an allowed file type.`); return; }
-
-        const id = crypto.randomUUID ? crypto.randomUUID() : (Date.now()+'-'+Math.random().toString(16).slice(2));
-        // Prevent dup by name/size/mtime across active/ready
-        const signature = f.name + '|' + f.size + '|' + f.lastModified;
-        if ([...active.values(), ...readyFiles].some(v => (v.file ? (v.file.name+'|'+v.file.size+'|'+v.file.lastModified) : (v.name+'|'+v.size+'|'+v.lastModified)) === signature)) {
-          return;
-        }
-
-        const els = createChip(f);
-
-        const remove = ()=>{
-          // cancel worker or sim if running
-          if (active.has(id)){
-            if (worker) try { worker.postMessage({ cmd:'abort', id }); } catch {}
-            const sim = simState.get(id);
-            if (sim){ sim.canceled = true; cancelAnimationFrame(sim.rafId); simState.delete(id); }
-            els.chip.remove();
-          }
-        };
-
-        // wire up remove button immediately
-        els.removeBtn.addEventListener('click', ()=>{
-          // If in ready list, delete from there; if active, abort the job
-          const idx = readyFiles.findIndex(x => x === f);
-          if (idx >= 0) readyFiles.splice(idx, 1);
-          remove();
-          active.delete(id);
-          setBtnState();
-          pumpQueue(); // keep queue moving if we canceled the current job
-        });
-
-        active.set(id, { els, file: f, remove, mode: 'worker' });
+        // Track and queue; defer heavy stuff so the chip paints first
+        active.set(id, { file, els, state:'queued', mode:'pending' });
         setBtnState();
 
-        // enqueue and start if idle
-        queue.push({ id, file: f });
-        ensureWorker();
-        pumpQueue();
+        // Queue and start engine after paint
+        setTimeout(()=> {
+          ensureWorker();      // instantiate worker lazily
+          q.push({ id, file }); // enqueue job
+          pump();               // start if idle
+        }, 0);
       }
 
-      function addMany(list){
-        // Stagger queueing very lightly to keep UI snappy
-        list.forEach((f, i)=> setTimeout(()=> addFile(f), i * 40));
+      function addMany(files){
+        // Stagger a tiny bit so very large selections feel instantaneous
+        files.forEach((f, i)=> setTimeout(()=> addFile(f), i*40));
       }
 
       addBtn.addEventListener('click', ()=> input.click());
       input.addEventListener('change', ()=>{
-        const picked = Array.from(input.files || []);
+        const files = Array.from(input.files || []);
         input.value = '';
-        if (!picked.length) return;
-        addMany(picked);
+        if (!files.length) return;
+        addMany(files);
       });
 
       function reset(){
-        // Abort active worker job
+        // Abort active jobs
         if (worker){
           active.forEach((_, id)=> { try { worker.postMessage({cmd:'abort', id}); } catch {} });
         }
-        // Cancel sims
-        simState.forEach((st, id)=> { st.canceled = true; cancelAnimationFrame(st.rafId); });
-        simState.clear();
-
         // Clear UI
-        active.forEach(({remove})=> { try { remove(); } catch {} });
+        listEl.querySelectorAll('.file-chip').forEach(el => el.remove());
         active.clear();
-        readyFiles = [];
-        listEl.innerHTML = '';
-        input.value = '';
-        queue = [];
+        ready.length = 0;
+        q.length = 0;
         busy = false;
         setBtnState();
       }
 
-      // Init state
-      setBtnState();
-
       return {
-        get: ()=> readyFiles.slice(),
+        get: ()=> ready.map(r => r.file),
         reset
       };
     }
@@ -591,7 +575,7 @@
         expanded ? closePanel() : openPanel();
       });
 
-      // Attachments (worker-based ingestion progress)
+      // Attachments (instant chips + worker ingestion)
       const widget = setupAttachmentWidget({
         addBtnId: 'hd-add-files',
         inputId : 'hd-files',
