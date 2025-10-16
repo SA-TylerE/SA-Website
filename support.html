@@ -220,34 +220,33 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    // ========= Attachment widget with CHUNKED client-side "adding to form" progress =========
+    // ========= Attachment widget: per-file "adding to form" progress (FileReader + smooth fallback) =========
     function setupAttachmentWidget({ addBtnId, inputId, listId, limits }){
       const addBtn = document.getElementById(addBtnId);
       const input  = document.getElementById(inputId);
       const listEl = document.getElementById(listId);
 
-      // Files that finished ingesting and are ready to submit
+      // Files that are fully ingested and ready to submit
       let readyFiles = [];
-      // In-flight reads so we can abort/remove mid-ingest
-      const inflight = new Map(); // fileKey -> { reader, els, cancelled }
+      // In-flight reads so we can abort if removed
+      const inflight = new Map(); // key -> { reader, els, sim, cancelled }
 
       const MAX_FILES = limits.maxFiles;
       const MAX_SIZE  = limits.maxSize;
       const allowed   = limits.allowed;
 
-      const fmtMB  = (n)=> (n/(1024*1024)).toFixed(2)+' MB';
-      const fkey   = (f)=> `${f.name}|${f.size}|${f.lastModified}`;
-      const CHUNK  = 512 * 1024; // 512KB per chunk (tweak to taste)
+      const fmtMB = (n)=> (n/(1024*1024)).toFixed(2)+' MB';
+      const fkey  = (f)=> `${f.name}|${f.size}|${f.lastModified}`;
 
       function setBtnState(){
         const count = readyFiles.length + inflight.size;
         addBtn.disabled = count >= MAX_FILES;
-        addBtn.title    = addBtn.disabled ? `Limit reached (${MAX_FILES} files)` : `Add up to ${MAX_FILES} files`;
+        addBtn.title = addBtn.disabled ? `Limit reached (${MAX_FILES} files)` : `Add up to ${MAX_FILES} files`;
       }
 
       function createChip(f){
         const chip = document.createElement('span');
-        chip.className = 'file-chip';
+        chip.className = 'file-chip is-loading';
         chip.innerHTML = `
           <span class="file-chip__name" title="${f.name}">${f.name}</span>
           <span class="file-chip__size">(${fmtMB(f.size)})</span>
@@ -270,6 +269,7 @@
             const inf = inflight.get(key);
             inf.cancelled = true;
             try { inf.reader.abort(); } catch {}
+            if (inf.sim) cancelAnimationFrame(inf.sim.rafId);
             inflight.delete(key);
             els.chip.remove();
           } else {
@@ -281,17 +281,44 @@
         });
       }
 
-      // Read one slice and resolve when it finishes (or reject on error/abort)
-      function readSlice(reader, blobSlice){
-        return new Promise((resolve, reject)=>{
-          reader.onload  = ()=> resolve(reader.result);
-          reader.onerror = ()=> reject(reader.error || new Error('read error'));
-          reader.onabort = ()=> reject(new DOMException('Aborted', 'AbortError'));
-          reader.readAsArrayBuffer(blobSlice);
-        });
+      // Smooth simulated progress driver (advances up to SIM_MAX until real progress updates it or the file finishes)
+      function startSimProgress(els){
+        const SIM_MAX = 90;            // cap simulated progress at 90%
+        const DURATION = 2500;         // ms to ease toward SIM_MAX
+        const start = performance.now();
+        let lastShown = 0;
+        function tick(now){
+          const t = Math.min(1, (now - start) / DURATION);
+          // easeOutCubic
+          const eased = 1 - Math.pow(1 - t, 3);
+          const target = Math.round(SIM_MAX * eased);
+          if (target !== lastShown){
+            els.fill.style.width = target + '%';
+            els.pct.textContent  = target + '%';
+            lastShown = target;
+          }
+          const inf = sim.ctx();
+          if (!inf || inf.cancelled || t >= 1) return; // stop at end; real progress or onload will finish it
+          sim.rafId = requestAnimationFrame(tick);
+        }
+        const sim = {
+          rafId: requestAnimationFrame(tick),
+          ctx: ()=> inflight.get(els.chip.dataset.key) // live lookup
+        };
+        return sim;
       }
 
-      async function ingestFile(f){
+      function showPct(els, pct){
+        els.fill.style.width = pct + '%';
+        els.pct.textContent  = pct + '%';
+      }
+
+      function markReady(els){
+        els.chip.classList.remove('is-loading');
+        els.chip.classList.add('is-ready');
+      }
+
+      function ingestFile(f){
         if ((readyFiles.length + inflight.size) >= MAX_FILES) return;
         if (f.size > MAX_SIZE){ alert(`${f.name} is larger than 5 MB.`); return; }
         const okType = allowed.includes(f.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(f.name);
@@ -300,67 +327,83 @@
         const key = fkey(f);
         if (readyFiles.some(x => fkey(x) === key) || inflight.has(key)) return;
 
-        // Show chip immediately at 0%
         const els = createChip(f);
+        els.chip.dataset.key = key;
         attachRemoveHandler(key, els);
 
         const reader = new FileReader();
-        inflight.set(key, { reader, els, cancelled: false });
 
-        // Chunked read loop
-        let offset = 0;
-        const total = Math.max(1, f.size);
-        try {
-          while (offset < f.size) {
-            const inf = inflight.get(key);
-            if (!inf || inf.cancelled) throw new DOMException('Aborted', 'AbortError');
+        // Register inflight before starting
+        const sim = startSimProgress(els);
+        inflight.set(key, { reader, els, sim, cancelled:false });
 
-            const end   = Math.min(offset + CHUNK, f.size);
-            const slice = f.slice(offset, end);
-            await readSlice(reader, slice);
-
-            offset = end;
-            const pct = Math.max(0, Math.min(100, Math.round((offset / total) * 100)));
-            els.fill.style.width = pct + '%';
-            els.pct.textContent  = pct + '%';
-
-            // Yield to let the UI paint
-            await new Promise(r => setTimeout(r, 0));
+        // Native progress (when the browser emits it)
+        let lastUpdate = 0;
+        reader.onprogress = (e)=>{
+          if (!inflight.has(key) || !e.lengthComputable) return;
+          const pct = Math.max(0, Math.min(100, Math.round((e.loaded / e.total) * 100)));
+          const now = performance.now();
+          // throttle UI updates (~60fps max)
+          if (pct !== lastUpdate && (now - lastUpdate > 16 || pct >= 100)){
+            showPct(els, pct);
+            lastUpdate = pct;
           }
+        };
 
-          // Completed
-          els.fill.style.width = '100%';
-          els.pct.textContent  = '100%';
+        reader.onloadend = ()=>{
+          // If removed during ingest, nothing to do
+          const inf = inflight.get(key);
+          if (!inf) return;
+
+          // stop sim
+          if (inf.sim) cancelAnimationFrame(inf.sim.rafId);
+
           inflight.delete(key);
-          readyFiles.push(f);
-        } catch (err) {
-          // On abort or error, remove chip
-          if (inflight.has(key)) inflight.delete(key);
-          try { els.chip.remove(); } catch {}
-        } finally {
+
+          if (reader.error){
+            // failed read -> remove chip
+            els.chip.remove();
+          }else{
+            showPct(els, 100);
+            markReady(els);
+            readyFiles.push(f);
+          }
           setBtnState();
-        }
+        };
+
+        reader.onerror = ()=>{
+          const inf = inflight.get(key);
+          if (inf && inf.sim) cancelAnimationFrame(inf.sim.rafId);
+          inflight.delete(key);
+          els.chip.remove();
+          setBtnState();
+        };
+
+        // Kick off read to trigger progress (we discard the result)
+        // Sequentialize reads to avoid jank: queue this in a microtask so multiple selections stagger naturally.
+        Promise.resolve().then(()=> reader.readAsArrayBuffer(f));
+
+        setBtnState();
       }
 
-      async function ingestMany(list){
-        // Sequential ingestion keeps UI smooth with multiple large files
-        for (const f of list){ await ingestFile(f); }
+      function ingestMany(list){
+        // Stagger starts slightly so multiple large files don't all fire at the same microsecond.
+        list.forEach((f, i)=> setTimeout(()=> ingestFile(f), i * 50));
       }
 
       addBtn.addEventListener('click', ()=> input.click());
 
       input.addEventListener('change', ()=>{
         const picked = Array.from(input.files || []);
-        input.value = ''; // allow re-selecting same file later
+        input.value = ''; // allow re-selecting
         if (!picked.length) return;
         ingestMany(picked);
-        setBtnState();
       });
 
       function reset(){
-        // Abort any inflight reads and clear UI
-        inflight.forEach(({reader, els})=>{
+        inflight.forEach(({reader, sim, els})=>{
           try { reader.abort(); } catch {}
+          if (sim) cancelAnimationFrame(sim.rafId);
           try { els.chip.remove(); } catch {}
         });
         inflight.clear();
@@ -370,11 +413,11 @@
         setBtnState();
       }
 
-      // Initialize button state
+      // init
       setBtnState();
 
       return {
-        get: ()=> readyFiles.slice(), // only READY files are sent
+        get: ()=> readyFiles.slice(), // only fully ingested files
         reset
       };
     }
@@ -468,7 +511,7 @@
         expanded ? closePanel() : openPanel();
       });
 
-      // Attachments (chunked client-side ingestion progress)
+      // Attachments (client-side ingestion progress)
       const widget = setupAttachmentWidget({
         addBtnId: 'hd-add-files',
         inputId : 'hd-files',
