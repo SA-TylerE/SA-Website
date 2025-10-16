@@ -220,16 +220,67 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    // ========= Attachment widget: simulated per-file "adding to form" progress (no file reads) =========
+    // ========= Inline Web Worker (reads files off the main thread with FileReaderSync) =========
+    function createIngestWorker(){
+      const workerSrc = `
+        const jobs = new Map();
+        function readFileInChunks(id, file, chunk){
+          try{
+            const reader = new FileReaderSync();
+            let offset = 0;
+            const total = file.size || 1;
+            while (offset < total){
+              const job = jobs.get(id);
+              if (!job || job.cancel) { self.postMessage({id, type:'aborted'}); jobs.delete(id); return; }
+              const end = Math.min(offset + chunk, total);
+              const slice = file.slice(offset, end);
+              reader.readAsArrayBuffer(slice); // blocks worker thread only
+              offset = end;
+              const pct = Math.round((offset/total)*100);
+              self.postMessage({id, type:'progress', pct, loaded: offset, total});
+            }
+            self.postMessage({id, type:'done'});
+            jobs.delete(id);
+          }catch(err){
+            self.postMessage({id, type:'error', message: String(err && err.message || err)});
+            jobs.delete(id);
+          }
+        }
+        self.onmessage = (e)=>{
+          const {cmd, id, file, chunk=524288} = e.data || {};
+          if (cmd === 'ingest'){
+            jobs.set(id, {cancel:false});
+            readFileInChunks(id, file, chunk);
+          } else if (cmd === 'abort'){
+            const j = jobs.get(id);
+            if (j) j.cancel = true;
+          }
+        };
+      `;
+      const blob = new Blob([workerSrc], { type: 'application/javascript' });
+      const url  = URL.createObjectURL(blob);
+      const w    = new Worker(url);
+      // Clean up blob URL when worker terminates
+      w.addEventListener('error', ()=> URL.revokeObjectURL(url));
+      w.addEventListener('messageerror', ()=> URL.revokeObjectURL(url));
+      return w;
+    }
+
+    // ========= Attachment widget using the worker for per-file progress =========
     function setupAttachmentWidget({ addBtnId, inputId, listId, limits }){
       const addBtn = document.getElementById(addBtnId);
       const input  = document.getElementById(inputId);
       const listEl = document.getElementById(listId);
 
-      // Fully "ingested" (ready) files
+      // Ready-to-send files
       let readyFiles = [];
-      // In-flight simulated ingests
-      const inflight = new Map(); // key -> { els, rafId, start, dur, cancelled }
+      // Map of active chips
+      const active = new Map(); // id -> { els, file, remove, cancel, mode: 'worker'|'sim' }
+
+      // Single worker + simple queue so we don't overwhelm memory
+      let worker = null;
+      let queue = [];         // [{id, file}]
+      let busy  = false;
 
       const MAX_FILES = limits.maxFiles;
       const MAX_SIZE  = limits.maxSize;
@@ -239,7 +290,7 @@
       const fkey  = (f)=> `${f.name}|${f.size}|${f.lastModified}`;
 
       function setBtnState(){
-        const count = readyFiles.length + inflight.size;
+        const count = readyFiles.length + active.size;
         addBtn.disabled = count >= MAX_FILES;
         addBtn.title = addBtn.disabled ? `Limit reached (${MAX_FILES} files)` : `Add up to ${MAX_FILES} files`;
       }
@@ -263,104 +314,190 @@
         };
       }
 
-      function attachRemoveHandler(key, els){
-        els.removeBtn.addEventListener('click', ()=>{
-          // Cancel simulated ingest if running
-          if (inflight.has(key)){
-            const job = inflight.get(key);
-            job.cancelled = true;
-            cancelAnimationFrame(job.rafId);
-            inflight.delete(key);
-            els.chip.remove();
-          } else {
-            // Remove from ready
-            const idx = readyFiles.findIndex(f => fkey(f) === key);
-            if (idx >= 0) readyFiles.splice(idx, 1);
-            els.chip.remove();
-          }
-          setBtnState();
-        });
+      function finishReady(id){
+        const entry = active.get(id);
+        if (!entry) return;
+        entry.els.chip.classList.remove('is-loading');
+        entry.els.chip.classList.add('is-ready');
+        readyFiles.push(entry.file);
+        active.delete(id);
+        setBtnState();
+        pumpQueue(); // proceed to next file, if any
       }
 
-      function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
-
-      function startSimIngest(file, key, els){
-        // Duration scales with size (fast for small, slower for large; still snappy)
-        // 0.6s at 0 bytes up to ~2.2s at 5 MB
-        const ms = Math.max(600, Math.min(2200, 450 + (file.size / (1024*1024)) * 350));
-        const job = { els, rafId: 0, start: performance.now(), dur: ms, cancelled: false };
-        inflight.set(key, job);
-
-        const tick = (now)=>{
-          if (job.cancelled) return;
-          const t = Math.min(1, (now - job.start) / job.dur);
-          const pct = Math.round(easeOutCubic(t) * 100);
-          els.fill.style.width = pct + '%';
-          els.pct.textContent  = pct + '%';
-
-          if (t < 1){
-            job.rafId = requestAnimationFrame(tick);
-          } else {
-            // Done
-            inflight.delete(key);
-            els.chip.classList.remove('is-loading');
-            els.chip.classList.add('is-ready');
-            readyFiles.push(file);
-            setBtnState();
-          }
-        };
-
-        job.rafId = requestAnimationFrame(tick);
+      function removeEntry(id){
+        const entry = active.get(id);
+        if (!entry) return;
+        try { entry.remove(); } catch {}
+        active.delete(id);
         setBtnState();
       }
 
-      function ingestFile(f){
-        if ((readyFiles.length + inflight.size) >= MAX_FILES) return;
+      // ---- worker pipeline ----
+      function ensureWorker(){
+        if (worker) return;
+        try{
+          worker = createIngestWorker();
+          worker.onmessage = (e)=>{
+            const {id, type, pct} = e.data || {};
+            const entry = active.get(id);
+            if (!entry) return;
+            if (type === 'progress'){
+              if (typeof pct === 'number'){
+                entry.els.fill.style.width = pct + '%';
+                entry.els.pct.textContent  = pct + '%';
+              }
+            } else if (type === 'done'){
+              entry.els.fill.style.width = '100%';
+              entry.els.pct.textContent  = '100%';
+              busy = false;
+              finishReady(id);
+            } else if (type === 'aborted'){
+              busy = false;
+              removeEntry(id);
+            } else if (type === 'error'){
+              busy = false;
+              // Fallback gracefully: remove chip (or we could switch to simulated)
+              removeEntry(id);
+            }
+          };
+          worker.onerror = ()=>{ busy = false; /* fallback on next pump */ };
+        }catch(e){
+          worker = null; // fallback to simulation
+        }
+      }
+
+      function pumpQueue(){
+        if (busy) return;
+        if (queue.length === 0) return;
+        const job = queue.shift();
+        // If worker OK, use it; otherwise simulate
+        if (worker){
+          busy = true;
+          try{
+            worker.postMessage({ cmd:'ingest', id: job.id, file: job.file, chunk: 512*1024 });
+          }catch(e){
+            busy = false;
+            // Worker rejected (e.g., structured clone blocked) -> simulate
+            startSim(job.id, job.file);
+          }
+        } else {
+          startSim(job.id, job.file);
+        }
+      }
+
+      // ---- simulated fallback (no file reads) ----
+      const simState = new Map(); // id -> { rafId, start, dur, canceled }
+      function startSim(id, file){
+        // ~0.6–2.2s based on size
+        const dur = Math.max(600, Math.min(2200, 450 + (file.size/(1024*1024))*350));
+        const t0  = performance.now();
+        const entry = active.get(id);
+        if (!entry) return;
+        simState.set(id, { rafId: 0, start: t0, dur, canceled: false });
+
+        const tick = (now)=>{
+          const st = simState.get(id);
+          if (!st || st.canceled) { simState.delete(id); return; }
+          const t = Math.min(1, (now - st.start) / st.dur);
+          const pct = Math.round((1 - Math.pow(1 - t, 3)) * 100);
+          entry.els.fill.style.width = pct + '%';
+          entry.els.pct.textContent  = pct + '%';
+
+          if (t < 1){
+            st.rafId = requestAnimationFrame(tick);
+          } else {
+            simState.delete(id);
+            finishReady(id);
+          }
+        };
+        simState.get(id).rafId = requestAnimationFrame(tick);
+      }
+
+      // ---- public flow ----
+      function addFile(f){
+        if ((readyFiles.length + active.size) >= MAX_FILES) return;
         if (f.size > MAX_SIZE){ alert(`${f.name} is larger than 5 MB.`); return; }
         const okType = allowed.includes(f.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(f.name);
         if (!okType){ alert(`${f.name} is not an allowed file type.`); return; }
 
-        const key = fkey(f);
-        if (readyFiles.some(x => fkey(x) === key) || inflight.has(key)) return;
+        const id = crypto.randomUUID ? crypto.randomUUID() : (Date.now()+'-'+Math.random().toString(16).slice(2));
+        // Prevent dup by name/size/mtime across active/ready
+        const signature = f.name + '|' + f.size + '|' + f.lastModified;
+        if ([...active.values(), ...readyFiles].some(v => (v.file ? (v.file.name+'|'+v.file.size+'|'+v.file.lastModified) : (v.name+'|'+v.size+'|'+v.lastModified)) === signature)) {
+          return;
+        }
 
         const els = createChip(f);
-        attachRemoveHandler(key, els);
-        startSimIngest(f, key, els);
+
+        const remove = ()=>{
+          // cancel worker or sim if running
+          if (active.has(id)){
+            if (worker) try { worker.postMessage({ cmd:'abort', id }); } catch {}
+            const sim = simState.get(id);
+            if (sim){ sim.canceled = true; cancelAnimationFrame(sim.rafId); simState.delete(id); }
+            els.chip.remove();
+          }
+        };
+
+        // wire up remove button immediately
+        els.removeBtn.addEventListener('click', ()=>{
+          // If in ready list, delete from there; if active, abort the job
+          const idx = readyFiles.findIndex(x => x === f);
+          if (idx >= 0) readyFiles.splice(idx, 1);
+          remove();
+          active.delete(id);
+          setBtnState();
+          pumpQueue(); // keep queue moving if we canceled the current job
+        });
+
+        active.set(id, { els, file: f, remove, mode: 'worker' });
+        setBtnState();
+
+        // enqueue and start if idle
+        queue.push({ id, file: f });
+        ensureWorker();
+        pumpQueue();
       }
 
-      function ingestMany(list){
-        // Stagger starts slightly for aesthetics
-        list.forEach((f, i)=> setTimeout(()=> ingestFile(f), i * 60));
+      function addMany(list){
+        // Stagger queueing very lightly to keep UI snappy
+        list.forEach((f, i)=> setTimeout(()=> addFile(f), i * 40));
       }
 
       addBtn.addEventListener('click', ()=> input.click());
-
       input.addEventListener('change', ()=>{
         const picked = Array.from(input.files || []);
-        input.value = ''; // allow re-select
+        input.value = '';
         if (!picked.length) return;
-        ingestMany(picked);
+        addMany(picked);
       });
 
       function reset(){
-        // Cancel any running animations
-        inflight.forEach(job=>{
-          job.cancelled = true;
-          cancelAnimationFrame(job.rafId);
-          try { job.els.chip.remove(); } catch {}
-        });
-        inflight.clear();
+        // Abort active worker job
+        if (worker){
+          active.forEach((_, id)=> { try { worker.postMessage({cmd:'abort', id}); } catch {} });
+        }
+        // Cancel sims
+        simState.forEach((st, id)=> { st.canceled = true; cancelAnimationFrame(st.rafId); });
+        simState.clear();
+
+        // Clear UI
+        active.forEach(({remove})=> { try { remove(); } catch {} });
+        active.clear();
         readyFiles = [];
         listEl.innerHTML = '';
         input.value = '';
+        queue = [];
+        busy = false;
         setBtnState();
       }
 
-      // init
+      // Init state
       setBtnState();
 
       return {
-        get: ()=> readyFiles.slice(), // only "ready" files are submitted
+        get: ()=> readyFiles.slice(),
         reset
       };
     }
@@ -454,7 +591,7 @@
         expanded ? closePanel() : openPanel();
       });
 
-      // Attachments (client-side simulated ingestion)
+      // Attachments (worker-based ingestion progress)
       const widget = setupAttachmentWidget({
         addBtnId: 'hd-add-files',
         inputId : 'hd-files',
@@ -490,7 +627,7 @@
           return;
         }
 
-        // Disable while sending (Send, Cancel, Add files)
+        // Disable while sending
         sendBtn.disabled = true;
         cancelBtn.disabled = true;
         const addBtn = document.getElementById('hd-add-files');
