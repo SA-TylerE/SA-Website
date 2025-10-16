@@ -220,23 +220,23 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    // ========= Attachment widget with per-file "adding to form" progress =========
+    // ========= Attachment widget with per-file "adding to form" progress (FileReader) =========
     function setupAttachmentWidget({ addBtnId, inputId, listId, limits }){
       const addBtn = document.getElementById(addBtnId);
       const input  = document.getElementById(inputId);
       const listEl = document.getElementById(listId);
 
-      // Files that are READY to submit (after ingestion)
+      // Files that finished ingesting and are ready to submit
       let readyFiles = [];
-      // Track active ingestions so we can cancel if user removes a chip mid-read
-      const inflight = new Map(); // fileKey -> { controller, elements }
+      // In-flight reads so we can abort/remove mid-ingest
+      const inflight = new Map(); // fileKey -> { reader, els }
 
       const MAX_FILES = limits.maxFiles;
       const MAX_SIZE  = limits.maxSize;
       const allowed   = limits.allowed;
 
       const fmtMB = (n)=> (n/(1024*1024)).toFixed(2)+' MB';
-      const keyOf = (f)=> `${f.name}|${f.size}|${f.lastModified}`;
+      const fileKey = (f)=> `${f.name}|${f.size}|${f.lastModified}`;
 
       function setBtnState(){
         const count = readyFiles.length + inflight.size;
@@ -249,15 +249,15 @@
         }
       }
 
-      function createChip(file){
+      function createChip(f){
         const chip = document.createElement('span');
         chip.className = 'file-chip';
         chip.innerHTML = `
-          <span class="file-chip__name" title="${file.name}">${file.name}</span>
-          <span class="file-chip__size">(${fmtMB(file.size)})</span>
+          <span class="file-chip__name" title="${f.name}">${f.name}</span>
+          <span class="file-chip__size">(${fmtMB(f.size)})</span>
           <span class="file-chip__bar" aria-hidden="true"><span data-fill></span></span>
           <span class="file-chip__pct" data-pct>0%</span>
-          <button class="file-chip__remove" type="button" aria-label="Remove ${file.name}">×</button>
+          <button class="file-chip__remove" type="button" aria-label="Remove ${f.name}">×</button>
         `;
         listEl.appendChild(chip);
         return {
@@ -268,17 +268,16 @@
         };
       }
 
-      function attachRemoveHandler(fileKey, els){
+      function attachRemoveHandler(key, els){
         els.removeBtn.addEventListener('click', ()=>{
-          // If it's still ingesting: cancel the stream and remove chip
-          if (inflight.has(fileKey)){
-            const inf = inflight.get(fileKey);
-            try { inf.controller.abort(); } catch {}
-            inflight.delete(fileKey);
+          if (inflight.has(key)){
+            // Abort read and remove chip
+            const inf = inflight.get(key);
+            try { inf.reader.abort(); } catch {}
+            inflight.delete(key);
             els.chip.remove();
           } else {
-            // Otherwise remove from ready list
-            const idx = readyFiles.findIndex(f => keyOf(f) === fileKey);
+            const idx = readyFiles.findIndex(f => fileKey(f) === key);
             if (idx >= 0) readyFiles.splice(idx, 1);
             els.chip.remove();
           }
@@ -286,94 +285,101 @@
         });
       }
 
-      async function ingestFile(file){
-        const fileKey = keyOf(file);
-
-        // Limits
+      function ingestFile(f){
         if ((readyFiles.length + inflight.size) >= MAX_FILES) return;
-        if (file.size > MAX_SIZE){ alert(`${file.name} is larger than 5 MB.`); return; }
-        const okType = allowed.includes(file.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(file.name);
-        if (!okType){ alert(`${file.name} is not an allowed file type.`); return; }
+        if (f.size > MAX_SIZE){ alert(`${f.name} is larger than 5 MB.`); return; }
+        const okType = allowed.includes(f.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(f.name);
+        if (!okType){ alert(`${f.name} is not an allowed file type.`); return; }
 
-        // Prevent duplicates (already ready or inflight)
-        if (readyFiles.some(f => keyOf(f) === fileKey) || inflight.has(fileKey)) return;
+        const key = fileKey(f);
+        if (readyFiles.some(x => fileKey(x) === key) || inflight.has(key)) return;
 
-        // Create chip immediately at 0%
-        const els = createChip(file);
-        attachRemoveHandler(fileKey, els);
+        const els = createChip(f);
+        attachRemoveHandler(key, els);
 
-        // Stream the file to show progress (no data kept; chunks discarded)
-        const reader = file.stream().getReader({ mode: 'byob' });
-        const controller = new AbortController();
-        inflight.set(fileKey, { controller, elements: els });
+        const reader = new FileReader();
+        inflight.set(key, { reader, els });
 
-        let loaded = 0;
-        const total = file.size || 1;
+        // Progress updates
+        reader.onprogress = (e)=>{
+          if (!e.lengthComputable) return;
+          const pct = Math.max(0, Math.min(100, Math.round((e.loaded / e.total) * 100)));
+          els.fill.style.width = pct + '%';
+          els.pct.textContent  = pct + '%';
+        };
 
-        try {
-          while (true) {
-            // Yield to the event loop to keep UI responsive if aborted
-            if (controller.signal.aborted) throw new DOMException('Aborted','AbortError');
-            const { value, done } = await reader.read();
-            if (done) break;
-            loaded += (value?.length ?? 0);
+        reader.onloadend = ()=>{
+          // If aborted, readyState will be 0 (EMPTY) or 2 (DONE but aborted). Either way, we remove if still present.
+          if (!inflight.has(key)) return; // removed mid-way
+          inflight.delete(key);
 
-            const pct = Math.max(0, Math.min(100, Math.round((loaded / total) * 100)));
-            els.fill.style.width = pct + '%';
-            els.pct.textContent  = pct + '%';
-
-            // Small animation frame yield for smoothness
-            await new Promise(r => requestAnimationFrame(r));
-          }
-
-          // Mark ready
-          els.fill.style.width = '100%';
-          els.pct.textContent  = '100%';
-
-          // Move from inflight -> ready
-          inflight.delete(fileKey);
-          readyFiles.push(file);
-
-        } catch (err) {
-          // If aborted or failed, remove chip unless already removed
-          if (inflight.has(fileKey)) {
-            inflight.delete(fileKey);
+          if (reader.error) {
+            // Failed read -> remove chip
             els.chip.remove();
+          } else {
+            // Success
+            els.fill.style.width = '100%';
+            els.pct.textContent  = '100%';
+            readyFiles.push(f);
           }
-        } finally {
           setBtnState();
-          try { reader.releaseLock(); } catch {}
+        };
+
+        reader.onerror = ()=>{
+          // Error -> remove and clean
+          if (inflight.has(key)) inflight.delete(key);
+          els.chip.remove();
+          setBtnState();
+        };
+
+        // Start reading to trigger progress (we discard the result)
+        try {
+          reader.readAsArrayBuffer(f);
+        } catch (e) {
+          // Older browsers or weird states: fail gracefully
+          if (inflight.has(key)) inflight.delete(key);
+          els.chip.remove();
+          setBtnState();
         }
+
+        setBtnState();
       }
 
-      async function ingestMany(picked){
-        // Process sequentially to keep UI smooth (avoid main-thread thrash on many files)
-        for (const f of picked){ await ingestFile(f); }
+      function ingestMany(files){
+        // Process sequentially to keep UI responsive when multiple large files
+        (async ()=>{
+          for (const f of files){ ingestFile(f); await new Promise(r => setTimeout(r, 0)); }
+        })();
       }
 
       addBtn.addEventListener('click', ()=> input.click());
-
       input.addEventListener('change', ()=>{
         const picked = Array.from(input.files || []);
-        input.value = ''; // allow re-selecting same file later
-        if (picked.length === 0) return;
+        input.value = '';
+        if (!picked.length) return;
         ingestMany(picked);
       });
 
       function reset(){
-        readyFiles = [];
+        // Abort any inflight reads
+        inflight.forEach(({reader, els}, key)=>{
+          try { reader.abort(); } catch {}
+          els.chip.remove();
+        });
         inflight.clear();
+        readyFiles = [];
         listEl.innerHTML = '';
         input.value = '';
         setBtnState();
       }
 
       return {
-        get: ()=> readyFiles.slice(), // only READY files are sent
+        get: ()=> readyFiles.slice(),
         reset
       };
     }
 
+    // ========== Page behavior / submission ==========
     (function(){
       const toggleBtn = document.getElementById('toggle-email-form');
       const panel     = document.getElementById('email-form-panel');
@@ -384,86 +390,20 @@
 
       let isAnimating = false;
 
-      // Status timers
-      let fadeTimer = null;
-      let resetTimer = null;
+      // Status helpers
+      let fadeTimer = null, resetTimer = null;
+      function cancelStatusTimers(){ if (fadeTimer){clearTimeout(fadeTimer);fadeTimer=null;} if (resetTimer){clearTimeout(resetTimer);resetTimer=null;} }
+      function setStatusSending(){ cancelStatusTimers(); statusEl.className='form-status form-status--progress is-visible'; statusEl.innerHTML=`<span class="spinner" aria-hidden="true"></span>Sending...`; }
+      function setStatusOK(msg){ cancelStatusTimers(); statusEl.className='form-status form-status--ok is-visible'; statusEl.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>${msg}`; fadeTimer=setTimeout(()=>{ statusEl.classList.remove('is-visible'); resetTimer=setTimeout(()=>{ statusEl.className='form-status'; statusEl.textContent=''; },300); },7000); }
+      function setStatusError(msg){ cancelStatusTimers(); statusEl.className='form-status form-status--error is-visible'; statusEl.textContent=msg; }
+      function clearStatus(){ cancelStatusTimers(); statusEl.classList.remove('is-visible'); resetTimer=setTimeout(()=>{ statusEl.className='form-status'; statusEl.textContent=''; },250); }
 
-      function cancelStatusTimers(){
-        if (fadeTimer)  { clearTimeout(fadeTimer);  fadeTimer = null; }
-        if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
-      }
+      function openPanel(){ if (isAnimating) return; isAnimating=true; panel.hidden=false; panel.classList.add('is-open'); panel.style.height='0px'; panel.style.opacity='0'; panel.offsetHeight; panel.style.height=panel.scrollHeight+'px'; panel.style.opacity='1'; toggleBtn.setAttribute('aria-expanded','true'); }
+      function closePanel(){ if (isAnimating) return; isAnimating=true; panel.style.height=panel.scrollHeight+'px'; panel.offsetHeight; panel.style.height='0px'; panel.style.opacity='0'; toggleBtn.setAttribute('aria-expanded','false'); }
+      panel.addEventListener('transitionend', (e)=>{ if (e.propertyName!=='height') return; const isOpen = toggleBtn.getAttribute('aria-expanded')==='true'; if (isOpen){ panel.style.height='auto'; } else { panel.classList.remove('is-open'); panel.hidden=true; panel.style.height=''; } isAnimating=false; });
+      toggleBtn.addEventListener('click', ()=>{ const expanded = toggleBtn.getAttribute('aria-expanded')==='true'; expanded ? closePanel() : openPanel(); });
 
-      function setStatusSending(){
-        cancelStatusTimers();
-        statusEl.className = 'form-status form-status--progress is-visible';
-        statusEl.innerHTML = `<span class="spinner" aria-hidden="true"></span>Sending...`;
-      }
-      function setStatusOK(msg){
-        cancelStatusTimers();
-        statusEl.className = 'form-status form-status--ok is-visible';
-        statusEl.innerHTML =
-          `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>${msg}`;
-        fadeTimer = setTimeout(()=>{
-          statusEl.classList.remove('is-visible');
-          resetTimer = setTimeout(()=>{
-            statusEl.className = 'form-status';
-            statusEl.textContent = '';
-          }, 300);
-        }, 7000);
-      }
-      function setStatusError(msg){
-        cancelStatusTimers();
-        statusEl.className = 'form-status form-status--error is-visible';
-        statusEl.textContent = msg;
-      }
-      function clearStatus(){
-        cancelStatusTimers();
-        statusEl.classList.remove('is-visible');
-        resetTimer = setTimeout(()=>{
-          statusEl.className = 'form-status';
-          statusEl.textContent = '';
-        }, 250);
-      }
-
-      function openPanel(){
-        if (isAnimating) return;
-        isAnimating = true;
-        panel.hidden = false;
-        panel.classList.add('is-open');
-        panel.style.height = '0px';
-        panel.style.opacity = '0';
-        panel.offsetHeight;
-        panel.style.height = panel.scrollHeight + 'px';
-        panel.style.opacity = '1';
-        toggleBtn.setAttribute('aria-expanded','true');
-      }
-      function closePanel(){
-        if (isAnimating) return;
-        isAnimating = true;
-        panel.style.height = panel.scrollHeight + 'px';
-        panel.offsetHeight;
-        panel.style.height = '0px';
-        panel.style.opacity = '0';
-        toggleBtn.setAttribute('aria-expanded','false');
-      }
-      panel.addEventListener('transitionend', (e)=>{
-        if (e.propertyName !== 'height') return;
-        const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
-        if (isOpen){
-          panel.style.height = 'auto';
-        }else{
-          panel.classList.remove('is-open');
-          panel.hidden = true;
-          panel.style.height = '';
-        }
-        isAnimating = false;
-      });
-      toggleBtn.addEventListener('click', ()=>{
-        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-        expanded ? closePanel() : openPanel();
-      });
-
-      // Attachments with client-side ingestion progress
+      // Attachments
       const widget = setupAttachmentWidget({
         addBtnId: 'hd-add-files',
         inputId : 'hd-files',
@@ -522,7 +462,6 @@
           fd.set('website_honeypot',hp);
           for (const f of widget.get()) fd.append('attachments[]', f, f.name);
 
-          // Simple fetch (no upload progress needed)
           const resp = await fetch(API('api/helpdesk.php'), { method:'POST', body: fd });
           const text = await resp.text();
           let data; try{ data = JSON.parse(text); }catch{ throw new Error('Non-JSON'); }
