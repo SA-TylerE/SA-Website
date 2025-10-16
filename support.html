@@ -220,16 +220,16 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    // ========= Attachment widget: per-file "adding to form" progress (FileReader + smooth fallback) =========
+    // ========= Attachment widget: simulated per-file "adding to form" progress (no file reads) =========
     function setupAttachmentWidget({ addBtnId, inputId, listId, limits }){
       const addBtn = document.getElementById(addBtnId);
       const input  = document.getElementById(inputId);
       const listEl = document.getElementById(listId);
 
-      // Files that are fully ingested and ready to submit
+      // Fully "ingested" (ready) files
       let readyFiles = [];
-      // In-flight reads so we can abort if removed
-      const inflight = new Map(); // key -> { reader, els, sim, cancelled }
+      // In-flight simulated ingests
+      const inflight = new Map(); // key -> { els, rafId, start, dur, cancelled }
 
       const MAX_FILES = limits.maxFiles;
       const MAX_SIZE  = limits.maxSize;
@@ -265,14 +265,15 @@
 
       function attachRemoveHandler(key, els){
         els.removeBtn.addEventListener('click', ()=>{
+          // Cancel simulated ingest if running
           if (inflight.has(key)){
-            const inf = inflight.get(key);
-            inf.cancelled = true;
-            try { inf.reader.abort(); } catch {}
-            if (inf.sim) cancelAnimationFrame(inf.sim.rafId);
+            const job = inflight.get(key);
+            job.cancelled = true;
+            cancelAnimationFrame(job.rafId);
             inflight.delete(key);
             els.chip.remove();
           } else {
+            // Remove from ready
             const idx = readyFiles.findIndex(f => fkey(f) === key);
             if (idx >= 0) readyFiles.splice(idx, 1);
             els.chip.remove();
@@ -281,41 +282,36 @@
         });
       }
 
-      // Smooth simulated progress driver (advances up to SIM_MAX until real progress updates it or the file finishes)
-      function startSimProgress(els){
-        const SIM_MAX = 90;            // cap simulated progress at 90%
-        const DURATION = 2500;         // ms to ease toward SIM_MAX
-        const start = performance.now();
-        let lastShown = 0;
-        function tick(now){
-          const t = Math.min(1, (now - start) / DURATION);
-          // easeOutCubic
-          const eased = 1 - Math.pow(1 - t, 3);
-          const target = Math.round(SIM_MAX * eased);
-          if (target !== lastShown){
-            els.fill.style.width = target + '%';
-            els.pct.textContent  = target + '%';
-            lastShown = target;
+      function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+
+      function startSimIngest(file, key, els){
+        // Duration scales with size (fast for small, slower for large; still snappy)
+        // 0.6s at 0 bytes up to ~2.2s at 5 MB
+        const ms = Math.max(600, Math.min(2200, 450 + (file.size / (1024*1024)) * 350));
+        const job = { els, rafId: 0, start: performance.now(), dur: ms, cancelled: false };
+        inflight.set(key, job);
+
+        const tick = (now)=>{
+          if (job.cancelled) return;
+          const t = Math.min(1, (now - job.start) / job.dur);
+          const pct = Math.round(easeOutCubic(t) * 100);
+          els.fill.style.width = pct + '%';
+          els.pct.textContent  = pct + '%';
+
+          if (t < 1){
+            job.rafId = requestAnimationFrame(tick);
+          } else {
+            // Done
+            inflight.delete(key);
+            els.chip.classList.remove('is-loading');
+            els.chip.classList.add('is-ready');
+            readyFiles.push(file);
+            setBtnState();
           }
-          const inf = sim.ctx();
-          if (!inf || inf.cancelled || t >= 1) return; // stop at end; real progress or onload will finish it
-          sim.rafId = requestAnimationFrame(tick);
-        }
-        const sim = {
-          rafId: requestAnimationFrame(tick),
-          ctx: ()=> inflight.get(els.chip.dataset.key) // live lookup
         };
-        return sim;
-      }
 
-      function showPct(els, pct){
-        els.fill.style.width = pct + '%';
-        els.pct.textContent  = pct + '%';
-      }
-
-      function markReady(els){
-        els.chip.classList.remove('is-loading');
-        els.chip.classList.add('is-ready');
+        job.rafId = requestAnimationFrame(tick);
+        setBtnState();
       }
 
       function ingestFile(f){
@@ -328,83 +324,30 @@
         if (readyFiles.some(x => fkey(x) === key) || inflight.has(key)) return;
 
         const els = createChip(f);
-        els.chip.dataset.key = key;
         attachRemoveHandler(key, els);
-
-        const reader = new FileReader();
-
-        // Register inflight before starting
-        const sim = startSimProgress(els);
-        inflight.set(key, { reader, els, sim, cancelled:false });
-
-        // Native progress (when the browser emits it)
-        let lastUpdate = 0;
-        reader.onprogress = (e)=>{
-          if (!inflight.has(key) || !e.lengthComputable) return;
-          const pct = Math.max(0, Math.min(100, Math.round((e.loaded / e.total) * 100)));
-          const now = performance.now();
-          // throttle UI updates (~60fps max)
-          if (pct !== lastUpdate && (now - lastUpdate > 16 || pct >= 100)){
-            showPct(els, pct);
-            lastUpdate = pct;
-          }
-        };
-
-        reader.onloadend = ()=>{
-          // If removed during ingest, nothing to do
-          const inf = inflight.get(key);
-          if (!inf) return;
-
-          // stop sim
-          if (inf.sim) cancelAnimationFrame(inf.sim.rafId);
-
-          inflight.delete(key);
-
-          if (reader.error){
-            // failed read -> remove chip
-            els.chip.remove();
-          }else{
-            showPct(els, 100);
-            markReady(els);
-            readyFiles.push(f);
-          }
-          setBtnState();
-        };
-
-        reader.onerror = ()=>{
-          const inf = inflight.get(key);
-          if (inf && inf.sim) cancelAnimationFrame(inf.sim.rafId);
-          inflight.delete(key);
-          els.chip.remove();
-          setBtnState();
-        };
-
-        // Kick off read to trigger progress (we discard the result)
-        // Sequentialize reads to avoid jank: queue this in a microtask so multiple selections stagger naturally.
-        Promise.resolve().then(()=> reader.readAsArrayBuffer(f));
-
-        setBtnState();
+        startSimIngest(f, key, els);
       }
 
       function ingestMany(list){
-        // Stagger starts slightly so multiple large files don't all fire at the same microsecond.
-        list.forEach((f, i)=> setTimeout(()=> ingestFile(f), i * 50));
+        // Stagger starts slightly for aesthetics
+        list.forEach((f, i)=> setTimeout(()=> ingestFile(f), i * 60));
       }
 
       addBtn.addEventListener('click', ()=> input.click());
 
       input.addEventListener('change', ()=>{
         const picked = Array.from(input.files || []);
-        input.value = ''; // allow re-selecting
+        input.value = ''; // allow re-select
         if (!picked.length) return;
         ingestMany(picked);
       });
 
       function reset(){
-        inflight.forEach(({reader, sim, els})=>{
-          try { reader.abort(); } catch {}
-          if (sim) cancelAnimationFrame(sim.rafId);
-          try { els.chip.remove(); } catch {}
+        // Cancel any running animations
+        inflight.forEach(job=>{
+          job.cancelled = true;
+          cancelAnimationFrame(job.rafId);
+          try { job.els.chip.remove(); } catch {}
         });
         inflight.clear();
         readyFiles = [];
@@ -417,7 +360,7 @@
       setBtnState();
 
       return {
-        get: ()=> readyFiles.slice(), // only fully ingested files
+        get: ()=> readyFiles.slice(), // only "ready" files are submitted
         reset
       };
     }
@@ -511,7 +454,7 @@
         expanded ? closePanel() : openPanel();
       });
 
-      // Attachments (client-side ingestion progress)
+      // Attachments (client-side simulated ingestion)
       const widget = setupAttachmentWidget({
         addBtnId: 'hd-add-files',
         inputId : 'hd-files',
