@@ -220,22 +220,27 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    // Attachment widget with per-file progress
+    // ========= Attachment widget with per-file "adding to form" progress =========
     function setupAttachmentWidget({ addBtnId, inputId, listId, limits }){
       const addBtn = document.getElementById(addBtnId);
       const input  = document.getElementById(inputId);
       const listEl = document.getElementById(listId);
-      let files  = [];
 
-      const allowed   = limits.allowed;
+      // Files that are READY to submit (after ingestion)
+      let readyFiles = [];
+      // Track active ingestions so we can cancel if user removes a chip mid-read
+      const inflight = new Map(); // fileKey -> { controller, elements }
+
       const MAX_FILES = limits.maxFiles;
       const MAX_SIZE  = limits.maxSize;
+      const allowed   = limits.allowed;
 
       const fmtMB = (n)=> (n/(1024*1024)).toFixed(2)+' MB';
-      const key   = (f)=> `${f.name}|${f.size}|${f.lastModified}`;
+      const keyOf = (f)=> `${f.name}|${f.size}|${f.lastModified}`;
 
       function setBtnState(){
-        if (files.length >= MAX_FILES){
+        const count = readyFiles.length + inflight.size;
+        if (count >= MAX_FILES){
           addBtn.disabled = true;
           addBtn.title = `Limit reached (${MAX_FILES} files)`;
         }else{
@@ -244,116 +249,129 @@
         }
       }
 
-      function render(){
-        listEl.innerHTML = '';
-        files.forEach((f, idx)=>{
-          const chip = document.createElement('span');
-          chip.className = 'file-chip';
-          chip.innerHTML = `
-            <span class="file-chip__name" title="${f.name}">${f.name}</span>
-            <span class="file-chip__size">(${fmtMB(f.size)})</span>
-            <span class="file-chip__bar" aria-hidden="true"><span data-fill></span></span>
-            <span class="file-chip__pct" data-pct>0%</span>
-            <button class="file-chip__remove" type="button" aria-label="Remove ${f.name}">×</button>
-          `;
-          // cache elements for fast updates
-          f._el = {
-            fill: chip.querySelector('[data-fill]'),
-            pct:  chip.querySelector('[data-pct]'),
-            chip
-          };
-          chip.querySelector('.file-chip__remove').addEventListener('click', ()=>{
-            files.splice(idx, 1);
-            render();
-            setBtnState();
-          });
-          listEl.appendChild(chip);
+      function createChip(file){
+        const chip = document.createElement('span');
+        chip.className = 'file-chip';
+        chip.innerHTML = `
+          <span class="file-chip__name" title="${file.name}">${file.name}</span>
+          <span class="file-chip__size">(${fmtMB(file.size)})</span>
+          <span class="file-chip__bar" aria-hidden="true"><span data-fill></span></span>
+          <span class="file-chip__pct" data-pct>0%</span>
+          <button class="file-chip__remove" type="button" aria-label="Remove ${file.name}">×</button>
+        `;
+        listEl.appendChild(chip);
+        return {
+          chip,
+          fill: chip.querySelector('[data-fill]'),
+          pct:  chip.querySelector('[data-pct]'),
+          removeBtn: chip.querySelector('.file-chip__remove'),
+        };
+      }
+
+      function attachRemoveHandler(fileKey, els){
+        els.removeBtn.addEventListener('click', ()=>{
+          // If it's still ingesting: cancel the stream and remove chip
+          if (inflight.has(fileKey)){
+            const inf = inflight.get(fileKey);
+            try { inf.controller.abort(); } catch {}
+            inflight.delete(fileKey);
+            els.chip.remove();
+          } else {
+            // Otherwise remove from ready list
+            const idx = readyFiles.findIndex(f => keyOf(f) === fileKey);
+            if (idx >= 0) readyFiles.splice(idx, 1);
+            els.chip.remove();
+          }
+          setBtnState();
         });
-        setBtnState();
+      }
+
+      async function ingestFile(file){
+        const fileKey = keyOf(file);
+
+        // Limits
+        if ((readyFiles.length + inflight.size) >= MAX_FILES) return;
+        if (file.size > MAX_SIZE){ alert(`${file.name} is larger than 5 MB.`); return; }
+        const okType = allowed.includes(file.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(file.name);
+        if (!okType){ alert(`${file.name} is not an allowed file type.`); return; }
+
+        // Prevent duplicates (already ready or inflight)
+        if (readyFiles.some(f => keyOf(f) === fileKey) || inflight.has(fileKey)) return;
+
+        // Create chip immediately at 0%
+        const els = createChip(file);
+        attachRemoveHandler(fileKey, els);
+
+        // Stream the file to show progress (no data kept; chunks discarded)
+        const reader = file.stream().getReader({ mode: 'byob' });
+        const controller = new AbortController();
+        inflight.set(fileKey, { controller, elements: els });
+
+        let loaded = 0;
+        const total = file.size || 1;
+
+        try {
+          while (true) {
+            // Yield to the event loop to keep UI responsive if aborted
+            if (controller.signal.aborted) throw new DOMException('Aborted','AbortError');
+            const { value, done } = await reader.read();
+            if (done) break;
+            loaded += (value?.length ?? 0);
+
+            const pct = Math.max(0, Math.min(100, Math.round((loaded / total) * 100)));
+            els.fill.style.width = pct + '%';
+            els.pct.textContent  = pct + '%';
+
+            // Small animation frame yield for smoothness
+            await new Promise(r => requestAnimationFrame(r));
+          }
+
+          // Mark ready
+          els.fill.style.width = '100%';
+          els.pct.textContent  = '100%';
+
+          // Move from inflight -> ready
+          inflight.delete(fileKey);
+          readyFiles.push(file);
+
+        } catch (err) {
+          // If aborted or failed, remove chip unless already removed
+          if (inflight.has(fileKey)) {
+            inflight.delete(fileKey);
+            els.chip.remove();
+          }
+        } finally {
+          setBtnState();
+          try { reader.releaseLock(); } catch {}
+        }
+      }
+
+      async function ingestMany(picked){
+        // Process sequentially to keep UI smooth (avoid main-thread thrash on many files)
+        for (const f of picked){ await ingestFile(f); }
       }
 
       addBtn.addEventListener('click', ()=> input.click());
 
       input.addEventListener('change', ()=>{
         const picked = Array.from(input.files || []);
-        for (const f of picked){
-          if (files.length >= MAX_FILES) break;
-          if (f.size > MAX_SIZE){ alert(`${f.name} is larger than 5 MB.`); continue; }
-          const okType = allowed.includes(f.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(f.name);
-          if (!okType){ alert(`${f.name} is not an allowed file type.`); continue; }
-          if (!files.some(existing => key(existing) === key(f))) files.push(f);
-        }
         input.value = ''; // allow re-selecting same file later
-        render(); // chips appear immediately at 0%
+        if (picked.length === 0) return;
+        ingestMany(picked);
       });
 
-      // Per-file progress mapping (from overall uploaded bytes)
-      let cumSizes = []; // [{acc, size}]
-      function recalcCumulative(){
-        cumSizes = [];
-        let acc = 0;
-        for (const f of files){ cumSizes.push({acc, size: f.size}); acc += f.size; }
-        return acc; // total bytes
+      function reset(){
+        readyFiles = [];
+        inflight.clear();
+        listEl.innerHTML = '';
+        input.value = '';
+        setBtnState();
       }
-      function setOverallProgress(loaded){
-        for (let i=0; i<files.length; i++){
-          const f = files[i];
-          const start = cumSizes[i].acc;
-          const end   = start + f.size;
-          const bytesForThis = Math.max(0, Math.min(loaded - start, f.size));
-          const pct = Math.max(0, Math.min(100, Math.round((bytesForThis / Math.max(1,f.size)) * 100)));
-          if (f._el){
-            f._el.fill.style.width = pct + '%';
-            f._el.pct.textContent = pct + '%';
-          }
-        }
-      }
-
-      function reset(){ files = []; listEl.innerHTML = ''; input.value = ''; setBtnState(); }
 
       return {
-        get: ()=> files.slice(),
-        reset,
-        recalcCumulative,
-        setOverallProgress,
+        get: ()=> readyFiles.slice(), // only READY files are sent
+        reset
       };
-    }
-
-    // Upload helper using XHR so we can tap into upload progress
-    async function uploadWithProgress(url, formData, {
-      onProgress = ()=>{},
-      onDone = ()=>{},
-      onError = ()=>{}
-    } = {}){
-      return new Promise((resolve, reject)=>{
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', url, true);
-        xhr.responseType = 'json';
-
-        xhr.upload.onprogress = (e)=>{
-          if (!e.lengthComputable) return;
-          const percent = Math.min(100, Math.round((e.loaded / e.total) * 100));
-          onProgress(percent, e.loaded, e.total);
-        };
-
-        xhr.onload = ()=>{
-          let data = xhr.response;
-          if (!data && xhr.responseText){
-            try { data = JSON.parse(xhr.responseText); } catch {}
-          }
-          if (xhr.status >= 200 && xhr.status < 300 && data && data.ok){
-            onDone(data);
-            resolve(data);
-          } else {
-            const err = (data && data.error) ? data.error : `HTTP ${xhr.status}`;
-            onError(err);
-            reject(new Error(err));
-          }
-        };
-
-        xhr.onerror = ()=>{ onError('Network error'); reject(new Error('Network error')); };
-        xhr.send(formData);
-      });
     }
 
     (function(){
@@ -445,14 +463,14 @@
         expanded ? closePanel() : openPanel();
       });
 
-      // Attachments with per-file progress
+      // Attachments with client-side ingestion progress
       const widget = setupAttachmentWidget({
         addBtnId: 'hd-add-files',
         inputId : 'hd-files',
         listId  : 'hd-file-list',
         limits  : {
           maxFiles: 5,
-          maxSize : 5 * 1024 * 1024,
+          maxSize : 5 * 1024 * 1024, // 5 MB
           allowed : [
             'image/png','image/jpeg','application/pdf','text/plain','application/msword',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -481,7 +499,7 @@
           return;
         }
 
-        // Disable while sending (Send, Cancel, Add files)
+        // Disable while sending
         sendBtn.disabled = true;
         cancelBtn.disabled = true;
         const addBtn = document.getElementById('hd-add-files');
@@ -502,23 +520,13 @@
           fd.set('email',email);
           fd.set('issue',issue);
           fd.set('website_honeypot',hp);
-          const selected = widget.get();
-          for (const f of selected) fd.append('attachments[]', f, f.name);
+          for (const f of widget.get()) fd.append('attachments[]', f, f.name);
 
-          // Prepare per-file progress mapping before sending
-          const totalBytes = widget.recalcCumulative();
-
-          const data = await uploadWithProgress(API('api/helpdesk.php'), fd, {
-            onProgress: (percent, loaded, total)=>{
-              const loadedBytes = (typeof total === 'number' && total > 0)
-                                  ? loaded
-                                  : Math.round((percent/100) * totalBytes);
-              widget.setOverallProgress(loadedBytes);
-            },
-            onDone: ()=>{
-              widget.setOverallProgress(totalBytes); // snap to 100%
-            }
-          });
+          // Simple fetch (no upload progress needed)
+          const resp = await fetch(API('api/helpdesk.php'), { method:'POST', body: fd });
+          const text = await resp.text();
+          let data; try{ data = JSON.parse(text); }catch{ throw new Error('Non-JSON'); }
+          if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Send failed');
 
           setStatusOK('Sent');
           resetFormAndFiles();
