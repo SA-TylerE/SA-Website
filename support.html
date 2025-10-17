@@ -220,69 +220,270 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    // Attachment widget with explicit reset()
+    // -------- Inline worker (reads off main thread) --------
+    function createIngestWorker(){
+      const src = `
+        const jobs = new Map();
+        self.onmessage = (e)=>{
+          const {cmd, id, file, chunk=524288} = e.data||{};
+          if (cmd==='ingest'){
+            jobs.set(id, {cancel:false});
+            try{
+              const reader = new FileReaderSync();
+              let offset = 0, total = file.size||1;
+              while(offset < total){
+                const job = jobs.get(id);
+                if (!job || job.cancel){ postMessage({id,type:'aborted'}); jobs.delete(id); return; }
+                const end = Math.min(offset+chunk, total);
+                reader.readAsArrayBuffer(file.slice(offset,end));
+                offset = end;
+                postMessage({id,type:'progress',pct:Math.round((offset/total)*100)});
+              }
+              postMessage({id,type:'done'});
+              jobs.delete(id);
+            }catch(err){
+              postMessage({id,type:'error',message:String(err&&err.message||err)});
+              jobs.delete(id);
+            }
+          }else if(cmd==='abort'){
+            const j = jobs.get(id); if (j) j.cancel = true;
+          }
+        };
+      `;
+      const blob = new Blob([src], {type:'application/javascript'});
+      const url  = URL.createObjectURL(blob);
+      const w    = new Worker(url);
+      w._revokeURL = ()=> URL.revokeObjectURL(url);
+      return w;
+    }
+
+    // ========= Attachment widget (instant chips + reliable remove + worker off-main-thread) =========
     function setupAttachmentWidget({ addBtnId, inputId, listId, limits }){
       const addBtn = document.getElementById(addBtnId);
       const input  = document.getElementById(inputId);
       const listEl = document.getElementById(listId);
-      let files  = [];
 
-      const allowed   = limits.allowed;
+      // Ready list is [{id, file}]
+      const ready = [];
+      // Active map is id -> {file, els, state: 'queued'|'working', mode: 'worker'|'sim'}
+      const active = new Map();
+
+      // Simple queue so we process one at a time (predictable CPU/mem)
+      const q = [];
+      let busy = false;
+
+      let worker = null;
+
       const MAX_FILES = limits.maxFiles;
       const MAX_SIZE  = limits.maxSize;
+      const allowed   = limits.allowed;
 
-      const fmtMB = (n)=> (n/(1024*1024)).toFixed(2)+' MB';
-      const key   = (f)=> `${f.name}|${f.size}|${f.lastModified}`;
+      const fmtMB = n => (n/(1024*1024)).toFixed(2)+' MB';
+      const sig = f => `${f.name}|${f.size}|${f.lastModified}`;
 
       function setBtnState(){
-        if (files.length >= MAX_FILES){
-          addBtn.disabled = true;
-          addBtn.title = `Limit reached (${MAX_FILES} files)`;
-        }else{
-          addBtn.disabled = false;
-          addBtn.title = `Add up to ${MAX_FILES} files`;
+        const count = ready.length + active.size;
+        addBtn.disabled = count >= MAX_FILES;
+        addBtn.title = addBtn.disabled ? `Limit reached (${MAX_FILES} files)` : `Add up to ${MAX_FILES} files`;
+      }
+
+      function chipFor(file, id){
+        const chip = document.createElement('span');
+        chip.className = 'file-chip is-loading';
+        chip.dataset.id = id;
+        chip.innerHTML = `
+          <span class="file-chip__name" title="${file.name}">${file.name}</span>
+          <span class="file-chip__size">(${fmtMB(file.size)})</span>
+          <span class="file-chip__bar" aria-hidden="true"><span data-fill style="width:0%"></span></span>
+          <span class="file-chip__pct" data-pct>0%</span>
+          <button class="file-chip__remove" type="button" aria-label="Remove ${file.name}">×</button>
+        `;
+        listEl.appendChild(chip);
+        return {
+          chip,
+          fill: chip.querySelector('[data-fill]'),
+          pct: chip.querySelector('[data-pct]'),
+          removeBtn: chip.querySelector('.file-chip__remove')
+        };
+      }
+
+      function markReady(id){
+        const entry = active.get(id);
+        if (!entry) return;
+        entry.els.fill.style.width = '100%';
+        entry.els.pct.textContent = '100%';
+        entry.els.chip.classList.remove('is-loading');
+        entry.els.chip.classList.add('is-ready');
+        ready.push({id, file: entry.file});
+        active.delete(id);
+        setBtnState();
+        pump();
+      }
+
+      function removeId(id){
+        // If active: abort and remove
+        const entry = active.get(id);
+        if (entry){
+          if (entry.mode === 'worker' && worker){
+            try { worker.postMessage({cmd:'abort', id}); } catch {}
+          }
+          try { entry.els.chip.remove(); } catch {}
+          active.delete(id);
+        } else {
+          // If ready: remove from ready array
+          const idx = ready.findIndex(r => r.id === id);
+          if (idx >= 0){
+            try {
+              const el = listEl.querySelector(`.file-chip[data-id="${id}"]`);
+              if (el) el.remove();
+            } catch {}
+            ready.splice(idx,1);
+          }
+        }
+        setBtnState();
+        pump();
+      }
+
+      function onRemoveClick(e){
+        const btn = e.target.closest('.file-chip__remove');
+        if (!btn) return;
+        const chip = btn.closest('.file-chip');
+        if (!chip) return;
+        const id = chip.dataset.id;
+        removeId(id);
+      }
+      listEl.addEventListener('click', onRemoveClick);
+
+      function ensureWorker(){
+        if (worker) return;
+        try {
+          worker = createIngestWorker();
+          worker.onmessage = (ev)=>{
+            const {id, type, pct} = ev.data || {};
+            const entry = active.get(id);
+            if (!entry) return;
+            if (type === 'progress'){
+              entry.els.fill.style.width = pct + '%';
+              entry.els.pct.textContent  = pct + '%';
+            } else if (type === 'done'){
+              busy = false;
+              markReady(id);
+            } else if (type === 'aborted'){
+              busy = false;
+              removeId(id);
+            } else if (type === 'error'){
+              // fall back to ready (or remove); here we remove to be safe
+              busy = false;
+              removeId(id);
+            }
+          };
+          worker.onerror = ()=>{ busy = false; };
+        } catch (e) {
+          worker = null;
         }
       }
 
-      function render(){
-        listEl.innerHTML = '';
-        files.forEach((f, idx)=>{
-          const chip = document.createElement('span');
-          chip.className = 'file-chip';
-          chip.innerHTML = `
-            <span class="file-chip__name" title="${f.name}">${f.name}</span>
-            <span class="file-chip__size">(${fmtMB(f.size)})</span>
-            <button class="file-chip__remove" type="button" aria-label="Remove ${f.name}">×</button>
-          `;
-          chip.querySelector('.file-chip__remove').addEventListener('click', ()=>{
-            files.splice(idx, 1);
-            render();
-            setBtnState();
-          });
-          listEl.appendChild(chip);
-        });
+      function pump(){
+        if (busy) return;
+        if (q.length === 0) return;
+        const job = q.shift();
+        const entry = active.get(job.id);
+        if (!entry) { pump(); return; }
+
+        // If worker available, start off-main-thread read
+        if (worker){
+          busy = true;
+          entry.state = 'working';
+          entry.mode = 'worker';
+          // Defer posting so the chip renders first
+          setTimeout(()=> {
+            try { worker.postMessage({cmd:'ingest', id: job.id, file: job.file, chunk: 512*1024}); }
+            catch { busy = false; removeId(job.id); }
+          }, 0);
+        } else {
+          // No worker: simulated progress with requestAnimationFrame (no file reads)
+          const dur = Math.max(600, Math.min(2200, 450 + (job.file.size/(1024*1024))*350));
+          const t0 = performance.now();
+          entry.state = 'working';
+          entry.mode = 'sim';
+          busy = true;
+
+          const tick = (now)=>{
+            if (!active.has(job.id)) { busy=false; pump(); return; }
+            const t = Math.min(1, (now - t0) / dur);
+            const pct = Math.round((1 - Math.pow(1 - t, 3)) * 100);
+            entry.els.fill.style.width = pct + '%';
+            entry.els.pct.textContent  = pct + '%';
+            if (t < 1){
+              requestAnimationFrame(tick);
+            } else {
+              busy = false;
+              markReady(job.id);
+            }
+          };
+          requestAnimationFrame(tick);
+        }
+      }
+
+      function addFile(file){
+        // Guardrails
+        if (ready.length + active.size >= MAX_FILES) return;
+        if (file.size > MAX_SIZE) { alert(`${file.name} is larger than 5 MB.`); return; }
+        const okType = allowed.includes(file.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(file.name);
+        if (!okType) { alert(`${file.name} is not an allowed file type.`); return; }
+
+        // Deduplicate across active+ready by signature
+        const signature = sig(file);
+        for (const [_, v] of active) if (sig(v.file) === signature) return;
+        if (ready.some(r => sig(r.file) === signature)) return;
+
+        // Create ID + chip immediately so it shows up with no delay
+        const id = (self.crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+        const els = chipFor(file, id);
+
+        // Track and queue; defer heavy stuff so the chip paints first
+        active.set(id, { file, els, state:'queued', mode:'pending' });
         setBtnState();
+
+        // Queue and start engine after paint
+        setTimeout(()=> {
+          ensureWorker();      // instantiate worker lazily
+          q.push({ id, file }); // enqueue job
+          pump();               // start if idle
+        }, 0);
+      }
+
+      function addMany(files){
+        // Stagger a tiny bit so very large selections feel instantaneous
+        files.forEach((f, i)=> setTimeout(()=> addFile(f), i*40));
       }
 
       addBtn.addEventListener('click', ()=> input.click());
-
       input.addEventListener('change', ()=>{
-        const picked = Array.from(input.files || []);
-        for (const f of picked){
-          if (files.length >= MAX_FILES) break;
-          if (f.size > MAX_SIZE){ alert(`${f.name} is larger than 5 MB.`); continue; }
-          const okType = allowed.includes(f.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(f.name);
-          if (!okType){ alert(`${f.name} is not an allowed file type.`); continue; }
-          if (!files.some(existing => key(existing) === key(f))) files.push(f);
-        }
-        input.value = ''; // allow re-selecting same file later
-        render();
+        const files = Array.from(input.files || []);
+        input.value = '';
+        if (!files.length) return;
+        addMany(files);
       });
 
-      function reset(){ files = []; listEl.innerHTML = ''; input.value = ''; setBtnState(); }
+      function reset(){
+        // Abort active jobs
+        if (worker){
+          active.forEach((_, id)=> { try { worker.postMessage({cmd:'abort', id}); } catch {} });
+        }
+        // Clear UI
+        listEl.querySelectorAll('.file-chip').forEach(el => el.remove());
+        active.clear();
+        ready.length = 0;
+        q.length = 0;
+        busy = false;
+        setBtnState();
+      }
 
-      // expose API
-      return { get: ()=> files.slice(), reset };
+      return {
+        get: ()=> ready.map(r => r.file),
+        reset
+      };
     }
 
     (function(){
@@ -296,8 +497,8 @@
       let isAnimating = false;
 
       // Status timers
-      let fadeTimer = null;   // for fade-out delay
-      let resetTimer = null;  // for DOM reset after fade
+      let fadeTimer = null;
+      let resetTimer = null;
 
       function cancelStatusTimers(){
         if (fadeTimer)  { clearTimeout(fadeTimer);  fadeTimer = null; }
@@ -374,14 +575,14 @@
         expanded ? closePanel() : openPanel();
       });
 
-      // Attachments
+      // Attachments (instant chips + worker ingestion)
       const widget = setupAttachmentWidget({
         addBtnId: 'hd-add-files',
         inputId : 'hd-files',
         listId  : 'hd-file-list',
         limits  : {
           maxFiles: 5,
-          maxSize : 5 * 1024 * 1024,
+          maxSize : 5 * 1024 * 1024, // 5 MB
           allowed : [
             'image/png','image/jpeg','application/pdf','text/plain','application/msword',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -410,7 +611,7 @@
           return;
         }
 
-        // Disable while sending (Send, Cancel, Add files)
+        // Disable while sending
         sendBtn.disabled = true;
         cancelBtn.disabled = true;
         const addBtn = document.getElementById('hd-add-files');

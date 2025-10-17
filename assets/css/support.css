@@ -90,3 +90,11 @@
 .override-download-btn.selected{ background:var(--red); color:#fff; border-color:var(--red); box-shadow:0 4px 12px rgba(170,30,46,.3) }
 .override-download-btn img{ width:18px; height:18px; display:block }
 .override-download-btn.selected img{ filter:brightness(0) invert(1) }
+.file-chip{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .5rem;border:1px solid #e6e6e6;border-radius:999px;margin:.25rem .35rem .25rem 0;background:#fff}
+.file-chip__name{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-chip__size{opacity:.7}
+.file-chip__remove{border:0;background:transparent;cursor:pointer;font-weight:700;line-height:1}
+.file-chip__bar{position:relative;width:120px;height:6px;background:#eee;border-radius:999px;overflow:hidden}
+.file-chip__bar>span{position:absolute;left:0;top:0;bottom:0;width:0}
+.file-chip__bar>span::before{content:"";position:absolute;inset:0;background:#aa1e2e;border-radius:999px}
+.file-chip__pct{font-variant-numeric:tabular-nums;min-width:3ch;text-align:right;opacity:.8}

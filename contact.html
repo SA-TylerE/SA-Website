@@ -90,7 +90,7 @@
                 <label>
                   <span>Phone<span class="req" aria-hidden="true">*</span></span>
                   <input type="tel" id="ct-phone" name="phone" autocomplete="tel" inputmode="tel" maxlength="14" pattern="^\(\d{3}\) \d{3}-\d{4}$" placeholder="(555) 123-4567" required aria-required="true">
-                </label>                
+                </label>
 
                 <label class="full">
                   <span>Subject<span class="req" aria-hidden="true">*</span></span>
@@ -175,7 +175,6 @@
 
   <!-- Phone input live formatter -->
   <script>
-    // === Phone input formatter for (###) ###-#### with smart caret ===
     (function initPhoneMask(){
       const input = document.getElementById('ct-phone');
       if (!input) return;
@@ -255,8 +254,8 @@
       let isAnimating = false;
 
       // Status timers
-      let fadeTimer = null;   // for fade-out delay
-      let resetTimer = null;  // for DOM reset after fade
+      let fadeTimer = null;
+      let resetTimer = null;
 
       function cancelStatusTimers(){
         if (fadeTimer)  { clearTimeout(fadeTimer);  fadeTimer = null; }
@@ -348,7 +347,6 @@
           return;
         }
 
-        // Disable while sending
         sendBtn.disabled = true;
         cancelBtn.disabled = true;
         setStatusSending();
