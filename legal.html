@@ -150,7 +150,7 @@
       let loadingTimer;
 
       // Optional: route PDFs through Google Viewer to avoid sidebars/chrome
-      const USE_GOOGLE_VIEWER_FOR_PDF = false; // set to true if your links are PDFs
+      const USE_GOOGLE_VIEWER_FOR_PDF = true; // set to true if your links are PDFs
       function buildEmbedUrl(url) {
         try {
           const u = new URL(url, location.origin);
