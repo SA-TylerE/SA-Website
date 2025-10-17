@@ -12,6 +12,11 @@ require_once __DIR__.'/mail_common.php';
  *   then ALWAYS deletes the per-request folder
  * - Uses a global flock to ensure ONLY ONE request is scanning at a time
  * - Writes a structured JSONL log to api/logs/helpdesk.log
+ *
+ * Notes:
+ * - We now get clamdscan's exit code from proc_close() (reliable), not proc_get_status()
+ * - Logging is throttled to avoid log bloat; retry warnings at most every 5 minutes
+ * - Remove deprecated "AllowSupplementaryGroups" from clamd.conf to keep stderr clean
  */
 
 // ---------- Paths / Limits ----------
@@ -171,7 +176,7 @@ function clamd_ping(?string $sockPath, string $reqId, string $when): array {
 }
 
 /**
- * Force clamdscan only (with explicit config), and log raw outcomes.
+ * Force clamdscan only (with explicit config).
  * Returns: ['status'=>'clean'|'infected'|'error'|'unavailable','engine'=>'clamdscan','code'=>int,'stdout'=>string,'stderr'=>string]
  */
 function antivirus_scan_once(string $path, string $reqId, string $filename): array {
@@ -180,14 +185,14 @@ function antivirus_scan_once(string $path, string $reqId, string $filename): arr
     return ['status'=>'error','engine'=>'clamdscan','code'=>127,'stdout'=>'','stderr'=>'clamdscan not found or not executable'];
   }
 
-  $cmd = implode(' ', [
+  $cmdParts = [
     escapeshellcmd(CLAMDSCAN_BIN),
     '--no-summary',
     '--fdpass',
-    '--verbose',
     '--config-file='.escapeshellarg(CLAMD_CONF),
     escapeshellarg($path)
-  ]);
+  ];
+  $cmd = implode(' ', $cmdParts);
 
   $desc = [1=>['pipe','w'], 2=>['pipe','w']];
   $proc = @proc_open($cmd, $desc, $pipes);
@@ -201,34 +206,25 @@ function antivirus_scan_once(string $path, string $reqId, string $filename): arr
   stream_set_blocking($pipes[2], true);
   $stdout = stream_get_contents($pipes[1]); fclose($pipes[1]);
   $stderr = stream_get_contents($pipes[2]); fclose($pipes[2]);
-  $status = proc_get_status($proc);
-  $code   = $status['exitcode'];
-  proc_close($proc);
 
-  // Log raw clamdscan result (useful when stderr is empty)
-  log_json('info', $reqId, 'clamdscan result', [
-    'file'=>$filename, 'exit_code'=>$code,
-    'stdout'=>substr((string)$stdout,0,400),
-    'stderr'=>substr((string)$stderr,0,400)
-  ]);
+  // IMPORTANT: proc_close() returns the *real* exit code. proc_get_status()['exitcode'] may be -1.
+  $code = proc_close($proc);
+
+  // Only log on non-clean outcomes to reduce noise
+  if ($code !== 0) {
+    log_json('warn', $reqId, 'clamdscan nonzero exit', [
+      'file'=>$filename, 'exit_code'=>$code,
+      'stdout'=>substr((string)$stdout,0,300),
+      'stderr'=>substr((string)$stderr,0,300),
+      'cmd'=>$cmd
+    ]);
+  }
 
   if ($code === 0) return ['status'=>'clean',    'engine'=>'clamdscan','code'=>$code,'stdout'=>$stdout,'stderr'=>$stderr];
   if ($code === 1) return ['status'=>'infected', 'engine'=>'clamdscan','code'=>$code,'stdout'=>$stdout,'stderr'=>$stderr];
 
-  // Exit 2 or other errors — try to identify socket/connect issues and environment
+  // Exit 2 or other errors — do a socket PING to capture errno/message
   clamd_ping(clamd_conf_socket(), $reqId, 'exit_code_'.$code);
-
-  static $envDumped = false;
-  if (!$envDumped) {
-    $uid = function_exists('posix_geteuid') ? posix_geteuid() : null;
-    $gid = function_exists('posix_getegid') ? posix_getegid() : null;
-    $groups = function_exists('posix_getgroups') ? posix_getgroups() : [];
-    log_json('warn', $reqId, 'env details (first error only)', [
-      'uid'=>$uid, 'gid'=>$gid, 'groups'=>$groups,
-      'socket'=>clamd_conf_socket(), 'cmd'=>$cmd
-    ]);
-    $envDumped = true;
-  }
 
   // Classify common messages as "unavailable" to separate from generic error
   $err = strtolower($stdout."\n".$stderr);
@@ -240,7 +236,7 @@ function antivirus_scan_once(string $path, string $reqId, string $filename): arr
 
 /**
  * Retry until scan finishes (clean or infected). Never “skip”.
- * Logs periodic warnings when clamd is unavailable/error.
+ * Logs periodic warnings when clamd is unavailable/error (max once/5 min).
  */
 function antivirus_scan_with_retry(string $path, string $reqId, string $filename): array {
   $attempt = 0;
@@ -260,9 +256,10 @@ function antivirus_scan_with_retry(string $path, string $reqId, string $filename
 
     // unavailable/error: wait and retry, never skip
     $now = time();
-    if ($now - $lastWarnAt >= 60) { // log at most once per minute
+    if ($now - $lastWarnAt >= 300) { // at most once every 5 minutes
       log_json('warn', $reqId, 'AV scan retry (daemon unavailable or error)', [
-        'file'=>$filename, 'attempt'=>$attempt, 'status'=>$res['status'], 'stderr'=>substr((string)$res['stderr'],0,400)
+        'file'=>$filename, 'attempt'=>$attempt, 'status'=>$res['status'],
+        'note'=>'throttled warning (5m)'
       ]);
       $lastWarnAt = $now;
     }
