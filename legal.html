@@ -23,16 +23,58 @@
       <div class="container">
         <div class="hero__inner">
           <h1>Legal & Agreements</h1>
-          <p class="lead">Preview the current terms below, or open any document in a new tab.</p>
-          <p class="legal-note">Embedding depends on the publisher’s settings. If a preview is blocked, the buttons below will open the document directly.</p>
+          <p class="lead">Select a document to preview or open in a new tab. The preview will appear below once selected.</p>
+          <p class="legal-note">If a site blocks embedding, clicking a button will open the document directly.</p>
         </div>
       </div>
     </section>
 
-    <!-- Big preview first (full-width) -->
+    <!-- Buttons row (now on top) -->
     <section class="section">
       <div class="container">
-        <aside class="legal-preview">
+        <div class="doc-list" role="list">
+          <a class="btn btn--doc doc-btn" role="listitem"
+             href="https://mspterms.live/system-alternatives/MSA"
+             data-doc-title="Master Services Agreement"
+             data-doc-url="https://mspterms.live/system-alternatives/MSA">
+             Master Services Agreement
+          </a>
+
+          <a class="btn btn--doc doc-btn" role="listitem"
+             href="https://mspterms.live/system-alternatives/Managed-Services-Omnibus"
+             data-doc-title="Managed Services Omnibus"
+             data-doc-url="https://mspterms.live/system-alternatives/Managed-Services-Omnibus">
+             Managed Services Omnibus
+          </a>
+
+          <a class="btn btn--doc doc-btn" role="listitem"
+             href="https://mspterms.live/system-alternatives/DPA"
+             data-doc-title="Data Processing Addendum"
+             data-doc-url="https://mspterms.live/system-alternatives/DPA">
+             Data Processing Addendum
+          </a>
+
+          <a class="btn btn--doc doc-btn" role="listitem"
+             href="https://mspterms.live/system-alternatives/Co-Managed-Services"
+             data-doc-title="Co-Managed Services Addendum"
+             data-doc-url="https://mspterms.live/system-alternatives/Co-Managed-Services">
+             Co-Managed Services Addendum
+          </a>
+
+          <a class="btn btn--doc doc-btn" role="listitem"
+             href="https://mspterms.live/system-alternatives/Third-Party-Services"
+             data-doc-title="Third-Party Services Addendum"
+             data-doc-url="https://mspterms.live/system-alternatives/Third-Party-Services">
+             Third-Party Services Addendum
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Full-width preview (hidden until used) -->
+    <section class="section" id="previewSection" hidden>
+      <div class="container">
+        <aside class="legal-preview" aria-live="polite">
           <header class="legal-preview__bar">
             <div class="legal-preview__titles">
               <strong id="previewTitle">Select a document to preview</strong>
@@ -45,7 +87,7 @@
 
           <div class="legal-preview__framewrap">
             <div id="previewFallback" class="legal-preview__fallback">
-              <p>Nothing loaded yet. Choose a document below to start a preview.</p>
+              <p>Nothing loaded yet. Choose a document above to start a preview.</p>
             </div>
             <iframe id="previewFrame" class="legal-preview__frame" title="Document preview"
                     sandbox="allow-same-origin allow-forms allow-scripts allow-popups"
@@ -57,38 +99,6 @@
             <p><strong>Preview blocked by the publisher.</strong> Opening the document directly…</p>
           </div>
         </aside>
-      </div>
-    </section>
-
-    <!-- Buttons row -->
-    <section class="section">
-      <div class="container">
-        <div class="doc-list">
-          <a class="btn btn--doc doc-btn"
-             href="https://mspterms.live/system-alternatives/MSA"
-             data-doc-title="Master Services Agreement (MSA)"
-             data-doc-url="https://mspterms.live/system-alternatives/MSA">MSA</a>
-
-          <a class="btn btn--doc doc-btn"
-             href="https://mspterms.live/system-alternatives/Managed-Services-Omnibus"
-             data-doc-title="Managed Services Omnibus"
-             data-doc-url="https://mspterms.live/system-alternatives/Managed-Services-Omnibus">Managed Services Omnibus</a>
-
-          <a class="btn btn--doc doc-btn"
-             href="https://mspterms.live/system-alternatives/DPA"
-             data-doc-title="Data Processing Addendum (DPA)"
-             data-doc-url="https://mspterms.live/system-alternatives/DPA">DPA</a>
-
-          <a class="btn btn--doc doc-btn"
-             href="https://mspterms.live/system-alternatives/Co-Managed-Services"
-             data-doc-title="Co-Managed Services Addendum"
-             data-doc-url="https://mspterms.live/system-alternatives/Co-Managed-Services">Co-Managed Services</a>
-
-          <a class="btn btn--doc doc-btn"
-             href="https://mspterms.live/system-alternatives/Third-Party-Services"
-             data-doc-title="Third-Party Services Addendum"
-             data-doc-url="https://mspterms.live/system-alternatives/Third-Party-Services">Third-Party Services</a>
-        </div>
       </div>
     </section>
 
@@ -107,7 +117,7 @@
 
   <script>
     (function () {
-      // Section reveal (unchanged)
+      // Reveal-on-scroll (unchanged)
       const allSections = Array.from(document.querySelectorAll('section'));
       const sectionsToReveal = allSections.slice(1);
       sectionsToReveal.forEach(sec => sec.classList.add('reveal'));
@@ -128,6 +138,7 @@
 
       // Preview logic
       const buttons = document.querySelectorAll('.doc-btn');
+      const previewSection = document.getElementById('previewSection');
       const frame = document.getElementById('previewFrame');
       const spinner = document.getElementById('previewSpinner');
       const fallback = document.getElementById('previewFallback');
@@ -138,7 +149,16 @@
 
       let loadingTimer;
 
+      function showPreviewSection() {
+        if (previewSection.hasAttribute('hidden')) {
+          previewSection.removeAttribute('hidden');
+          // smooth scroll into view for good UX
+          previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
       function loadDoc(title, url, opts = { autoNavigateOnBlock: false }) {
+        showPreviewSection();
         blocked.hidden = true;
         fallback.style.display = 'none';
         spinner.style.display = 'grid';
@@ -149,20 +169,19 @@
         openBtn.href = url || '#';
         if (url) openBtn.removeAttribute('aria-disabled'); else openBtn.setAttribute('aria-disabled','true');
 
-        // Reset and load
+        // reset + load
         frame.src = 'about:blank';
         requestAnimationFrame(() => { frame.src = url; });
 
         clearTimeout(loadingTimer);
         loadingTimer = setTimeout(() => {
-          // Assume blocked if no load event fired
+          // likely blocked by XFO/CSP
           spinner.style.display = 'none';
           spinner.setAttribute('aria-hidden', 'true');
           blocked.hidden = false;
 
-          // If user clicked a button, honor the request and go directly
           if (opts.autoNavigateOnBlock && url) {
-            try { window.location.assign(url); } catch (e) { /* no-op */ }
+            try { window.location.assign(url); } catch (e) {}
           }
         }, 3500);
       }
@@ -179,15 +198,14 @@
         btn.addEventListener('click', (e) => {
           const url = btn.dataset.docUrl || btn.getAttribute('href');
           const title = btn.dataset.docTitle || btn.textContent.trim();
-          if (!url) return; // let the native link work if no url data
+          if (!url) return;
 
-          // Progressive enhancement: prevent default to attempt preview
-          e.preventDefault();
+          e.preventDefault(); // attempt preview first
           loadDoc(title, url, { autoNavigateOnBlock: true });
         });
       });
 
-      // Optional deep-link via ?doc=
+      // Deep-link via ?doc=
       const params = new URLSearchParams(location.search);
       const docParam = params.get('doc');
       if (docParam) {
@@ -195,7 +213,9 @@
           (b.dataset.docTitle || b.textContent || '').toLowerCase().includes(docParam.toLowerCase())
         );
         if (match) {
-          loadDoc(match.dataset.docTitle || match.textContent.trim(), match.dataset.docUrl || match.href, { autoNavigateOnBlock: false });
+          loadDoc(match.dataset.docTitle || match.textContent.trim(),
+                  match.dataset.docUrl || match.href,
+                  { autoNavigateOnBlock: false });
         }
       }
     })();
