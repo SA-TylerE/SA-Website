@@ -4,11 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Legal | System Alternatives</title>
-  <meta name="description" content="Managed IT, cybersecurity, and consulting for SMBs in the Portland/Vancouver area." />
+  <meta name="description" content="Legal terms, agreements, and data processing addenda for System Alternatives services." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/legal.css" />
   <script src="/assets/js/includes.js" defer></script>
 </head>
 <body>
@@ -16,11 +17,91 @@
   <!-- Shared header -->
   <div data-include="/partials/header.html"></div>
 
-  <main>
+  <main class="legal-page">
+    <!-- Hero -->
+    <section class="hero hero--light legal-hero">
+      <div class="container">
+        <div class="hero__inner">
+          <h1>Legal & Agreements</h1>
+          <p class="lead">The following terms govern our services. Select a document to view the current version.</p>
+          <p class="legal-note">By engaging System Alternatives, you agree to the applicable terms below. Each document may be updated from time to time.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Documents grid -->
     <section class="section">
       <div class="container">
-        <h1>Legal</h1>
-        <p>Legal content here.</p>
+        <div class="legal-grid">
+          <!-- MSA -->
+          <article class="doc-card">
+            <div>
+              <h3>Master Services Agreement (MSA)</h3>
+              <p>Core terms that apply to most services we provide.</p>
+            </div>
+            <div class="doc-actions doc-links">
+              <a class="btn btn--primary" href="https://mspterms.live/system-alternatives/MSA" target="_blank" rel="noopener">Open document</a>
+              <a class="btn btn--ghost" href="https://mspterms.live/system-alternatives/MSA" target="_blank" rel="noopener">View online</a>
+            </div>
+          </article>
+
+          <!-- Managed Services Omnibus -->
+          <article class="doc-card">
+            <div>
+              <h3>Managed Services Omnibus</h3>
+              <p>Service-specific terms that supplement the MSA for managed offerings.</p>
+            </div>
+            <div class="doc-actions doc-links">
+              <a class="btn btn--primary" href="https://mspterms.live/system-alternatives/Managed-Services-Omnibus" target="_blank" rel="noopener">Open document</a>
+              <a class="btn btn--ghost" href="https://mspterms.live/system-alternatives/Managed-Services-Omnibus" target="_blank" rel="noopener">View online</a>
+            </div>
+          </article>
+
+          <!-- DPA -->
+          <article class="doc-card">
+            <div>
+              <h3>Data Processing Addendum (DPA)</h3>
+              <p>Data protection, privacy, and processing terms for customer data.</p>
+            </div>
+            <div class="doc-actions doc-links">
+              <a class="btn btn--primary" href="https://mspterms.live/system-alternatives/DPA" target="_blank" rel="noopener">Open document</a>
+              <a class="btn btn--ghost" href="https://mspterms.live/system-alternatives/DPA" target="_blank" rel="noopener">View online</a>
+            </div>
+          </article>
+
+          <!-- Co-Managed Services -->
+          <article class="doc-card">
+            <div>
+              <h3>Co-Managed Services Addendum</h3>
+              <p>Roles and responsibilities when working alongside your internal IT.</p>
+            </div>
+            <div class="doc-actions doc-links">
+              <a class="btn btn--primary" href="https://mspterms.live/system-alternatives/Co-Managed-Services" target="_blank" rel="noopener">Open document</a>
+              <a class="btn btn--ghost" href="https://mspterms.live/system-alternatives/Co-Managed-Services" target="_blank" rel="noopener">View online</a>
+            </div>
+          </article>
+
+          <!-- Third-Party Services -->
+          <article class="doc-card">
+            <div>
+              <h3>Third-Party Services Addendum</h3>
+              <p>Terms that apply to software and services provided by third parties.</p>
+            </div>
+            <div class="doc-actions doc-links">
+              <a class="btn btn--primary" href="https://mspterms.live/system-alternatives/Third-Party-Services" target="_blank" rel="noopener">Open document</a>
+              <a class="btn btn--ghost" href="https://mspterms.live/system-alternatives/Third-Party-Services" target="_blank" rel="noopener">View online</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Small print -->
+    <section class="section">
+      <div class="container">
+        <p class="legal-smallprint">
+          Tip: If you were directed here from a quote or order form, the version of the terms that applies is the one referenced in that document (or the most recent version published before your acceptance).
+        </p>
       </div>
     </section>
   </main>

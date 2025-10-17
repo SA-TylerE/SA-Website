@@ -1,0 +1,101 @@
+/* Legal page — scoped so nothing leaks to other pages */
+.legal-page .legal-hero {
+  padding: 72px 0 56px;
+  background: transparent;
+}
+
+.legal-page .legal-hero .hero__inner {
+  display: grid;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.legal-page .legal-note {
+  font-size: 0.95rem;
+  opacity: .9;
+  margin-top: .25rem;
+}
+
+.legal-page .legal-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px){
+  .legal-page .legal-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (min-width: 960px){
+  .legal-page .legal-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+
+.legal-page .doc-card {
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 16px;
+  padding: 20px;
+  background: var(--card-bg, #fff);
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+}
+
+.legal-page .doc-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  line-height: 1.3;
+}
+
+.legal-page .doc-card p {
+  margin: 0 0 16px;
+  font-size: .95rem;
+  opacity: .9;
+}
+
+.legal-page .doc-actions { margin-top: auto; }
+
+.legal-page .doc-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Buttons (scoped to this page so they don't override global .btns) */
+.legal-page .btn {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform .02s ease, box-shadow .2s ease, background .2s ease, filter .2s ease;
+  cursor: pointer;
+}
+
+.legal-page .btn:active { transform: translateY(1px); }
+
+.legal-page .btn--primary {
+  background: var(--brand, #aa1e2e);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(170,30,46,.25);
+}
+
+.legal-page .btn--primary:hover { filter: brightness(1.05); }
+
+.legal-page .btn--ghost {
+  background: transparent;
+  color: inherit;
+  border-color: rgba(0,0,0,.15);
+}
+
+/* Small print */
+.legal-page .legal-smallprint {
+  font-size: .9rem;
+  opacity: .85;
+}
