@@ -22,6 +22,7 @@ const SCAN_LOCK_FILE   = __DIR__ . '/clamav.scan.lock';  // global mutex
 const MAX_FILES        = 5;
 const MAX_SIZE_BYTES   = 5 * 1024 * 1024; // 5 MB
 const CLAMDSCAN_BIN    = '/usr/bin/clamdscan';
+const CLAMD_CONF       = '/etc/clamav/clamd.conf';       // ensure this matches your host
 
 // ---------- Helpers ----------
 function get_request_data(): array {
@@ -130,20 +131,72 @@ function early_ack_then_continue(array $payload=['ok'=>true]): void {
   }
 }
 
+// ---------- ClamAV diagnostics helpers ----------
+function clamd_conf_socket(string $confPath = CLAMD_CONF): ?string {
+  if (!is_readable($confPath)) return null;
+  $sock = null;
+  foreach (file($confPath, FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
+    if ($line === '' || $line[0] === '#') continue;
+    if (preg_match('/^\s*LocalSocket\s+(.*)\s*$/i', $line, $m)) {
+      $sock = trim($m[1]);
+      break;
+    }
+  }
+  return $sock ?: null;
+}
+
+function clamd_ping(?string $sockPath, string $reqId, string $when): array {
+  $sockPath = $sockPath ?: clamd_conf_socket();
+  if (!$sockPath) {
+    log_json('error', $reqId, "clamd PING: no LocalSocket found", ['when'=>$when, 'conf'=>CLAMD_CONF]);
+    return ['ok'=>false, 'err'=>'no socket path'];
+  }
+  $errno = 0; $errstr = '';
+  $fp = @stream_socket_client("unix://".$sockPath, $errno, $errstr, 2.0, STREAM_CLIENT_CONNECT);
+  if (!$fp) {
+    log_json('error', $reqId, "clamd PING connect failed", [
+      'when'=>$when, 'socket'=>$sockPath, 'errno'=>$errno, 'error'=>$errstr
+    ]);
+    return ['ok'=>false, 'errno'=>$errno, 'err'=>$errstr];
+  }
+  stream_set_timeout($fp, 2);
+  fwrite($fp, "PING\n");
+  $resp = fgets($fp, 16) ?: '';
+  fclose($fp);
+  $ok = (trim($resp) === 'PONG');
+  log_json($ok ? 'info' : 'warn', $reqId, "clamd PING ".($ok?'OK':'bad'), [
+    'when'=>$when, 'socket'=>$sockPath, 'resp'=>trim($resp)
+  ]);
+  return ['ok'=>$ok, 'resp'=>trim($resp)];
+}
+
 /**
- * Force clamdscan only.
+ * Force clamdscan only (with explicit config), and log raw outcomes.
  * Returns: ['status'=>'clean'|'infected'|'error'|'unavailable','engine'=>'clamdscan','code'=>int,'stdout'=>string,'stderr'=>string]
  */
-function antivirus_scan_once(string $path): array {
+function antivirus_scan_once(string $path, string $reqId, string $filename): array {
   if (!is_executable(CLAMDSCAN_BIN)) {
-    return ['status'=>'unavailable','engine'=>'clamdscan','code'=>2,'stdout'=>'','stderr'=>'clamdscan not found'];
+    log_json('error', $reqId, 'clamdscan not executable', ['bin'=>CLAMDSCAN_BIN]);
+    return ['status'=>'error','engine'=>'clamdscan','code'=>127,'stdout'=>'','stderr'=>'clamdscan not found or not executable'];
   }
-  $cmd  = CLAMDSCAN_BIN . ' --no-summary --fdpass ' . escapeshellarg($path);
+
+  $cmd = implode(' ', [
+    escapeshellcmd(CLAMDSCAN_BIN),
+    '--no-summary',
+    '--fdpass',
+    '--verbose',
+    '--config-file='.escapeshellarg(CLAMD_CONF),
+    escapeshellarg($path)
+  ]);
+
   $desc = [1=>['pipe','w'], 2=>['pipe','w']];
   $proc = @proc_open($cmd, $desc, $pipes);
   if (!is_resource($proc)) {
+    log_json('error', $reqId, 'proc_open failed for clamdscan', ['file'=>$filename]);
+    clamd_ping(clamd_conf_socket(), $reqId, 'proc_open_failed');
     return ['status'=>'error','engine'=>'clamdscan','code'=>2,'stdout'=>'','stderr'=>'proc_open failed'];
   }
+
   stream_set_blocking($pipes[1], true);
   stream_set_blocking($pipes[2], true);
   $stdout = stream_get_contents($pipes[1]); fclose($pipes[1]);
@@ -152,9 +205,32 @@ function antivirus_scan_once(string $path): array {
   $code   = $status['exitcode'];
   proc_close($proc);
 
+  // Log raw clamdscan result (useful when stderr is empty)
+  log_json('info', $reqId, 'clamdscan result', [
+    'file'=>$filename, 'exit_code'=>$code,
+    'stdout'=>substr((string)$stdout,0,400),
+    'stderr'=>substr((string)$stderr,0,400)
+  ]);
+
   if ($code === 0) return ['status'=>'clean',    'engine'=>'clamdscan','code'=>$code,'stdout'=>$stdout,'stderr'=>$stderr];
   if ($code === 1) return ['status'=>'infected', 'engine'=>'clamdscan','code'=>$code,'stdout'=>$stdout,'stderr'=>$stderr];
 
+  // Exit 2 or other errors — try to identify socket/connect issues and environment
+  clamd_ping(clamd_conf_socket(), $reqId, 'exit_code_'.$code);
+
+  static $envDumped = false;
+  if (!$envDumped) {
+    $uid = function_exists('posix_geteuid') ? posix_geteuid() : null;
+    $gid = function_exists('posix_getegid') ? posix_getegid() : null;
+    $groups = function_exists('posix_getgroups') ? posix_getgroups() : [];
+    log_json('warn', $reqId, 'env details (first error only)', [
+      'uid'=>$uid, 'gid'=>$gid, 'groups'=>$groups,
+      'socket'=>clamd_conf_socket(), 'cmd'=>$cmd
+    ]);
+    $envDumped = true;
+  }
+
+  // Classify common messages as "unavailable" to separate from generic error
   $err = strtolower($stdout."\n".$stderr);
   if (strpos($err, 'connect') !== false || strpos($err, 'socket') !== false) {
     return ['status'=>'unavailable','engine'=>'clamdscan','code'=>$code,'stdout'=>$stdout,'stderr'=>$stderr];
@@ -171,7 +247,7 @@ function antivirus_scan_with_retry(string $path, string $reqId, string $filename
   $lastWarnAt = 0;
   while (true) {
     $attempt++;
-    $res = antivirus_scan_once($path);
+    $res = antivirus_scan_once($path, $reqId, $filename);
 
     if ($res['status'] === 'clean' || $res['status'] === 'infected') {
       if ($attempt > 1) {
@@ -336,7 +412,7 @@ try {
         $verdict='blocked'; $reason='MIME check failed';
       }
 
-      // MUST scan every candidate; sequentially (we're inside the foreach; no parallelism).
+      // MUST scan every candidate sequentially.
       $av = ['status'=>null,'engine'=>'clamdscan','code'=>null,'stdout'=>'','stderr'=>''];
       if ($verdict !== 'blocked') {
         $av = antivirus_scan_with_retry($destPath, $reqId, $cleanName); // blocks until clean or infected
@@ -345,7 +421,7 @@ try {
         } elseif ($av['status'] === 'clean') {
           $verdict = 'attached';
         } else {
-          // By design antivirus_scan_with_retry returns only clean|infected, but keep guard:
+          // Should not happen, but guard:
           $verdict = 'blocked'; $reason = 'scan anomaly';
           log_json('error', $reqId, 'Unexpected AV status', ['file'=>$cleanName, 'status'=>$av['status']]);
         }
