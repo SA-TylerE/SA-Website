@@ -23,78 +23,15 @@
       <div class="container">
         <div class="hero__inner">
           <h1>Legal & Agreements</h1>
-          <p class="lead">The following terms govern our services. Select a document to preview or open it in a new tab.</p>
-          <p class="legal-note">Embedding depends on the publisher’s settings. If a preview won’t load, use the “Open in new tab” button.</p>
+          <p class="lead">Preview the current terms below, or open any document in a new tab.</p>
+          <p class="legal-note">Embedding depends on the publisher’s settings. If a preview is blocked, the buttons below will open the document directly.</p>
         </div>
       </div>
     </section>
 
-    <!-- Documents + Preview -->
+    <!-- Big preview first (full-width) -->
     <section class="section">
-      <div class="container legal-layout">
-        <div class="legal-grid">
-          <!-- MSA -->
-          <article class="doc-card" data-doc-title="Master Services Agreement (MSA)" data-doc-url="https://mspterms.live/system-alternatives/MSA">
-            <div>
-              <h3>Master Services Agreement (MSA)</h3>
-              <p>Core terms that apply to most services we provide.</p>
-            </div>
-            <div class="doc-actions doc-links">
-              <button class="btn btn--primary js-preview">Preview</button>
-              <a class="btn btn--ghost" href="https://mspterms.live/system-alternatives/MSA" target="_blank" rel="noopener">Open in new tab</a>
-            </div>
-          </article>
-
-          <!-- Managed Services Omnibus -->
-          <article class="doc-card" data-doc-title="Managed Services Omnibus" data-doc-url="https://mspterms.live/system-alternatives/Managed-Services-Omnibus">
-            <div>
-              <h3>Managed Services Omnibus</h3>
-              <p>Service-specific terms that supplement the MSA for managed offerings.</p>
-            </div>
-            <div class="doc-actions doc-links">
-              <button class="btn btn--primary js-preview">Preview</button>
-              <a class="btn btn--ghost" href="https://mspterms.live/system-alternatives/Managed-Services-Omnibus" target="_blank" rel="noopener">Open in new tab</a>
-            </div>
-          </article>
-
-          <!-- DPA -->
-          <article class="doc-card" data-doc-title="Data Processing Addendum (DPA)" data-doc-url="https://mspterms.live/system-alternatives/DPA">
-            <div>
-              <h3>Data Processing Addendum (DPA)</h3>
-              <p>Data protection, privacy, and processing terms for customer data.</p>
-            </div>
-            <div class="doc-actions doc-links">
-              <button class="btn btn--primary js-preview">Preview</button>
-              <a class="btn btn--ghost" href="https://mspterms.live/system-alternatives/DPA" target="_blank" rel="noopener">Open in new tab</a>
-            </div>
-          </article>
-
-          <!-- Co-Managed Services -->
-          <article class="doc-card" data-doc-title="Co-Managed Services Addendum" data-doc-url="https://mspterms.live/system-alternatives/Co-Managed-Services">
-            <div>
-              <h3>Co-Managed Services Addendum</h3>
-              <p>Roles and responsibilities when working alongside your internal IT.</p>
-            </div>
-            <div class="doc-actions doc-links">
-              <button class="btn btn--primary js-preview">Preview</button>
-              <a class="btn btn--ghost" href="https://mspterms.live/system-alternatives/Co-Managed-Services" target="_blank" rel="noopener">Open in new tab</a>
-            </div>
-          </article>
-
-          <!-- Third-Party Services -->
-          <article class="doc-card" data-doc-title="Third-Party Services Addendum" data-doc-url="https://mspterms.live/system-alternatives/Third-Party-Services">
-            <div>
-              <h3>Third-Party Services Addendum</h3>
-              <p>Terms that apply to software and services provided by third parties.</p>
-            </div>
-            <div class="doc-actions doc-links">
-              <button class="btn btn--primary js-preview">Preview</button>
-              <a class="btn btn--ghost" href="https://mspterms.live/system-alternatives/Third-Party-Services" target="_blank" rel="noopener">Open in new tab</a>
-            </div>
-          </article>
-        </div>
-
-        <!-- Side/Bottom Preview Panel -->
+      <div class="container">
         <aside class="legal-preview">
           <header class="legal-preview__bar">
             <div class="legal-preview__titles">
@@ -108,16 +45,50 @@
 
           <div class="legal-preview__framewrap">
             <div id="previewFallback" class="legal-preview__fallback">
-              <p>Nothing loaded yet. Choose a document from the list to the left.</p>
+              <p>Nothing loaded yet. Choose a document below to start a preview.</p>
             </div>
-            <iframe id="previewFrame" class="legal-preview__frame" title="Document preview" sandbox="allow-same-origin allow-forms allow-scripts allow-popups" loading="lazy" referrerpolicy="no-referrer"></iframe>
+            <iframe id="previewFrame" class="legal-preview__frame" title="Document preview"
+                    sandbox="allow-same-origin allow-forms allow-scripts allow-popups"
+                    loading="lazy" referrerpolicy="no-referrer"></iframe>
             <div id="previewSpinner" class="legal-preview__spinner" aria-hidden="true"></div>
           </div>
 
           <div id="previewBlocked" class="legal-preview__blocked" hidden>
-            <p><strong>Preview blocked by the publisher.</strong> Some sites disallow embedding. Use the “Open in new tab” button above.</p>
+            <p><strong>Preview blocked by the publisher.</strong> Opening the document directly…</p>
           </div>
         </aside>
+      </div>
+    </section>
+
+    <!-- Buttons row -->
+    <section class="section">
+      <div class="container">
+        <div class="doc-list">
+          <a class="btn btn--doc doc-btn"
+             href="https://mspterms.live/system-alternatives/MSA"
+             data-doc-title="Master Services Agreement (MSA)"
+             data-doc-url="https://mspterms.live/system-alternatives/MSA">MSA</a>
+
+          <a class="btn btn--doc doc-btn"
+             href="https://mspterms.live/system-alternatives/Managed-Services-Omnibus"
+             data-doc-title="Managed Services Omnibus"
+             data-doc-url="https://mspterms.live/system-alternatives/Managed-Services-Omnibus">Managed Services Omnibus</a>
+
+          <a class="btn btn--doc doc-btn"
+             href="https://mspterms.live/system-alternatives/DPA"
+             data-doc-title="Data Processing Addendum (DPA)"
+             data-doc-url="https://mspterms.live/system-alternatives/DPA">DPA</a>
+
+          <a class="btn btn--doc doc-btn"
+             href="https://mspterms.live/system-alternatives/Co-Managed-Services"
+             data-doc-title="Co-Managed Services Addendum"
+             data-doc-url="https://mspterms.live/system-alternatives/Co-Managed-Services">Co-Managed Services</a>
+
+          <a class="btn btn--doc doc-btn"
+             href="https://mspterms.live/system-alternatives/Third-Party-Services"
+             data-doc-title="Third-Party Services Addendum"
+             data-doc-url="https://mspterms.live/system-alternatives/Third-Party-Services">Third-Party Services</a>
+        </div>
       </div>
     </section>
 
@@ -156,7 +127,7 @@
       }
 
       // Preview logic
-      const cards = document.querySelectorAll('.doc-card');
+      const buttons = document.querySelectorAll('.doc-btn');
       const frame = document.getElementById('previewFrame');
       const spinner = document.getElementById('previewSpinner');
       const fallback = document.getElementById('previewFallback');
@@ -167,59 +138,65 @@
 
       let loadingTimer;
 
-      function loadDoc(title, url) {
-        // UI prep
+      function loadDoc(title, url, opts = { autoNavigateOnBlock: false }) {
         blocked.hidden = true;
         fallback.style.display = 'none';
+        spinner.style.display = 'grid';
         spinner.setAttribute('aria-hidden', 'false');
-        spinner.style.display = 'block';
-        titleEl.textContent = title || 'Document';
-        urlEl.textContent = url;
-        openBtn.href = url;
-        openBtn.removeAttribute('aria-disabled');
 
-        // Start load
-        // Clear any previous src to force a reload event path
-        frame.removeAttribute('srcdoc');
+        titleEl.textContent = title || 'Document';
+        urlEl.textContent = url || '';
+        openBtn.href = url || '#';
+        if (url) openBtn.removeAttribute('aria-disabled'); else openBtn.setAttribute('aria-disabled','true');
+
+        // Reset and load
         frame.src = 'about:blank';
-        // Small delay so spinner is visible on quick loads
         requestAnimationFrame(() => { frame.src = url; });
 
-        // If the frame is blocked by XFO/CSP, many browsers won’t fire onload or onerror.
-        // We’ll use a timeout heuristic; if nothing has fired in N ms, show the blocked notice.
         clearTimeout(loadingTimer);
         loadingTimer = setTimeout(() => {
-          // If still “loading”, assume blocked
+          // Assume blocked if no load event fired
           spinner.style.display = 'none';
           spinner.setAttribute('aria-hidden', 'true');
           blocked.hidden = false;
-        }, 3500); // tweak if you’d like
+
+          // If user clicked a button, honor the request and go directly
+          if (opts.autoNavigateOnBlock && url) {
+            try { window.location.assign(url); } catch (e) { /* no-op */ }
+          }
+        }, 3500);
       }
 
       frame.addEventListener('load', () => {
         clearTimeout(loadingTimer);
         spinner.style.display = 'none';
         spinner.setAttribute('aria-hidden', 'true');
-        // We can’t reliably inspect cross-origin content; if it loaded, great.
-        // If the publisher served a redirect to a blocked page, the timeout above will handle it.
+        blocked.hidden = true;
       });
 
-      // Hook up Preview buttons
-      document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.js-preview');
-        if (!btn) return;
-        const card = btn.closest('.doc-card');
-        const title = card?.dataset.docTitle;
-        const url = card?.dataset.docUrl;
-        if (url) loadDoc(title, url);
+      // Intercept button clicks: try preview; if blocked, auto-navigate
+      buttons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const url = btn.dataset.docUrl || btn.getAttribute('href');
+          const title = btn.dataset.docTitle || btn.textContent.trim();
+          if (!url) return; // let the native link work if no url data
+
+          // Progressive enhancement: prevent default to attempt preview
+          e.preventDefault();
+          loadDoc(title, url, { autoNavigateOnBlock: true });
+        });
       });
 
-      // Optional: support deep links via hash (?doc=...)
+      // Optional deep-link via ?doc=
       const params = new URLSearchParams(location.search);
       const docParam = params.get('doc');
       if (docParam) {
-        const match = Array.from(cards).find(c => (c.dataset.docTitle || '').toLowerCase().includes(docParam.toLowerCase()));
-        if (match) loadDoc(match.dataset.docTitle, match.dataset.docUrl);
+        const match = Array.from(buttons).find(b =>
+          (b.dataset.docTitle || b.textContent || '').toLowerCase().includes(docParam.toLowerCase())
+        );
+        if (match) {
+          loadDoc(match.dataset.docTitle || match.textContent.trim(), match.dataset.docUrl || match.href, { autoNavigateOnBlock: false });
+        }
       }
     })();
   </script>
