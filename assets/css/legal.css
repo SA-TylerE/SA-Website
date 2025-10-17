@@ -408,39 +408,30 @@
   background: #fff8f8; color: #6a111a; font-size: .9rem;
 }
 
-/* Centered grid, max 3 per row */
+/* Centered, wrapped buttons — max 3 per row */
 .legal-page .doc-list {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: 1fr;            /* 1 col by default */
-  justify-content: center;               /* center the tracks */
-  margin-inline: auto;                   /* center the grid itself */
-  max-width: 1200px;                     /* keeps the row from stretching too wide */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;     /* center each wrapped line */
+  gap: 14px 18px;              /* row/column gaps */
+  max-width: 1200px;
+  margin-inline: auto;
   text-align: center;
 }
 
-/* 2 columns on mid screens */
-@media (min-width: 640px) {
-  .legal-page .doc-list {
-    grid-template-columns: repeat(2, minmax(260px, 360px));
-  }
-}
-
-/* 3 columns on large screens (max) */
-@media (min-width: 980px) {
-  .legal-page .doc-list {
-    grid-template-columns: repeat(3, minmax(260px, 360px));
-  }
-}
-
+/* Button sizing: allows 1/2/3 per row at common widths */
 .legal-page .btn--doc {
   background: var(--brand, #aa1e2e);
   color: #fff;
   padding: 14px 18px;
   border-radius: 12px;
   box-shadow: 0 6px 16px rgba(170,30,46,.25);
-  width: 100%;               /* fill its grid track */
-  max-width: 360px;          /* pairs with the column max above */
-  white-space: normal;       /* allow wrapping of long labels */
+  white-space: normal;
+
+  /* Flex sizing: 260–360px columns, wrap to next row as needed */
+  flex: 1 1 320px;   /* preferred 320px, can shrink to 260, grow to 360 */
+  min-width: 260px;
+  max-width: 360px;
 }
+
 .legal-page .btn--doc:hover { filter: brightness(1.05); }

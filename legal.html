@@ -136,7 +136,7 @@
         sectionsToReveal.forEach(sec => sec.classList.add('is-visible'));
       }
 
-      // Preview logic
+      // --- Preview logic
       const buttons = document.querySelectorAll('.doc-btn');
       const previewSection = document.getElementById('previewSection');
       const frame = document.getElementById('previewFrame');
@@ -149,16 +149,30 @@
 
       let loadingTimer;
 
+      // Optional: route PDFs through Google Viewer to avoid sidebars/chrome
+      const USE_GOOGLE_VIEWER_FOR_PDF = false; // set to true if your links are PDFs
+      function buildEmbedUrl(url) {
+        try {
+          const u = new URL(url, location.origin);
+          const looksPdf = /\.pdf(\?|#|$)/i.test(u.pathname);
+          if (USE_GOOGLE_VIEWER_FOR_PDF && looksPdf) {
+            return `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(u.href)}`;
+          }
+          return u.href;
+        } catch { return url; }
+      }
+
       function showPreviewSection() {
         if (previewSection.hasAttribute('hidden')) {
           previewSection.removeAttribute('hidden');
-          // smooth scroll into view for good UX
-          previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+        // NEW: always scroll into view on every click, not just first reveal
+        previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
 
       function loadDoc(title, url, opts = { autoNavigateOnBlock: false }) {
         showPreviewSection();
+
         blocked.hidden = true;
         fallback.style.display = 'none';
         spinner.style.display = 'grid';
@@ -167,11 +181,14 @@
         titleEl.textContent = title || 'Document';
         urlEl.textContent = url || '';
         openBtn.href = url || '#';
-        if (url) openBtn.removeAttribute('aria-disabled'); else openBtn.setAttribute('aria-disabled','true');
+        if (url) openBtn.removeAttribute('aria-disabled'); else openBtn.setAttribute('aria-disabled', 'true');
+
+        // Use "clean" embed URL when applicable
+        const embedUrl = buildEmbedUrl(url);
 
         // reset + load
         frame.src = 'about:blank';
-        requestAnimationFrame(() => { frame.src = url; });
+        requestAnimationFrame(() => { frame.src = embedUrl; });
 
         clearTimeout(loadingTimer);
         loadingTimer = setTimeout(() => {
