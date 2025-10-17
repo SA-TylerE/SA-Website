@@ -9,17 +9,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/css/base.css" />
-  <link rel="stylesheet" href="assets/css/cybersecurity.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/cybersecurity.css" />
 
-  <script src="assets/js/includes.js" defer></script>
+  <script src="/assets/js/includes.js" defer></script>
 </head>
 <body>
 
   <div id="top" aria-hidden="true"></div>
 
   <!-- Shared header -->
-  <div data-include="partials/header.html"></div>
+  <div data-include="/partials/header.html"></div>
 
   <!-- Hero -->
   <section class="hero hero--light hero--bg hero--enhanced hero--compact hero--singlecol cs-hero">
@@ -32,7 +32,7 @@
           slowing your team down.
         </p>
         <div class="hero__cta">
-          <a class="btn btn--primary" href="/contact.html">Request an assessment</a>
+          <a class="btn btn--primary" href="/contact">Request an assessment</a>
         </div>
         <ul class="hero__badges">
           <li>24/7 SOC (MDR)</li>
@@ -244,13 +244,15 @@
           <dd>Suspicious activity is investigated 24/7 with isolation actions when needed. You’ll receive incident summaries, recommendations, and any next steps.</dd>
         </dl>
         <div class="cta-row">
-          <a class="btn btn-primary" href="/contact.html">Assess security</a>
+          <a class="btn btn-primary" href="/contact">Assess security</a>
           <a class="btn btn-outline" href="#top">Back to top</a>
         </div>
       </div>
     </section>
 
   </main>
+  <!-- Shared footer -->
+  <div data-include="/partials/footer.html"></div>
   <!-- FAQ smooth open/close -->
   <script>
     (function(){
@@ -303,8 +305,5 @@
       });
     })();
   </script>
-  <!-- Shared footer -->
-  <div data-include="partials/footer.html"></div>
-
 </body>
 </html>

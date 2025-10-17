@@ -8,15 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/base.css" />
-  <link rel="stylesheet" href="assets/css/index.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/index.css" />
   <!-- Load header/footer include helper (deferred so DOM is parsed first) -->
-  <script src="assets/js/includes.js" defer></script>
+  <script src="/assets/js/includes.js" defer></script>
 </head>
 <body>
 
   <!-- Shared header (injected from /partials/header.html) -->
-  <div data-include="partials/header.html"></div>
+  <div data-include="/partials/header.html"></div>
 
   <!-- Hero (scoped: stronger background, readable text) -->
   <section class="hero hero--light hero--bg hero--enhanced home-hero">
@@ -26,9 +26,9 @@
         <h1>Big Picture Ready IT &amp; Cybersecurity</h1>
         <p>We keep your systems running, your data secure, and your team focused — no surprises, no headaches.</p>
         <div class="hero__cta">
-          <a class="btn btn--primary" href="/contact.html">Get Started</a>
-          <a class="btn btn--outline" href="/managed-services.html">Explore Services</a>
-          <a class="btn btn--outline" href="/cybersecurity.html">Explore Security</a>
+          <a class="btn btn--primary" href="/contact">Get Started</a>
+          <a class="btn btn--outline" href="/managed-services">Explore Services</a>
+          <a class="btn btn--outline" href="/cybersecurity">Explore Security</a>
         </div>
         <ul class="hero__badges">
           <li>Serving Portland / Vancouver since 2008</li>
@@ -92,7 +92,7 @@
             <li>Patching &amp; compliance</li>
             <li>Backups &amp; recovery</li>
           </ul>
-          <a class="link" href="/managed-services.html">Learn more</a>
+          <a class="link" href="/managed-services">Learn more</a>
         </article>
 
         <article class="card card--service">
@@ -102,7 +102,7 @@
             <li>Quarterly physical inspections</li>
             <li>Health reports &amp; cleanup</li>
           </ul>
-          <a class="link" href="/maintenance.html">Learn more</a>
+          <a class="link" href="/maintenance">Learn more</a>
         </article>
 
         <article class="card card--service">
@@ -112,12 +112,12 @@
             <li>Email &amp; phishing defense</li>
             <li>Compliance &amp; risk management</li>
           </ul>
-          <a class="link" href="/cybersecurity.html">Learn more</a>
+          <a class="link" href="/cybersecurity">Learn more</a>
         </article>
       </div>
 
       <div class="section__cta">
-        <a class="btn btn--primary" href="/managed-services.html">See all services</a>
+        <a class="btn btn--primary" href="/managed-services">See all services</a>
       </div>
     </div>
   </section>
@@ -142,7 +142,7 @@
         </div>
       </div>
       <div class="section__cta">
-        <a class="btn btn--primary" href="/cybersecurity.html">Explore cybersecurity</a>
+        <a class="btn btn--primary" href="/cybersecurity">Explore cybersecurity</a>
       </div>
     </div>
   </section>
@@ -182,14 +182,14 @@
       <h2>Ready to Turn IT into an Advantage?</h2>
       <p class="lead">Get your free evaluation and see how we can help.</p>
       <div class="cta__buttons">
-        <a class="btn btn--primary" href="/contact.html">Request Evaluation</a>
+        <a class="btn btn--primary" href="/contact">Request Evaluation</a>
         <a class="btn btn--outline" href="tel:+1-503-878-8000">Call Now</a>
       </div>
     </div>
   </section>
 
   <!-- Shared footer (injected from /partials/footer.html) -->
-  <div data-include="partials/footer.html"></div>
+  <div data-include="/partials/footer.html"></div>
 
   <!-- Scroll reveal (once) -->
   <script>
