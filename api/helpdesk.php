@@ -4,24 +4,24 @@ declare(strict_types=1);
 require_once __DIR__.'/mail_common.php';
 
 /**
- * Helpdesk (Support) endpoint — early ACK + background processing + queue cleanup
+ * Helpdesk (Support) endpoint — early ACK + serialized clamdscan + queue cleanup
  * - Accepts JSON or multipart/form-data with attachments
  * - Early ACKs {"ok":true} so UI can show "Sent" immediately
- * - Stages files in api/queue/<req-id>/, scans with ClamAV (daemon or CLI),
- *   sends mail, then ALWAYS deletes the per-request folder
+ * - Stages files in api/queue/<req-id>/, scans with clamdscan ONLY (sequential),
+ *   retries until scan completes (clean or infected), sends mail,
+ *   then ALWAYS deletes the per-request folder
+ * - Uses a global flock to ensure ONLY ONE request is scanning at a time
  * - Writes a structured JSONL log to api/logs/helpdesk.log
- *
- * Policy:
- *   - Infected  => BLOCK
- *   - Error/Unavailable => ALLOW (but mark in report + warn log)
  */
 
-// ---------- Paths ----------
-const QUEUE_ROOT = __DIR__ . '/queue';
-const LOG_DIR    = __DIR__ . '/logs';
-const LOG_FILE   = LOG_DIR . '/helpdesk.log';
-const MAX_FILES  = 5;
-const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+// ---------- Paths / Limits ----------
+const QUEUE_ROOT       = __DIR__ . '/queue';
+const LOG_DIR          = __DIR__ . '/logs';
+const LOG_FILE         = LOG_DIR . '/helpdesk.log';
+const SCAN_LOCK_FILE   = __DIR__ . '/clamav.scan.lock';  // global mutex
+const MAX_FILES        = 5;
+const MAX_SIZE_BYTES   = 5 * 1024 * 1024; // 5 MB
+const CLAMDSCAN_BIN    = '/usr/bin/clamdscan';
 
 // ---------- Helpers ----------
 function get_request_data(): array {
@@ -34,6 +34,7 @@ function get_request_data(): array {
   }
   return $_POST;
 }
+
 function detect_mime_safely(string $path, string $name): string {
   if (class_exists('finfo')) {
     $fi = new finfo(FILEINFO_MIME_TYPE);
@@ -54,6 +55,7 @@ function detect_mime_safely(string $path, string $name): string {
   ];
   return $map[$ext] ?? 'application/octet-stream';
 }
+
 function normalize_files_array(array $files): array {
   $out = [];
   if (is_array($files['name'] ?? null)) {
@@ -77,6 +79,7 @@ function normalize_files_array(array $files): array {
   }
   return $out;
 }
+
 function rrmdir(string $dir): void {
   if (!is_dir($dir)) return;
   $items = scandir($dir); if ($items === false) return;
@@ -87,15 +90,18 @@ function rrmdir(string $dir): void {
   }
   @rmdir($dir);
 }
+
 function ensure_dirs(): void {
   if (!is_dir(QUEUE_ROOT)) @mkdir(QUEUE_ROOT, 0770, true);
   if (!is_dir(LOG_DIR))    @mkdir(LOG_DIR,   0750, true);
   if (!file_exists(LOG_FILE)) @touch(LOG_FILE);
   @chmod(LOG_FILE, 0640);
 }
+
 function req_id(): string {
   return date('Ymd-His').'-'.bin2hex(random_bytes(4));
 }
+
 function log_json(string $level, string $reqId, string $msg, array $ctx = []): void {
   $line = json_encode([
     'ts'     => gmdate('c'),
@@ -108,52 +114,111 @@ function log_json(string $level, string $reqId, string $msg, array $ctx = []): v
     @file_put_contents(LOG_FILE, $line."\n", FILE_APPEND);
   }
 }
-/**
- * AV scan (no PHP-side timeout). Returns:
- *   ['status'=>'clean'|'infected'|'error'|'unavailable', 'engine'=>..., 'code'=>..., 'stdout'=>..., 'stderr'=>...]
- */
-function antivirus_scan_detail(string $path): array {
-  $clamdscan = '/usr/bin/clamdscan';
-  $clamscan  = '/usr/bin/clamscan';
-  $candidates = [];
-  if (is_executable($clamdscan)) $candidates[] = [$clamdscan, "$clamdscan --no-summary --fdpass ".escapeshellarg($path), 'clamdscan'];
-  if (is_executable($clamscan))  $candidates[] = [$clamscan,  "$clamscan --no-summary ".escapeshellarg($path),           'clamscan'];
-  if (!$candidates) return ['status'=>'unavailable','engine'=>null,'code'=>2,'stdout'=>'','stderr'=>'no scanner'];
 
-  foreach ($candidates as [$bin,$cmd,$engine]) {
-    $desc = [1=>['pipe','w'], 2=>['pipe','w']];
-    $proc = @proc_open($cmd, $desc, $pipes);
-    if (!is_resource($proc)) continue;
-
-    // Blocking reads are fine here; clamd finishes when it's done.
-    stream_set_blocking($pipes[1], true);
-    stream_set_blocking($pipes[2], true);
-    $stdout = stream_get_contents($pipes[1]); fclose($pipes[1]);
-    $stderr = stream_get_contents($pipes[2]); fclose($pipes[2]);
-    $status = proc_get_status($proc);
-    $code   = $status['exitcode'];
-    proc_close($proc);
-
-    if ($code === 0) return ['status'=>'clean',    'engine'=>$engine, 'code'=>$code, 'stdout'=>$stdout, 'stderr'=>$stderr];
-    if ($code === 1) return ['status'=>'infected', 'engine'=>$engine, 'code'=>$code, 'stdout'=>$stdout, 'stderr'=>$stderr];
-    // exit 2 or other -> error; try next engine or return error if last
-    if ($engine === 'clamscan' || count($candidates) === 1) {
-      return ['status'=>'error', 'engine'=>$engine, 'code'=>$code, 'stdout'=>$stdout, 'stderr'=>$stderr];
-    }
-  }
-  return ['status'=>'error','engine'=>null,'code'=>2,'stdout'=>'','stderr'=>'proc error'];
-}
 function make_work_dir(string $reqId): string {
   $dir = QUEUE_ROOT.'/'.$reqId;
   if (!@mkdir($dir, 0770, true)) json_fail('Server storage unavailable', 500);
   return realpath($dir) ?: $dir;
 }
+
 function early_ack_then_continue(array $payload=['ok'=>true]): void {
   echo json_encode($payload, JSON_UNESCAPED_SLASHES), "\n";
   if (function_exists('fastcgi_finish_request')) {
     fastcgi_finish_request();
   } else {
     @ob_end_flush(); @flush();
+  }
+}
+
+/**
+ * Force clamdscan only.
+ * Returns: ['status'=>'clean'|'infected'|'error'|'unavailable','engine'=>'clamdscan','code'=>int,'stdout'=>string,'stderr'=>string]
+ */
+function antivirus_scan_once(string $path): array {
+  if (!is_executable(CLAMDSCAN_BIN)) {
+    return ['status'=>'unavailable','engine'=>'clamdscan','code'=>2,'stdout'=>'','stderr'=>'clamdscan not found'];
+  }
+  $cmd  = CLAMDSCAN_BIN . ' --no-summary --fdpass ' . escapeshellarg($path);
+  $desc = [1=>['pipe','w'], 2=>['pipe','w']];
+  $proc = @proc_open($cmd, $desc, $pipes);
+  if (!is_resource($proc)) {
+    return ['status'=>'error','engine'=>'clamdscan','code'=>2,'stdout'=>'','stderr'=>'proc_open failed'];
+  }
+  stream_set_blocking($pipes[1], true);
+  stream_set_blocking($pipes[2], true);
+  $stdout = stream_get_contents($pipes[1]); fclose($pipes[1]);
+  $stderr = stream_get_contents($pipes[2]); fclose($pipes[2]);
+  $status = proc_get_status($proc);
+  $code   = $status['exitcode'];
+  proc_close($proc);
+
+  if ($code === 0) return ['status'=>'clean',    'engine'=>'clamdscan','code'=>$code,'stdout'=>$stdout,'stderr'=>$stderr];
+  if ($code === 1) return ['status'=>'infected', 'engine'=>'clamdscan','code'=>$code,'stdout'=>$stdout,'stderr'=>$stderr];
+
+  $err = strtolower($stdout."\n".$stderr);
+  if (strpos($err, 'connect') !== false || strpos($err, 'socket') !== false) {
+    return ['status'=>'unavailable','engine'=>'clamdscan','code'=>$code,'stdout'=>$stdout,'stderr'=>$stderr];
+  }
+  return ['status'=>'error','engine'=>'clamdscan','code'=>$code,'stdout'=>$stdout,'stderr'=>$stderr];
+}
+
+/**
+ * Retry until scan finishes (clean or infected). Never “skip”.
+ * Logs periodic warnings when clamd is unavailable/error.
+ */
+function antivirus_scan_with_retry(string $path, string $reqId, string $filename): array {
+  $attempt = 0;
+  $lastWarnAt = 0;
+  while (true) {
+    $attempt++;
+    $res = antivirus_scan_once($path);
+
+    if ($res['status'] === 'clean' || $res['status'] === 'infected') {
+      if ($attempt > 1) {
+        log_json('info', $reqId, 'AV scan completed after retries', [
+          'file'=>$filename, 'attempts'=>$attempt, 'final_status'=>$res['status']
+        ]);
+      }
+      return $res;
+    }
+
+    // unavailable/error: wait and retry, never skip
+    $now = time();
+    if ($now - $lastWarnAt >= 60) { // log at most once per minute
+      log_json('warn', $reqId, 'AV scan retry (daemon unavailable or error)', [
+        'file'=>$filename, 'attempt'=>$attempt, 'status'=>$res['status'], 'stderr'=>substr((string)$res['stderr'],0,400)
+      ]);
+      $lastWarnAt = $now;
+    }
+    sleep(2); // gentle backoff; keep CPU low while waiting for clamd
+  }
+}
+
+/**
+ * Acquire a global scan lock so only one request scans at a time.
+ * Returns the lock handle which must be kept open until release.
+ */
+function acquire_scan_lock() {
+  $fh = fopen(SCAN_LOCK_FILE, 'c');
+  if ($fh === false) {
+    // As a fallback, proceed without lock but log error
+    return null;
+  }
+  // Make sure perms are sane
+  @chmod(SCAN_LOCK_FILE, 0660);
+  // Block until we get the lock to serialize scanning
+  if (!flock($fh, LOCK_EX)) {
+    // If lock fails (rare), still proceed but log
+    log_json('error', 'n/a', 'Failed to acquire scan lock');
+    return null;
+  }
+  return $fh;
+}
+
+function release_scan_lock($fh): void {
+  if (is_resource($fh)) {
+    @flock($fh, LOCK_UN);
+    @fclose($fh);
   }
 }
 
@@ -202,7 +267,7 @@ $text = $emailSubject."\n"
       . "IP: $ip\n\n"
       . "$issue\n";
 
-// Early ACK for fast UX
+// Early ACK so the UI shows "Sent" immediately
 early_ack_then_continue(['ok'=>true,'message'=>'Received']);
 
 // Background work continues
@@ -211,6 +276,7 @@ ignore_user_abort(true);
 $attachments = [];
 $scanReport  = [];
 $workDir     = null;
+$lockHandle  = null;
 
 try {
   // Handle attachments if any
@@ -229,6 +295,12 @@ try {
       'text/csv'
     ];
 
+    // Acquire global scan lock to serialize scanning across requests
+    $lockHandle = acquire_scan_lock();
+    if (!$lockHandle) {
+      log_json('warn', $reqId, 'Proceeding without scan lock (acquire failed)');
+    }
+
     $kept = 0;
     foreach ($flat as $idx => $f) {
       if (($f['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) continue;
@@ -243,7 +315,8 @@ try {
       $name = $f['name'] ?? 'file';
       $size = (int)($f['size'] ?? 0);
 
-      $verdict = 'attached';
+      // static checks first
+      $verdict = 'candidate';
       $reason  = '';
 
       if ($size > MAX_SIZE_BYTES) { $verdict='blocked'; $reason='too large'; }
@@ -263,21 +336,18 @@ try {
         $verdict='blocked'; $reason='MIME check failed';
       }
 
-      // AV scan (only if still candidate to attach)
-      $av = ['status'=>'unavailable','engine'=>null,'code'=>null,'stdout'=>'','stderr'=>''];
+      // MUST scan every candidate; sequentially (we're inside the foreach; no parallelism).
+      $av = ['status'=>null,'engine'=>'clamdscan','code'=>null,'stdout'=>'','stderr'=>''];
       if ($verdict !== 'blocked') {
-        $av = antivirus_scan_detail($destPath);
-
+        $av = antivirus_scan_with_retry($destPath, $reqId, $cleanName); // blocks until clean or infected
         if ($av['status'] === 'infected') {
           $verdict = 'blocked'; $reason = 'virus detected';
-        } elseif ($av['status'] === 'error' || $av['status'] === 'unavailable') {
-          // Allow, but mark and log
-          $verdict = 'attached'; $reason = $av['status'];
-          log_json('warn', $reqId, 'AV issue', [
-            'file'=>$cleanName, 'status'=>$av['status'], 'engine'=>$av['engine'],
-            'code'=>$av['code'], 'stdout'=>substr((string)$av['stdout'],0,500),
-            'stderr'=>substr((string)$av['stderr'],0,500)
-          ]);
+        } elseif ($av['status'] === 'clean') {
+          $verdict = 'attached';
+        } else {
+          // By design antivirus_scan_with_retry returns only clean|infected, but keep guard:
+          $verdict = 'blocked'; $reason = 'scan anomaly';
+          log_json('error', $reqId, 'Unexpected AV status', ['file'=>$cleanName, 'status'=>$av['status']]);
         }
       }
 
@@ -288,13 +358,13 @@ try {
         'size'   => $size,
         'mime'   => $mime,
         'sha256' => $sha256,
-        'engine' => $av['engine'],
-        'av'     => $av['status'],
+        'engine' => $av['engine'] ?? 'clamdscan',
+        'av'     => $av['status'] ?? 'n/a',
         'action' => ($verdict === 'blocked' ? 'blocked' : 'attached'),
         'note'   => $reason
       ];
 
-      if ($verdict !== 'blocked') {
+      if ($verdict === 'attached') {
         $attachments[] = ['path'=>$destPath, 'name'=>$cleanName];
         $kept++;
       }
@@ -311,8 +381,8 @@ try {
     foreach ($scanReport as $r) {
       $sizeKB = number_format($r['size']/1024, 1).' KB';
       $avLabel = $r['av'];
-      if ($r['engine']) $avLabel .= ' ('.$r['engine'].')';
-      if ($r['note'])   $avLabel .= ' — '.$r['note'];
+      if (!empty($r['engine'])) $avLabel .= ' ('.$r['engine'].')';
+      if (!empty($r['note']))   $avLabel .= ' — '.$r['note'];
       $sha = $r['sha256'] ? '<br><span style="color:#9aa0a6;font-size:0.85em">sha256: '.htmlspecialchars($r['sha256']).'</span>' : '';
       $html .= '<tr style="background:#fff"><td>'.htmlspecialchars($r['name']).$sha.'</td>'
             .  '<td>'.$sizeKB.'</td><td>'.htmlspecialchars($r['mime']).'</td>'
@@ -324,7 +394,7 @@ try {
     $text .= "\n--- Attachment scan report ---\n";
     foreach ($scanReport as $r) {
       $sizeKB = number_format($r['size']/1024, 1).' KB';
-      $avLabel = $r['av'].($r['engine'] ? " ({$r['engine']})" : '').($r['note'] ? " — {$r['note']}" : '');
+      $avLabel = $r['av'].(!empty($r['engine']) ? " ({$r['engine']})" : '').(!empty($r['note']) ? " — {$r['note']}" : '');
       $text .= "{$r['name']} | {$sizeKB} | {$r['mime']} | {$avLabel} | {$r['action']}";
       if (!empty($r['sha256'])) $text .= " | sha256: {$r['sha256']}";
       $text .= "\n";
@@ -341,15 +411,19 @@ try {
       $text,
       $attachments
     );
+    $attachedCnt = count($attachments);
+    $blockedCnt  = count(array_filter($scanReport, fn($r)=>$r['action']==='blocked'));
     log_json('info', $reqId, 'Mail sent', [
       'ip'=>$ip, 'subject'=>$emailSubject, 'from_email'=>$email, 'name'=>$name,
-      'attachments_total'=>count($attachments), 'blocked_total'=>count(array_filter($scanReport, fn($r)=>$r['action']==='blocked'))
+      'attachments_total'=>$attachedCnt, 'blocked_total'=>$blockedCnt
     ]);
   } catch (Throwable $e) {
     log_json('error', $reqId, 'Mail send error', ['error'=>$e->getMessage()]);
   }
 } finally {
-  if ($workDir && is_dir($workDir)) rrmdir($workDir); // ALWAYS purge staged files
+  // Release global lock (if held) and clean queue
+  if ($lockHandle) release_scan_lock($lockHandle);
+  if ($workDir && is_dir($workDir)) rrmdir($workDir);
 }
 
 // Done
