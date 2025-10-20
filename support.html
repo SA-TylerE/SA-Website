@@ -113,6 +113,89 @@
       </div>
     </section>
 
+    <!-- Ticket Portal -->
+    <section class="ticket-portal">
+      <div class="tp-tabs">
+        <button class="tp-tab tp-tab--active" data-tp="create">Open a new ticket</button>
+        <button class="tp-tab" data-tp="lookup">Check ticket status</button>
+      </div>
+
+      <div class="tp-panel tp-panel--create">
+        <form id="tpCreate" enctype="multipart/form-data" novalidate>
+          <div class="tp-row">
+            <label>Full name <span>*</span></label>
+            <input name="name" type="text" required maxlength="120" autocomplete="name">
+          </div>
+          <div class="tp-row">
+            <label>Email <span>*</span></label>
+            <input name="email" type="email" required maxlength="190" autocomplete="email">
+          </div>
+          <div class="tp-row">
+            <label>Company (optional)</label>
+            <input name="company" type="text" maxlength="190" autocomplete="organization">
+          </div>
+          <div class="tp-row">
+            <label>Subject <span>*</span></label>
+            <input name="subject" type="text" required maxlength="150">
+          </div>
+          <div class="tp-row">
+            <label>Describe the issue <span>*</span></label>
+            <textarea name="issue" required maxlength="5000" rows="6" placeholder="What happened? When did it start? Error messages?"></textarea>
+          </div>
+          <div class="tp-row">
+            <label>Attachments (up to 5, max 15 MB each; no executables)</label>
+            <input name="files[]" type="file" multiple accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
+          </div>
+
+          <!-- Hook for CAPTCHA if you want it (hCaptcha/Cloudflare Turnstile) -->
+          <div id="tpCreateCaptcha" class="tp-row" hidden></div>
+
+          <div class="tp-actions">
+            <button type="submit" class="btn btn--primary" id="tpCreateSubmit">Submit ticket</button>
+            <span class="tp-hint" id="tpCreateHint"></span>
+          </div>
+        </form>
+      </div>
+
+      <div class="tp-panel tp-panel--lookup" hidden>
+        <form id="tpLookupStart" novalidate>
+          <div class="tp-row">
+            <label>Ticket number (if you have it)</label>
+            <input name="ticket_number" type="text" maxlength="20" placeholder="Optional">
+          </div>
+          <div class="tp-row">
+            <label>Requester email <span>*</span></label>
+            <input name="email" type="email" required maxlength="190">
+          </div>
+
+          <!-- Optional CAPTCHA hook -->
+          <div id="tpLookupCaptcha" class="tp-row" hidden></div>
+
+          <div class="tp-actions">
+            <button type="submit" class="btn btn--primary">Email me a secure link</button>
+            <span class="tp-hint" id="tpLookupHint"></span>
+          </div>
+        </form>
+
+        <!-- This second step is opened from the emailed link; page JS will fill token -->
+        <div id="tpLookupResult" class="tp-result" hidden>
+          <h3>Your ticket</h3>
+          <div class="tp-ticket" id="tpTicketCard"></div>
+
+          <form id="tpAddComment" novalidate>
+            <div class="tp-row">
+              <label>Add a public comment (optional)</label>
+              <textarea name="message" rows="4" maxlength="5000"></textarea>
+            </div>
+            <div class="tp-actions">
+              <button type="submit" class="btn">Post comment</button>
+              <span class="tp-hint" id="tpCommentHint"></span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <!-- Remote support (Splashtop SOS) -->
     <section class="section" id="remote">
       <div class="container remote-grid">
@@ -652,5 +735,207 @@
       });
     })();
   </script>
+  <!-- Ticket Portal -->
+  <section class="ticket-portal">
+    <div class="tp-tabs">
+      <button class="tp-tab tp-tab--active" data-tp="create">Open a new ticket</button>
+      <button class="tp-tab" data-tp="lookup">Check ticket status</button>
+    </div>
+
+    <div class="tp-panel tp-panel--create">
+      <form id="tpCreate" enctype="multipart/form-data" novalidate>
+        <div class="tp-row">
+          <label>Full name <span>*</span></label>
+          <input name="name" type="text" required maxlength="120" autocomplete="name">
+        </div>
+        <div class="tp-row">
+          <label>Email <span>*</span></label>
+          <input name="email" type="email" required maxlength="190" autocomplete="email">
+        </div>
+        <div class="tp-row">
+          <label>Company (optional)</label>
+          <input name="company" type="text" maxlength="190" autocomplete="organization">
+        </div>
+        <div class="tp-row">
+          <label>Subject <span>*</span></label>
+          <input name="subject" type="text" required maxlength="150">
+        </div>
+        <div class="tp-row">
+          <label>Describe the issue <span>*</span></label>
+          <textarea name="issue" required maxlength="5000" rows="6" placeholder="What happened? When did it start? Error messages?"></textarea>
+        </div>
+        <div class="tp-row">
+          <label>Attachments (up to 5, max 15 MB each; no executables)</label>
+          <input name="files[]" type="file" multiple accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
+        </div>
+
+        <!-- Hook for CAPTCHA if you want it (hCaptcha/Cloudflare Turnstile) -->
+        <div id="tpCreateCaptcha" class="tp-row" hidden></div>
+
+        <div class="tp-actions">
+          <button type="submit" class="btn btn--primary" id="tpCreateSubmit">Submit ticket</button>
+          <span class="tp-hint" id="tpCreateHint"></span>
+        </div>
+      </form>
+    </div>
+
+    <div class="tp-panel tp-panel--lookup" hidden>
+      <form id="tpLookupStart" novalidate>
+        <div class="tp-row">
+          <label>Ticket number (if you have it)</label>
+          <input name="ticket_number" type="text" maxlength="20" placeholder="Optional">
+        </div>
+        <div class="tp-row">
+          <label>Requester email <span>*</span></label>
+          <input name="email" type="email" required maxlength="190">
+        </div>
+
+        <!-- Optional CAPTCHA hook -->
+        <div id="tpLookupCaptcha" class="tp-row" hidden></div>
+
+        <div class="tp-actions">
+          <button type="submit" class="btn btn--primary">Email me a secure link</button>
+          <span class="tp-hint" id="tpLookupHint"></span>
+        </div>
+      </form>
+
+      <!-- This second step is opened from the emailed link; page JS will fill token -->
+      <div id="tpLookupResult" class="tp-result" hidden>
+        <h3>Your ticket</h3>
+        <div class="tp-ticket" id="tpTicketCard"></div>
+
+        <form id="tpAddComment" novalidate>
+          <div class="tp-row">
+            <label>Add a public comment (optional)</label>
+            <textarea name="message" rows="4" maxlength="5000"></textarea>
+          </div>
+          <div class="tp-actions">
+            <button type="submit" class="btn">Post comment</button>
+            <span class="tp-hint" id="tpCommentHint"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <script>
+  (() => {
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Tab logic
+    $$(".tp-tab").forEach(btn => btn.addEventListener("click", e => {
+      $$(".tp-tab").forEach(b => b.classList.remove("tp-tab--active"));
+      e.currentTarget.classList.add("tp-tab--active");
+      const tgt = e.currentTarget.getAttribute("data-tp");
+      $$(".tp-panel").forEach(p => p.hidden = true);
+      $(`.tp-panel--${tgt}`).hidden = false;
+      document.querySelector(".ticket-portal").scrollIntoView({behavior:"smooth", block:"start"});
+    }));
+
+    // Create Ticket submit
+    $("#tpCreate").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      const hint = $("#tpCreateHint");
+      const btn  = $("#tpCreateSubmit");
+      hint.textContent = ""; btn.disabled = true;
+
+      // Client-side validation (basic)
+      const fd = new FormData(form);
+      const email = fd.get("email")?.toString().trim() || "";
+      const name  = fd.get("name")?.toString().trim() || "";
+      const subject = fd.get("subject")?.toString().trim() || "";
+      const issue = fd.get("issue")?.toString().trim() || "";
+
+      if (!name || !email || !subject || !issue) {
+        hint.textContent = "Please fill out all required fields.";
+        btn.disabled = false; return;
+      }
+
+      try {
+        const res = await fetch("/api/tickets/create.php", { method:"POST", body: fd, credentials: "same-origin" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Submission failed.");
+        hint.textContent = `Ticket created! #${data.public_ref}. Check your email for confirmation.`;
+        form.reset();
+      } catch (err) {
+        hint.textContent = err.message || "Error creating ticket.";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // Start lookup (sends magic link)
+    $("#tpLookupStart").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.currentTarget);
+      const hint = $("#tpLookupHint");
+      hint.textContent = "";
+      try {
+        const res = await fetch("/api/tickets/lookup_start.php", { method:"POST", body: fd, credentials:"same-origin" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Request failed.");
+        hint.textContent = "If that email exists for a ticket, a secure link has been sent.";
+        e.currentTarget.reset();
+      } catch (err) {
+        hint.textContent = err.message || "Error sending link.";
+      }
+    });
+
+    // If this page was opened via magic link (token in URL), auto-load ticket
+    (async () => {
+      const url = new URL(window.location.href);
+      const token = url.searchParams.get("tkn");
+      if (!token) return;
+
+      try {
+        const res = await fetch("/api/tickets/lookup_fetch.php?tkn=" + encodeURIComponent(token), { credentials:"same-origin" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Could not load ticket.");
+
+        // Switch to Lookup tab and show result
+        $("[data-tp='lookup']").click();
+        $("#tpLookupResult").hidden = false;
+
+        $("#tpTicketCard").innerHTML = `
+          <div class="tp-card-line"><strong>Ticket #</strong> ${data.public_ref}</div>
+          <div class="tp-card-line"><strong>Subject</strong> ${data.subject}</div>
+          <div class="tp-card-line"><strong>Status</strong> ${data.status}</div>
+          <div class="tp-card-line"><strong>Last Update</strong> ${data.updated_at}</div>
+          <div class="tp-thread">
+            ${data.thread.map(m => `
+              <div class="tp-msg">
+                <div class="tp-msg-meta">${m.when} — ${m.author}${m.public ? '' : ' (private)'}</div>
+                <div class="tp-msg-body">${m.body_html}</div>
+              </div>`).join("")}
+          </div>
+        `;
+
+        // Wire comment form
+        $("#tpAddComment").addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const hint = $("#tpCommentHint"); hint.textContent = "";
+          const fd = new FormData(e.currentTarget);
+          fd.append("tkn", token);
+          try {
+            const res = await fetch("/api/tickets/add_comment.php", { method:"POST", body: fd, credentials:"same-origin" });
+            const out = await res.json();
+            if (!res.ok) throw new Error(out?.error || "Failed to post comment.");
+            hint.textContent = "Comment posted.";
+            e.currentTarget.reset();
+          } catch (err) {
+            hint.textContent = err.message || "Error posting comment.";
+          }
+        });
+
+        document.querySelector(".ticket-portal").scrollIntoView({behavior:"smooth", block:"start"});
+      } catch (err) {
+        // stay silent to avoid leaking existence
+      }
+    })();
+  })();
+  </script>
+
 </body>
 </html>
