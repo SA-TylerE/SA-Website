@@ -483,8 +483,8 @@ try {
     foreach ($scanReport as $r) {
       $sizeKB  = number_format($r['size']/1024, 1).' KB';
 
-      // status + note only
-      $avLabel = $r['av'] . (!empty($r['note']) ? " {$r['note']}" : '');
+      // status only
+      $avLabel = $r['av'];
 
       $text .= "{$r['name']} | {$sizeKB} | {$avLabel} | {$r['action']}";
       if (!empty($r['sha256'])) {
