@@ -38,7 +38,6 @@
 
           <div class="helpdesk-actions">
             <a class="btn btn--primary" href="tel:+1-503-878-7000">Call/Text 503-878-7000</a>
-
             <button
               type="button"
               id="toggle-email-form"
@@ -47,7 +46,6 @@
               aria-controls="email-form-panel">
               Email Helpdesk
             </button>
-
             <button
               type="button"
               id="toggle-ticket-form"
@@ -133,64 +131,58 @@
                 <button class="tp-tab" data-tp="lookup" role="tab" aria-selected="false">Check ticket status</button>
               </div>
 
-              <!-- Create -->
+              <!-- Create (same grid as email/contact) -->
               <div class="tp-panel tp-panel--create" role="tabpanel">
-                <form id="tpCreate" enctype="multipart/form-data" novalidate>
-                  <div class="tp-grid">
-                    <label class="tp-field">
-                      <span>Full name <em>*</em></span>
+                <form id="tpCreate" class="support-form" enctype="multipart/form-data" novalidate>
+                  <div class="form-grid">
+                    <label>
+                      <span>Full name <span class="req" aria-hidden="true">*</span></span>
                       <input name="name" type="text" required maxlength="120" autocomplete="name">
                     </label>
-                    <label class="tp-field">
+                    <label>
                       <span>Company (optional)</span>
                       <input name="company" type="text" maxlength="190" autocomplete="organization">
                     </label>
 
-                    <label class="tp-field">
-                      <span>Email <em>*</em></span>
+                    <label>
+                      <span>Email <span class="req" aria-hidden="true">*</span></span>
                       <input name="email" type="email" required maxlength="190" autocomplete="email">
                     </label>
-                    <label class="tp-field">
-                      <span>Phone <em>*</em></span>
-                      <input name="phone" id="tp-phone" type="tel" required inputmode="tel" autocomplete="tel"
-                             maxlength="14" pattern="^\(\d{3}\) \d{3}-\d{4}$" placeholder="(555) 123-4567">
+                    <label>
+                      <span>Phone <span class="req" aria-hidden="true">*</span></span>
+                      <input name="phone" id="tp-phone" type="tel" required autocomplete="tel"
+                             inputmode="tel" maxlength="14"
+                             pattern="^\(\d{3}\) \d{3}-\d{4}$" placeholder="(555) 123-4567">
                     </label>
 
-                    <label class="tp-field tp-field--full">
-                      <span>Subject <em>*</em></span>
+                    <label class="full">
+                      <span>Subject <span class="req" aria-hidden="true">*</span></span>
                       <input name="subject" type="text" required maxlength="150">
                     </label>
-
-                    <label class="tp-field tp-field--full">
-                      <span>Describe the issue <em>*</em></span>
+                    <label class="full">
+                      <span>Describe the issue <span class="req" aria-hidden="true">*</span></span>
                       <textarea name="issue" required maxlength="5000" rows="6" placeholder="What happened? When did it start? Error messages?"></textarea>
                     </label>
 
-                    <!-- Attachments -->
-                    <div class="tp-field tp-field--full">
-                      <span>Attachments (up to 5, max 15 MB each; no executables)</span>
-                      <div class="attachments">
-                        <div class="attach-row">
-                          <button type="button" id="tp-add-files" class="attach-btn" title="Add up to 5 files">
-                            <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
-                              <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
-                              <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                            Add files
-                          </button>
-                        </div>
-                        <div id="tp-file-list" class="attach-list"></div>
-                        <input type="file" id="tp-files" name="files[]" multiple hidden
-                               accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
-                        <div class="attach-note">Up to 5 files, max 15&nbsp;MB each; allowed: PNG, JPG, PDF, TXT/LOG, DOC/DOCX, XLSX, CSV.</div>
+                    <!-- Attachments widget (same as email) -->
+                    <div class="full attachments">
+                      <div class="attach-row">
+                        <button type="button" id="tp-add-files" class="attach-btn" title="Add up to 5 files">
+                          <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          </svg>
+                          Add files
+                        </button>
                       </div>
+                      <div id="tp-file-list" class="attach-list"></div>
+                      <input type="file" id="tp-files" name="files[]" multiple hidden
+                             accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
+                      <div class="attach-note">Up to 5 files, max 15&nbsp;MB each; no executables.</div>
                     </div>
                   </div>
 
-                  <!-- Optional CAPTCHA -->
-                  <div id="tpCreateCaptcha" hidden></div>
-
-                  <div class="tp-actions">
+                  <div class="form-actions">
                     <button type="submit" class="btn btn--primary" id="tpCreateSubmit">Submit ticket</button>
                     <button type="button" class="btn btn--outline" id="tpCreateCancel">Cancel</button>
                     <span class="tp-hint" id="tpCreateHint" role="status" aria-live="polite"></span>
@@ -200,22 +192,19 @@
 
               <!-- Lookup -->
               <div class="tp-panel tp-panel--lookup" role="tabpanel" hidden aria-hidden="true">
-                <form id="tpLookupStart" novalidate>
-                  <div class="tp-grid">
-                    <label class="tp-field">
-                      <span>Requester email <em>*</em></span>
+                <form id="tpLookupStart" class="support-form" novalidate>
+                  <div class="form-grid">
+                    <label class="full">
+                      <span>Requester email <span class="req" aria-hidden="true">*</span></span>
                       <input name="email" type="email" required maxlength="190">
                     </label>
-                    <label class="tp-field">
+                    <label class="full">
                       <span>Ticket number (optional)</span>
                       <input name="ticket_number" type="text" maxlength="20" placeholder="If you have it">
                     </label>
                   </div>
 
-                  <!-- Optional CAPTCHA hook -->
-                  <div id="tpLookupCaptcha" hidden></div>
-
-                  <div class="tp-actions">
+                  <div class="form-actions">
                     <button type="submit" class="btn btn--primary">Email me a secure link</button>
                     <button type="button" class="btn btn--outline" id="tpLookupCancel">Cancel</button>
                     <span class="tp-hint" id="tpLookupHint" role="status" aria-live="polite"></span>
@@ -227,12 +216,14 @@
                   <h3 class="tp-result__title">Your ticket</h3>
                   <div class="tp-ticket" id="tpTicketCard"></div>
 
-                  <form id="tpAddComment" class="tp-comment" novalidate>
-                    <label class="tp-field tp-field--full">
-                      <span>Add a public comment (optional)</span>
-                      <textarea name="message" rows="4" maxlength="5000"></textarea>
-                    </label>
-                    <div class="tp-actions">
+                  <form id="tpAddComment" class="support-form tp-comment" novalidate>
+                    <div class="form-grid">
+                      <label class="full">
+                        <span>Add a public comment (optional)</span>
+                        <textarea name="message" rows="4" maxlength="5000"></textarea>
+                      </label>
+                    </div>
+                    <div class="form-actions">
                       <button type="submit" class="btn">Post comment</button>
                       <span class="tp-hint" id="tpCommentHint" role="status" aria-live="polite"></span>
                     </div>
@@ -337,7 +328,7 @@
           const p = downloads[key];
           const btn = document.createElement("button");
           btn.className = "override-download-btn";
-          btn.type = "button";
+        btn.type = "button";
           btn.dataset.key = key;
           btn.innerHTML = `<img src="${p.icon}" alt="${p.name}"> ${p.name}`;
           btn.addEventListener("click", () => updateDownload(key, true));
@@ -353,7 +344,7 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    /* ===== Inline worker for attachments ===== */
+    /* ===== Shared attachment widget (email + ticket) ===== */
     function createIngestWorker(){
       const src = `
         const jobs = new Map();
@@ -390,22 +381,18 @@
       return w;
     }
 
-    /* ===== Universal attachment widget (Email + Ticket) ===== */
     function setupAttachmentWidget({ addBtnId, inputId, listId, limits }){
       const addBtn = document.getElementById(addBtnId);
       const input  = document.getElementById(inputId);
       const listEl = document.getElementById(listId);
-
       const ready = [];
       const active = new Map();
       const q = [];
       let busy = false;
       let worker = null;
-
       const MAX_FILES = limits.maxFiles;
       const MAX_SIZE  = limits.maxSize;
       const allowed   = limits.allowed;
-
       const fmtMB = n => (n/(1024*1024)).toFixed(2)+' MB';
       const sig = f => `${f.name}|${f.size}|${f.lastModified}`;
 
@@ -414,7 +401,6 @@
         addBtn.disabled = count >= MAX_FILES;
         addBtn.title = addBtn.disabled ? `Limit reached (${MAX_FILES} files)` : `Add up to ${MAX_FILES} files`;
       }
-
       function chipFor(file, id){
         const chip = document.createElement('span');
         chip.className = 'file-chip is-loading';
@@ -434,7 +420,6 @@
           removeBtn: chip.querySelector('.file-chip__remove')
         };
       }
-
       function markReady(id){
         const entry = active.get(id);
         if (!entry) return;
@@ -447,7 +432,6 @@
         setBtnState();
         pump();
       }
-
       function removeId(id){
         const entry = active.get(id);
         if (entry){
@@ -469,7 +453,6 @@
         setBtnState();
         pump();
       }
-
       listEl.addEventListener('click', (e)=>{
         const btn = e.target.closest('.file-chip__remove');
         if (!btn) return;
@@ -477,7 +460,6 @@
         if (!chip) return;
         removeId(chip.dataset.id);
       });
-
       function ensureWorker(){
         if (worker) return;
         try {
@@ -500,7 +482,6 @@
           worker.onerror = ()=>{ busy = false; };
         } catch { worker = null; }
       }
-
       function pump(){
         if (busy || q.length === 0) return;
         const job = q.shift();
@@ -528,27 +509,21 @@
           requestAnimationFrame(tick);
         }
       }
-
       function addFile(file){
         if (ready.length + active.size >= MAX_FILES) return;
-        if (file.size > MAX_SIZE) { alert(`${file.name} is larger than ${fmtMB(MAX_SIZE)}.`); return; }
+        if (file.size > MAX_SIZE) { alert(`${file.name} is larger than ${(MAX_SIZE/1048576).toFixed(0)} MB.`); return; }
         const okType = allowed.includes(file.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(file.name);
         if (!okType) { alert(`${file.name} is not an allowed file type.`); return; }
-
         const signature = sig(file);
         for (const [, v] of active) if (sig(v.file) === signature) return;
         if (ready.some(r => sig(r.file) === signature)) return;
-
         const id = (self.crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
         const els = chipFor(file, id);
         active.set(id, { file, els, state:'queued', mode:'pending' });
         setBtnState();
-
         setTimeout(()=> { ensureWorker(); q.push({ id, file }); pump(); }, 0);
       }
-
       function addMany(files){ files.forEach((f, i)=> setTimeout(()=> addFile(f), i*40)); }
-
       addBtn.addEventListener('click', ()=> input.click());
       input.addEventListener('change', ()=>{
         const files = Array.from(input.files || []);
@@ -556,24 +531,19 @@
         if (!files.length) return;
         addMany(files);
       });
-
       function reset(){
         if (worker){
           active.forEach((_, id)=> { try { worker.postMessage({cmd:'abort', id}); } catch {} });
         }
         listEl.querySelectorAll('.file-chip').forEach(el => el.remove());
         active.clear();
-        ready.length = 0;
-        q.length = 0;
-        busy = false;
-        setBtnState();
+        ready.length = 0; q.length = 0; busy = false; setBtnState();
       }
-
       return { get: ()=> ready.map(r => r.file), reset };
     }
 
+    /* ===== Email panel open/close + submit ===== */
     (function(){
-      /* ===== Email panel open/close ===== */
       const toggleBtn = document.getElementById('toggle-email-form');
       const panel     = document.getElementById('email-form-panel');
       const form      = document.getElementById('helpdesk-email-form');
@@ -607,15 +577,19 @@
       });
       toggleBtn.addEventListener('click', ()=>{
         const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+        // close Ticket if opening Email
         if (!expanded && window.saPanels?.ticket?.isOpen?.()) window.saPanels.ticket.close();
         expanded ? closePanel() : openPanel();
       });
 
-      // expose for cross control
+      // expose to allow ticket panel to close it
       window.saPanels = window.saPanels || {};
-      window.saPanels.email = { open: openPanel, close: closePanel, isOpen: ()=> toggleBtn.getAttribute('aria-expanded') === 'true' };
+      window.saPanels.email = {
+        open: openPanel,
+        close: closePanel,
+        isOpen: ()=> toggleBtn.getAttribute('aria-expanded') === 'true'
+      };
 
-      // Email attachments
       const widget = setupAttachmentWidget({
         addBtnId: 'hd-add-files',
         inputId : 'hd-files',
@@ -636,10 +610,13 @@
         if (!form.reportValidity()){ setStatusErr('Please complete all required fields.'); return; }
         sendBtn.disabled = true; cancelBtn.disabled = true; document.getElementById('hd-add-files').disabled = true;
         setStatusSend();
+
         const fd = new FormData(form);
+        for (const f of widget.get()) fd.append('attachments[]', f, f.name);
+
         try{
           const resp = await fetch(API('api/helpdesk.php'), { method:'POST', body: fd });
-          const data = await resp.json();
+          const text = await resp.text(); let data; try{ data = JSON.parse(text); }catch{ throw new Error('Non-JSON'); }
           if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Send failed');
           setStatusOK('Sent'); resetFormAndFiles();
         }catch(err){ console.error('Helpdesk send failed:', err); setStatusErr('Send failed — please try again.'); }
@@ -649,7 +626,7 @@
 
     /* ===== Ticket portal: collapsible + tabs + API + phone mask ===== */
     (function(){
-      const $ = (s, el=document)=>el.querySelector(s);
+      const $  = (s, el=document)=>el.querySelector(s);
       const $$ = (s, el=document)=>Array.from(el.querySelectorAll(s));
 
       const toggleBtn = document.getElementById('toggle-ticket-form');
@@ -675,18 +652,18 @@
         animating = false;
       });
 
-      // Mutual exclusivity with Email panel
+      // Mutually exclusive with Email panel
       toggleBtn.addEventListener('click', ()=>{
         const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
         if (!expanded && window.saPanels?.email?.isOpen?.()) window.saPanels.email.close();
         expanded ? closePanel() : openPanel();
       });
 
-      // expose
+      // Expose for cross-control
       window.saPanels = window.saPanels || {};
       window.saPanels.ticket = { open: openPanel, close: closePanel, isOpen: ()=> toggleBtn.getAttribute('aria-expanded') === 'true' };
 
-      // Tabs (no scroll jump)
+      // Tabs (no scrolling)
       $$('.tp-tab', portal).forEach(btn=>{
         btn.addEventListener('click', (e)=>{
           $$('.tp-tab', portal).forEach(b=>b.classList.remove('tp-tab--active'));
@@ -696,17 +673,30 @@
         });
       });
 
-      // Phone mask (US) for ticket create
-      (function initTpPhoneMask(){
-        const input = document.getElementById('tp-phone'); if (!input) return;
-        function formatUS(d){ const s=d.slice(0,10); if(!s) return ''; if(s.length<4) return `(${s}`; if(s.length<7) return `(${s.slice(0,3)}) ${s.slice(3)}`; return `(${s.slice(0,3)}) ${s.slice(3,6)}-${s.slice(6)}`; }
-        function digitsUpTo(str,pos){ let c=0; for(let i=0;i<pos&&i<str.length;i++) if(/\d/.test(str[i])) c++; return c; }
-        function caretForIdx(str,idx){ if(idx<=0) return 0; let c=0; for(let i=0;i<str.length;i++){ if(/\d/.test(str[i])) c++; if(c>=idx) return i+1; } return str.length; }
+      // Phone live formatter (same as contact page)
+      (function initPhoneMask(){
+        const input = document.getElementById('tp-phone');
+        if (!input) return;
+        function formatUS(digits){ const d=digits.slice(0,10); if(!d.length) return ''; if(d.length<4) return `(${d}`; if(d.length<7) return `(${d.slice(0,3)}) ${d.slice(3)}`; return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`; }
+        function digitCountUpTo(str,pos){ let c=0; for(let i=0;i<pos&&i<str.length;i++) if(/\d/.test(str[i])) c++; return c; }
+        function caretForIndex(str,idx){ if(idx<=0) return 0; let c=0; for(let i=0;i<str.length;i++){ if(/\d/.test(str[i])) c++; if(c>=idx) return i+1; } return str.length; }
         function setValidity(v){ if(v && !/^\(\d{3}\) \d{3}-\d{4}$/.test(v)) input.setCustomValidity('Please enter a full 10-digit US number, e.g. (555) 123-4567.'); else input.setCustomValidity(''); }
-        input.addEventListener('input',()=>{ const ov=input.value, op=input.selectionStart??ov.length, nDigits=digitsUpTo(ov,op); const digits=ov.replace(/\D/g,'').slice(0,10); const nv=formatUS(digits); const np=caretForIdx(nv,nDigits); if(nv!==ov){ input.value=nv; queueMicrotask(()=>input.setSelectionRange(np,np)); } setValidity(input.value);});
-        input.addEventListener('blur',()=>setValidity(input.value));
-        input.addEventListener('paste',(e)=>{ e.preventDefault(); const pasted=(e.clipboardData||window.clipboardData).getData('text')||''; const d=pasted.replace(/\D/g,'').slice(0,10); input.value=formatUS(d); const end=input.value.length; input.setSelectionRange(end,end); setValidity(input.value); });
+        input.addEventListener('input', ()=>{ const ov=input.value, op=input.selectionStart??ov.length, db=digitCountUpTo(ov,op); const nd=ov.replace(/\D/g,'').slice(0,10); const nv=formatUS(nd); const np=caretForIndex(nv,db); if(nv!==ov){ input.value=nv; queueMicrotask(()=>input.setSelectionRange(np,np)); } setValidity(input.value); });
+        input.addEventListener('blur', ()=> setValidity(input.value));
+        input.addEventListener('paste', (e)=>{ e.preventDefault(); const digits=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,10); input.value=formatUS(digits); const end=input.value.length; input.setSelectionRange(end,end); setValidity(input.value); });
       })();
+
+      // Ticket attachments widget
+      const tpWidget = setupAttachmentWidget({
+        addBtnId: 'tp-add-files',
+        inputId : 'tp-files',
+        listId  : 'tp-file-list',
+        limits  : {
+          maxFiles: 5,
+          maxSize : 15 * 1024 * 1024,
+          allowed : ['image/png','image/jpeg','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv']
+        }
+      });
 
       // Create ticket submit
       $('#tpCreate', portal)?.addEventListener('submit', async (e)=>{
@@ -717,15 +707,18 @@
         hint.textContent = ""; btn.disabled = true;
 
         const fd = new FormData(form);
-        const need = ['name','email','phone','subject','issue'];
-        for (const n of need){ if (!(fd.get(n)||'').toString().trim()){ hint.textContent='Please fill out all required fields.'; btn.disabled=false; return; } }
+        ['name','email','phone','subject','issue'].forEach(n=>{
+          if (!String(fd.get(n)||'').trim()){ hint.textContent='Please fill out all required fields.'; btn.disabled=false; return; }
+        });
+        // include files
+        for (const f of tpWidget.get()) fd.append('files[]', f, f.name);
 
         try {
           const res = await fetch("/api/tickets/create.php", { method:"POST", body: fd, credentials: "same-origin" });
           const data = await res.json();
           if (!res.ok) throw new Error(data?.error || "Submission failed.");
           hint.textContent = `Ticket created! #${data.public_ref}. Check your email for confirmation.`;
-          form.reset(); ticketFiles.reset();
+          form.reset(); tpWidget.reset();
         } catch (err) {
           hint.textContent = err.message || "Error creating ticket.";
         } finally {
@@ -733,11 +726,11 @@
         }
       });
 
-      // Cancel buttons clear + close
-      $('#tpCreateCancel', portal)?.addEventListener('click', ()=>{
-        $('#tpCreate', portal)?.reset(); ticketFiles.reset(); window.saPanels.ticket.close();
+      // Ticket cancel buttons
+      document.getElementById('tpCreateCancel')?.addEventListener('click', ()=>{
+        $('#tpCreate', portal)?.reset(); tpWidget.reset(); window.saPanels.ticket.close();
       });
-      $('#tpLookupCancel', portal)?.addEventListener('click', ()=>{
+      document.getElementById('tpLookupCancel')?.addEventListener('click', ()=>{
         $('#tpLookupStart', portal)?.reset(); window.saPanels.ticket.close();
       });
 
@@ -745,7 +738,8 @@
       $('#tpLookupStart', portal)?.addEventListener('submit', async (e)=>{
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
-        const hint = $('#tpLookupHint', portal); hint.textContent = "";
+        const hint = $('#tpLookupHint', portal);
+        hint.textContent = "";
         try {
           const res = await fetch("/api/tickets/lookup_start.php", { method:"POST", body: fd, credentials:"same-origin" });
           const data = await res.json();
@@ -762,18 +756,17 @@
         const url = new URL(window.location.href);
         const token = url.searchParams.get("tkn");
         if (!token) return;
-
         if (!window.saPanels.ticket.isOpen()) window.saPanels.ticket.open();
-        const lookupTab = portal.querySelector('.tp-tab[data-tp="lookup"]'); if (lookupTab) lookupTab.click();
+        const lookupTab = portal.querySelector('.tp-tab[data-tp="lookup"]');
+        if (lookupTab) lookupTab.click();
 
         try {
           const res = await fetch("/api/tickets/lookup_fetch.php?tkn=" + encodeURIComponent(token), { credentials:"same-origin" });
           const data = await res.json();
           if (!res.ok) throw new Error(data?.error || "Could not load ticket.");
 
-          $("#tpLookupResult", portal).hidden = false;
-
-          $("#tpTicketCard", portal).innerHTML = `
+          document.getElementById("tpLookupResult").hidden = false;
+          document.getElementById("tpTicketCard").innerHTML = `
             <div class="tp-card-line"><strong>Ticket #</strong> ${data.public_ref}</div>
             <div class="tp-card-line"><strong>Subject</strong> ${data.subject}</div>
             <div class="tp-card-line"><strong>Status</strong> ${data.status}</div>
@@ -787,9 +780,9 @@
             </div>
           `;
 
-          $("#tpAddComment", portal)?.addEventListener("submit", async (e) => {
+          document.getElementById("tpAddComment")?.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const hint = $("#tpCommentHint", portal); hint.textContent = "";
+            const hint = document.getElementById("tpCommentHint"); hint.textContent = "";
             const fd = new FormData(e.currentTarget);
             fd.append("tkn", token);
             try {
@@ -802,32 +795,8 @@
               hint.textContent = err.message || "Error posting comment.";
             }
           });
-        } catch (err) {
-          /* silent */
-        }
+        } catch { /* silent */ }
       })();
-
-      // Ticket attachments
-      const ticketFiles = setupAttachmentWidget({
-        addBtnId: 'tp-add-files',
-        inputId : 'tp-files',
-        listId  : 'tp-file-list',
-        limits  : {
-          maxFiles: 5,
-          maxSize : 15 * 1024 * 1024,
-          allowed : ['image/png','image/jpeg','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv']
-        }
-      });
-
-      // Append files on submit
-      const createForm = $('#tpCreate', portal);
-      if (createForm){
-        createForm.addEventListener('submit', (e)=>{
-          const fd = new FormData(createForm);
-          // (fetch builds fd from form automatically; for clarity when building manually, use:)
-          // ticketFiles.get().forEach(f => fd.append('files[]', f, f.name));
-        }, { once:false });
-      }
     })();
   </script>
 </body>
