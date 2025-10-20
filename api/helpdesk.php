@@ -456,9 +456,8 @@ try {
     foreach ($scanReport as $r) {
       $sizeKB  = number_format($r['size']/1024, 1).' KB';
 
-      // status + note only
+      // status only
       $avLabel = $r['av'];
-      if (!empty($r['note'])) $avLabel .= ' ' . $r['note'];
 
       // VirusTotal link (unchanged)
       $sha = '';
