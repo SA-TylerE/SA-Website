@@ -452,13 +452,15 @@ try {
           .  '<table role="presentation" cellpadding="6" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:0.95rem">'
           // Removed MIME column
           .  '<tr style="background:#fff"><th align="left">File</th><th align="left">Size</th><th align="left">AV</th><th align="left">Action</th></tr>';
+    // HTML table rows
     foreach ($scanReport as $r) {
       $sizeKB  = number_format($r['size']/1024, 1).' KB';
-      $avLabel = $r['av'];
-      if (!empty($r['engine'])) $avLabel .= ' ('.$r['engine'].')';
-      if (!empty($r['note']))   $avLabel .= ' — '.$r['note'];
 
-      // Compact VirusTotal link (no hash shown)
+      // status + note only
+      $avLabel = $r['av'];
+      if (!empty($r['note'])) $avLabel .= ' ' . $r['note'];
+
+      // VirusTotal link (unchanged)
       $sha = '';
       if (!empty($r['sha256'])) {
         $hash = $r['sha256'];
@@ -476,11 +478,14 @@ try {
     }
     $html .= '</table></div>';
 
+    // Plaintext lines
     $text .= "\n--- Attachment scan report ---\n";
     foreach ($scanReport as $r) {
       $sizeKB  = number_format($r['size']/1024, 1).' KB';
-      $avLabel = $r['av'].(!empty($r['engine']) ? " ({$r['engine']})" : '').(!empty($r['note']) ? " — {$r['note']}" : '');
-      // Removed MIME from plaintext line as well
+
+      // status + note only
+      $avLabel = $r['av'] . (!empty($r['note']) ? " {$r['note']}" : '');
+
       $text .= "{$r['name']} | {$sizeKB} | {$avLabel} | {$r['action']}";
       if (!empty($r['sha256'])) {
         $hash = $r['sha256'];
