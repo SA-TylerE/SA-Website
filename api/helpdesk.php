@@ -429,7 +429,7 @@ try {
       $scanReport[] = [
         'name'   => $cleanName,
         'size'   => $size,
-        'mime'   => $mime,
+        'mime'   => $mime,   // kept for internal checks/logging; not displayed
         'sha256' => $sha256,
         'engine' => $av['engine'] ?? 'clamdscan',
         'av'     => $av['status'] ?? 'n/a',
@@ -450,15 +450,27 @@ try {
           .  '<div style="padding:12px; border:1px solid #e6e6e6; border-radius:10px; background:#fafafa">'
           .  '<div style="font-weight:800; margin:0 0 8px; color:#58595b">Attachment scan report</div>'
           .  '<table role="presentation" cellpadding="6" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:0.95rem">'
-          .  '<tr style="background:#fff"><th align="left">File</th><th align="left">Size</th><th align="left">MIME</th><th align="left">AV</th><th align="left">Action</th></tr>';
+          // Removed MIME column
+          .  '<tr style="background:#fff"><th align="left">File</th><th align="left">Size</th><th align="left">AV</th><th align="left">Action</th></tr>';
     foreach ($scanReport as $r) {
-      $sizeKB = number_format($r['size']/1024, 1).' KB';
+      $sizeKB  = number_format($r['size']/1024, 1).' KB';
       $avLabel = $r['av'];
       if (!empty($r['engine'])) $avLabel .= ' ('.$r['engine'].')';
       if (!empty($r['note']))   $avLabel .= ' — '.$r['note'];
-      $sha = $r['sha256'] ? '<br><span style="color:#9aa0a6;font-size:0.85em">sha256: '.htmlspecialchars($r['sha256']).'</span>' : '';
+
+      // Compact VirusTotal link (no hash shown)
+      $sha = '';
+      if (!empty($r['sha256'])) {
+        $hash = $r['sha256'];
+        $vt   = 'https://www.virustotal.com/gui/file/' . rawurlencode($hash);
+        $sha  = '<br><span style="color:#9aa0a6;font-size:0.85em">'
+              . '<a href="'.$vt.'" target="_blank" rel="noopener noreferrer"'
+              . ' title="Open VirusTotal for this file (SHA-256)">VirusTotal scan</a>'
+              . '</span>';
+      }
+
       $html .= '<tr style="background:#fff"><td>'.htmlspecialchars($r['name']).$sha.'</td>'
-            .  '<td>'.$sizeKB.'</td><td>'.htmlspecialchars($r['mime']).'</td>'
+            .  '<td>'.$sizeKB.'</td>'
             .  '<td>'.htmlspecialchars($avLabel).'</td>'
             .  '<td>'.htmlspecialchars($r['action']).'</td></tr>';
     }
@@ -466,10 +478,14 @@ try {
 
     $text .= "\n--- Attachment scan report ---\n";
     foreach ($scanReport as $r) {
-      $sizeKB = number_format($r['size']/1024, 1).' KB';
+      $sizeKB  = number_format($r['size']/1024, 1).' KB';
       $avLabel = $r['av'].(!empty($r['engine']) ? " ({$r['engine']})" : '').(!empty($r['note']) ? " — {$r['note']}" : '');
-      $text .= "{$r['name']} | {$sizeKB} | {$r['mime']} | {$avLabel} | {$r['action']}";
-      if (!empty($r['sha256'])) $text .= " | sha256: {$r['sha256']}";
+      // Removed MIME from plaintext line as well
+      $text .= "{$r['name']} | {$sizeKB} | {$avLabel} | {$r['action']}";
+      if (!empty($r['sha256'])) {
+        $hash = $r['sha256'];
+        $text .= " | VirusTotal: https://www.virustotal.com/gui/file/{$hash}";
+      }
       $text .= "\n";
     }
   }
