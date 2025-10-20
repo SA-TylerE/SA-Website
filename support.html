@@ -46,9 +46,15 @@
               aria-controls="email-form-panel">
               Email Helpdesk
             </button>
-            <a class="btn btn--outline" href="#" aria-disabled="true" title="Web ticketing coming soon">
+            <button 
+              type="button"  
+              id="open-ticket-btn"
+              class="btn btn--outline"  
+              aria-disabled="false"
+              aria-expanded="false" 
+              title="Create a ticket">
               Open a Ticket
-            </a>
+            </button>
           </div>
         </article>
 
@@ -114,87 +120,89 @@
     </section>
 
     <!-- Ticket Portal -->
-    <section class="ticket-portal">
-      <div class="tp-tabs">
-        <button class="tp-tab tp-tab--active" data-tp="create">Open a new ticket</button>
-        <button class="tp-tab" data-tp="lookup">Check ticket status</button>
-      </div>
+    <details id="ticket-portal" class="contact-accordion" data-accordion></details>
+      <section class="ticket-portal">
+        <div class="tp-tabs">
+          <button class="tp-tab tp-tab--active" data-tp="create">Open a new ticket</button>
+          <button class="tp-tab" data-tp="lookup">Check ticket status</button>
+        </div>
 
-      <div class="tp-panel tp-panel--create">
-        <form id="tpCreate" enctype="multipart/form-data" novalidate>
-          <div class="tp-row">
-            <label>Full name <span>*</span></label>
-            <input name="name" type="text" required maxlength="120" autocomplete="name">
-          </div>
-          <div class="tp-row">
-            <label>Email <span>*</span></label>
-            <input name="email" type="email" required maxlength="190" autocomplete="email">
-          </div>
-          <div class="tp-row">
-            <label>Company (optional)</label>
-            <input name="company" type="text" maxlength="190" autocomplete="organization">
-          </div>
-          <div class="tp-row">
-            <label>Subject <span>*</span></label>
-            <input name="subject" type="text" required maxlength="150">
-          </div>
-          <div class="tp-row">
-            <label>Describe the issue <span>*</span></label>
-            <textarea name="issue" required maxlength="5000" rows="6" placeholder="What happened? When did it start? Error messages?"></textarea>
-          </div>
-          <div class="tp-row">
-            <label>Attachments (up to 5, max 15 MB each; no executables)</label>
-            <input name="files[]" type="file" multiple accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
-          </div>
-
-          <!-- Hook for CAPTCHA if you want it (hCaptcha/Cloudflare Turnstile) -->
-          <div id="tpCreateCaptcha" class="tp-row" hidden></div>
-
-          <div class="tp-actions">
-            <button type="submit" class="btn btn--primary" id="tpCreateSubmit">Submit ticket</button>
-            <span class="tp-hint" id="tpCreateHint"></span>
-          </div>
-        </form>
-      </div>
-
-      <div class="tp-panel tp-panel--lookup" hidden>
-        <form id="tpLookupStart" novalidate>
-          <div class="tp-row">
-            <label>Ticket number (if you have it)</label>
-            <input name="ticket_number" type="text" maxlength="20" placeholder="Optional">
-          </div>
-          <div class="tp-row">
-            <label>Requester email <span>*</span></label>
-            <input name="email" type="email" required maxlength="190">
-          </div>
-
-          <!-- Optional CAPTCHA hook -->
-          <div id="tpLookupCaptcha" class="tp-row" hidden></div>
-
-          <div class="tp-actions">
-            <button type="submit" class="btn btn--primary">Email me a secure link</button>
-            <span class="tp-hint" id="tpLookupHint"></span>
-          </div>
-        </form>
-
-        <!-- This second step is opened from the emailed link; page JS will fill token -->
-        <div id="tpLookupResult" class="tp-result" hidden>
-          <h3>Your ticket</h3>
-          <div class="tp-ticket" id="tpTicketCard"></div>
-
-          <form id="tpAddComment" novalidate>
+        <div class="tp-panel tp-panel--create">
+          <form id="tpCreate" enctype="multipart/form-data" novalidate>
             <div class="tp-row">
-              <label>Add a public comment (optional)</label>
-              <textarea name="message" rows="4" maxlength="5000"></textarea>
+              <label>Full name <span>*</span></label>
+              <input name="name" type="text" required maxlength="120" autocomplete="name">
             </div>
+            <div class="tp-row">
+              <label>Email <span>*</span></label>
+              <input name="email" type="email" required maxlength="190" autocomplete="email">
+            </div>
+            <div class="tp-row">
+              <label>Company (optional)</label>
+              <input name="company" type="text" maxlength="190" autocomplete="organization">
+            </div>
+            <div class="tp-row">
+              <label>Subject <span>*</span></label>
+              <input name="subject" type="text" required maxlength="150">
+            </div>
+            <div class="tp-row">
+              <label>Describe the issue <span>*</span></label>
+              <textarea name="issue" required maxlength="5000" rows="6" placeholder="What happened? When did it start? Error messages?"></textarea>
+            </div>
+            <div class="tp-row">
+              <label>Attachments (up to 5, max 15 MB each; no executables)</label>
+              <input name="files[]" type="file" multiple accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
+            </div>
+
+            <!-- Hook for CAPTCHA if you want it (hCaptcha/Cloudflare Turnstile) -->
+            <div id="tpCreateCaptcha" class="tp-row" hidden></div>
+
             <div class="tp-actions">
-              <button type="submit" class="btn">Post comment</button>
-              <span class="tp-hint" id="tpCommentHint"></span>
+              <button type="submit" class="btn btn--primary" id="tpCreateSubmit">Submit ticket</button>
+              <span class="tp-hint" id="tpCreateHint"></span>
             </div>
           </form>
         </div>
-      </div>
-    </section>
+
+        <div class="tp-panel tp-panel--lookup" hidden>
+          <form id="tpLookupStart" novalidate>
+            <div class="tp-row">
+              <label>Ticket number (if you have it)</label>
+              <input name="ticket_number" type="text" maxlength="20" placeholder="Optional">
+            </div>
+            <div class="tp-row">
+              <label>Requester email <span>*</span></label>
+              <input name="email" type="email" required maxlength="190">
+            </div>
+
+            <!-- Optional CAPTCHA hook -->
+            <div id="tpLookupCaptcha" class="tp-row" hidden></div>
+
+            <div class="tp-actions">
+              <button type="submit" class="btn btn--primary">Email me a secure link</button>
+              <span class="tp-hint" id="tpLookupHint"></span>
+            </div>
+          </form>
+
+          <!-- This second step is opened from the emailed link; page JS will fill token -->
+          <div id="tpLookupResult" class="tp-result" hidden>
+            <h3>Your ticket</h3>
+            <div class="tp-ticket" id="tpTicketCard"></div>
+
+            <form id="tpAddComment" novalidate>
+              <div class="tp-row">
+                <label>Add a public comment (optional)</label>
+                <textarea name="message" rows="4" maxlength="5000"></textarea>
+              </div>
+              <div class="tp-actions">
+                <button type="submit" class="btn">Post comment</button>
+                <span class="tp-hint" id="tpCommentHint"></span>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </details>
 
     <!-- Remote support (Splashtop SOS) -->
     <section class="section" id="remote">
@@ -934,6 +942,53 @@
         // stay silent to avoid leaking existence
       }
     })();
+  })();
+  </script>
+  <script>
+  (() => {
+    const $ = (s, el=document)=>el.querySelector(s);
+    const $$ = (s, el=document)=>Array.from(el.querySelectorAll(s));
+
+    const acc = $('#ticket-portal');
+    const focusFirst = () => {
+      const first = acc.querySelector('input,textarea,select,button');
+      if (first) first.focus({preventScroll:true});
+    };
+
+    // Header "Open a Ticket" button -> open accordion
+    const trigger = document.getElementById('open-ticket-btn');
+    if (trigger) {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        acc.open = true;
+        acc.scrollIntoView({behavior:'smooth', block:'start'});
+        // default to "create" tab
+        const createTab = acc.querySelector('.tp-tab[data-tp="create"]');
+        if (createTab) createTab.click();
+        setTimeout(focusFirst, 250);
+      });
+    }
+
+    // Tab switching
+    $$('.tp-tab', acc).forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        $$('.tp-tab', acc).forEach(b => b.classList.remove('tp-tab--active'));
+        e.currentTarget.classList.add('tp-tab--active');
+        const tgt = e.currentTarget.getAttribute('data-tp');
+        $$('.tp-panel', acc).forEach(p => p.hidden = !p.classList.contains(`tp-panel--${tgt}`));
+        acc.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    });
+
+    // Deep-link open: /support.html?tkn=...
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('tkn')) {
+      acc.open = true;
+      // switch to lookup tab so existing loader in your earlier script runs
+      const lookupTab = acc.querySelector('.tp-tab[data-tp="lookup"]');
+      if (lookupTab) lookupTab.click();
+      acc.scrollIntoView({behavior:'smooth', block:'start'});
+    }
   })();
   </script>
 
