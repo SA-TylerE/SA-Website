@@ -1,0 +1,26 @@
+# Prevent filename guessing
+Options -MultiViews
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+# 1) Strip trailing slash if NOT a real directory  (/support/ -> /support)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+?)/$ /$1 [R=301,L]
+
+# 2) Leave real files/dirs alone
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# 3) Map /foo -> /foo.html (internal)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+)$ /$1.html [L]
+
+# 4) Canonicalize /foo.html -> /foo (external)
+RewriteCond %{THE_REQUEST} \s/([^\s?]+)\.html[?\s] [NC]
+RewriteCond %{DOCUMENT_ROOT}/%1.html -f
+RewriteRule ^ %1 [R=301,L]
+</IfModule>
