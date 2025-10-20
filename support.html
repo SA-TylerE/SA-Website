@@ -46,11 +46,10 @@
               aria-controls="email-form-panel">
               Email Helpdesk
             </button>
-            <!-- CHANGED: link -> button, same look/feel as Email -->
             <button
               type="button"
               id="toggle-ticket-form"
-              class="btn btn--outline"
+              class="btn btn--ghost"
               aria-expanded="false"
               aria-controls="ticket-form-panel">
               Open a Ticket
@@ -58,7 +57,7 @@
           </div>
         </article>
 
-        <!-- Collapsible email form panel (unchanged visually) -->
+        <!-- Collapsible email form panel -->
         <div id="email-form-panel" class="collapsible" hidden>
           <div class="card collapsible__body">
             <h3>Send details to the helpdesk</h3>
@@ -119,13 +118,12 @@
       </div>
     </section>
 
-    <!-- Ticket Portal (now a collapsible like Email; all content preserved) -->
+    <!-- Ticket Portal (collapsible like Email) -->
     <section class="section" id="tickets">
       <div class="container">
         <div id="ticket-form-panel" class="collapsible" hidden>
           <div class="card collapsible__body">
             <h3>Open / Manage a Ticket</h3>
-            <!-- everything below is your original ticket portal content -->
             <section class="ticket-portal" aria-label="Ticket portal">
               <div class="tp-tabs" role="tablist" aria-label="Ticket actions">
                 <button class="tp-tab tp-tab--active" data-tp="create" role="tab" aria-selected="true">Open a new ticket</button>
@@ -326,7 +324,7 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    /* ===== Email form: attachments + open/close (kept, plus tiny export to let Ticket panel close it) ===== */
+    /* ===== Email form: attachments + open/close (unchanged) ===== */
     function createIngestWorker(){
       const src = `
         const jobs = new Map();
@@ -559,12 +557,12 @@
       });
       toggleBtn.addEventListener('click', ()=>{
         const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-        // NEW: make panels mutually exclusive
+        // close Ticket if opening Email
         if (!expanded && window.saPanels?.ticket?.isOpen?.()) window.saPanels.ticket.close();
         expanded ? closePanel() : openPanel();
       });
 
-      // expose so Ticket panel can close Email when it opens
+      // expose to allow ticket panel to close it
       window.saPanels = window.saPanels || {};
       window.saPanels.email = {
         open: openPanel,
@@ -632,14 +630,14 @@
         animating = false;
       });
 
-      // Mutually exclusive with Email
+      // Mutually exclusive with Email panel
       toggleBtn.addEventListener('click', ()=>{
         const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
         if (!expanded && window.saPanels?.email?.isOpen?.()) window.saPanels.email.close();
         expanded ? closePanel() : openPanel();
       });
 
-      // export so Email can close Ticket
+      // Expose for cross-control
       window.saPanels = window.saPanels || {};
       window.saPanels.ticket = {
         open: openPanel,
@@ -647,14 +645,14 @@
         isOpen: ()=> toggleBtn.getAttribute('aria-expanded') === 'true'
       };
 
-      // Tabs
+      // Tabs (removed scrollIntoView to prevent jumps)
       $$('.tp-tab', portal).forEach(btn=>{
         btn.addEventListener('click', (e)=>{
           $$('.tp-tab', portal).forEach(b=>b.classList.remove('tp-tab--active'));
           e.currentTarget.classList.add('tp-tab--active');
           const tgt = e.currentTarget.getAttribute('data-tp');
           $$('.tp-panel', portal).forEach(p => p.hidden = !p.classList.contains(`tp-panel--${tgt}`));
-          panel.scrollIntoView({behavior:'smooth', block:'start'});
+          // no scrolling here on purpose
         });
       });
 
@@ -700,13 +698,12 @@
         }
       });
 
-      // If this page was opened via magic link (?tkn=...), auto-load ticket and open panel
+      // Deep-link magic token (?tkn=...) — keep smooth scroll here
       (async () => {
         const url = new URL(window.location.href);
         const token = url.searchParams.get("tkn");
         if (!token) return;
 
-        // open ticket panel + switch to lookup tab
         if (!window.saPanels.ticket.isOpen()) window.saPanels.ticket.open();
         const lookupTab = portal.querySelector('.tp-tab[data-tp="lookup"]');
         if (lookupTab) lookupTab.click();
