@@ -1,21 +1,8 @@
-/* Support — page-only */
+/* =========================================================
+   Shared: collapsible panels + form styling (used by Support & Contact)
+   ========================================================= */
 
-/* Support hero */
-.support-hero{ --hero-bg: url('/assets/img/support-hero.png'); }
-
-/* Sections */
-#helpdesk.section{ padding:20px 0 0 }
-#remote.section{   padding:8px 0 14px }
-.helpdesk-card{ margin:0; display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between; }
-.helpdesk-card__intro{ min-width:260px }
-.helpdesk-card h2{ margin:0 0 4px }
-.helpdesk-card .lead{ margin:0; color:var(--gray-dark) }
-.helpdesk-actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap }
-#helpdesk .card{ transition:none; padding:16px }
-#helpdesk .card:hover{ transform:none; box-shadow:0 10px 24px rgba(0,0,0,.06) }
-
-/* Collapsible */
-#email-form-panel[hidden]{ display:none !important }
+.collapsible[hidden]{ display:none !important; }
 .collapsible{
   display:block; overflow:hidden; height:0; opacity:0; padding:0; border:0; background:transparent; box-shadow:none;
   transition: height .28s ease, opacity .2s ease, background-color .24s ease, border-color .24s ease, box-shadow .24s ease;
@@ -27,27 +14,33 @@
   box-shadow:0 10px 24px rgba(0,0,0,.06);
 }
 
-/* Form grid */
+@media (prefers-reduced-motion:reduce){ .collapsible{ transition:none } }
+
+/* Shared form layout */
 .support-form .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
-.support-form .form-grid .full{ grid-column:1 / -1 }
-.support-form label span{ display:block; font-weight:700; margin-bottom:6px }
+.support-form .form-grid .full{ grid-column:1 / -1; }
+.support-form label span{ display:block; font-weight:700; margin-bottom:6px; }
 .support-form input, .support-form textarea{
   width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font:inherit;
 }
-.support-form input:focus, .support-form textarea:focus{ outline:2px solid rgba(170,30,46,.25); border-color:var(--red) }
+.support-form input:focus, .support-form textarea:focus{
+  outline:2px solid rgba(170,30,46,.25); border-color:var(--red);
+}
+.support-form .form-actions{ display:flex; gap:12px; margin-top:8px; align-items:center; }
+.support-form .form-note{ margin:10px 0 0; color:var(--gray-dark); font-size:.95rem; }
 @media (max-width:720px){ .support-form .form-grid{ grid-template-columns:1fr } }
 
-/* Attachments widget */
+/* Attachments (email panel) */
 .attach-row{ display:flex; gap:10px; align-items:center; margin: 2px 0 6px; }
 .attach-btn{
-  appearance:none; border:1px solid var(--border); background:#fff;
+  appearance:none; border:1px dashed var(--border); background:#fff;
   padding:10px 14px; border-radius:var(--radius-pill); font-weight:700; cursor:pointer;
-  display:inline-flex; gap:10px; align-items:center; transition:all .15s ease;
+  display:inline-flex; gap:10px; align-items:center; transition:all .15s ease; color:var(--red);
 }
 .attach-btn:hover{ border-color:var(--red); box-shadow:0 4px 10px rgba(0,0,0,.08); transform:translateY(-1px) }
 .attach-btn:active{ transform:translateY(0); box-shadow:0 2px 6px rgba(0,0,0,.06) }
-.attach-btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
-.attach-btn .icon-plus{ width:18px; height:18px; }
+.attach-btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+.attach-btn .icon-plus{ width:18px; height:18px; display:inline-block; }
 
 .attach-list{ display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 2px; }
 .file-chip{
@@ -56,15 +49,47 @@
 }
 .file-chip__name{ max-width:28ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .file-chip__size{ color:var(--gray-dark); opacity:.8; font-size:.9rem }
-.file-chip__remove{
-  appearance:none; border:0; background:transparent; cursor:pointer; padding:0 4px; font-size:1.1rem; line-height:1;
-}
+.file-chip__remove{ appearance:none; border:0; background:transparent; cursor:pointer; padding:0 4px; font-size:1.1rem; line-height:1; }
 .file-chip__remove:hover{ color:var(--red) }
+.file-chip__bar{position:relative;width:120px;height:6px;background:#eee;border-radius:999px;overflow:hidden}
+.file-chip__bar>span{position:absolute;left:0;top:0;bottom:0;width:0}
+.file-chip__bar>span::before{content:"";position:absolute;inset:0;background:#aa1e2e;border-radius:999px}
+.file-chip__pct{font-variant-numeric:tabular-nums;min-width:3ch;text-align:right;opacity:.8}
 
-/* Muted note under attachments */
-.attachments .attach-note{ color: var(--gray-dark); opacity:.7; font-size:.92rem }
+/* Inline form status */
+.form-status{
+  display:inline-flex; gap:8px; align-items:center; min-height:1.25em;
+  margin-left:8px; opacity:0; visibility:hidden; transition: opacity .25s ease, visibility .25s ease;
+}
+.form-status.is-visible{ opacity:1; visibility:visible; }
+.form-status--ok{ color:#1a7f37; }
+.form-status--error{ color:#b42318; }
+.form-status--progress{ color: var(--gray-dark); }
+.form-status svg{ width:18px; height:18px; display:inline-block }
+.spinner{
+  width:16px; height:16px; display:inline-block; border-radius:50%;
+  border:2px solid currentColor; border-right-color: transparent; animation: sa-spin .8s linear infinite;
+}
+@keyframes sa-spin{ to{ transform: rotate(360deg); } }
 
-/* Remote section layout */
+/* =========================================================
+   Support-only sections
+   ========================================================= */
+
+.support-hero{ --hero-bg: url('/assets/img/support-hero.png'); }
+
+#helpdesk.section{ padding:20px 0 0 }
+#remote.section{   padding:8px 0 14px }
+
+.helpdesk-card{ margin:0; display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between; }
+.helpdesk-card__intro{ min-width:260px }
+.helpdesk-card h2{ margin:0 0 4px }
+.helpdesk-card .lead{ margin:0; color:var(--gray-dark) }
+.helpdesk-actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+#helpdesk .card{ transition:none; padding:16px }
+#helpdesk .card:hover{ transform:none; box-shadow:0 10px 24px rgba(0,0,0,.06) }
+
+/* Remote area */
 .remote-grid{ display:grid; grid-template-columns:1.2fr .8fr; gap:18px; align-items:stretch }
 @media (max-width:980px){ .remote-grid{ grid-template-columns:1fr } }
 .remote-grid > .card{ height:100%; transition:none }
@@ -90,102 +115,80 @@
 .override-download-btn.selected{ background:var(--red); color:#fff; border-color:var(--red); box-shadow:0 4px 12px rgba(170,30,46,.3) }
 .override-download-btn img{ width:18px; height:18px; display:block }
 .override-download-btn.selected img{ filter:brightness(0) invert(1) }
-.file-chip{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .5rem;border:1px solid #e6e6e6;border-radius:999px;margin:.25rem .35rem .25rem 0;background:#fff}
-.file-chip__name{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.file-chip__size{opacity:.7}
-.file-chip__remove{border:0;background:transparent;cursor:pointer;font-weight:700;line-height:1}
-.file-chip__bar{position:relative;width:120px;height:6px;background:#eee;border-radius:999px;overflow:hidden}
-.file-chip__bar>span{position:absolute;left:0;top:0;bottom:0;width:0}
-.file-chip__bar>span::before{content:"";position:absolute;inset:0;background:#aa1e2e;border-radius:999px}
-.file-chip__pct{font-variant-numeric:tabular-nums;min-width:3ch;text-align:right;opacity:.8}
-/* ============================
-   Ticket Portal (support.css)
-   ============================ */
 
-/* Accordion shell (reuse look from Email section) */
-.contact-accordion {
-  border: 1px solid var(--border, #e6e6e6);
-  border-radius: 12px;
-  background: #fff;
-  margin: 24px 0;
-  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+/* =========================================================
+   Ticket Portal (accordion + form)
+   ========================================================= */
+
+/* Accordion shell to match Email panel */
+.contact-accordion{
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+  margin:24px 0;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
 }
-.contact-accordion[open] { box-shadow: 0 4px 14px rgba(0,0,0,.07); }
-.contact-accordion__summary {
-  list-style: none;
-  cursor: pointer;
-  padding: 16px 18px;
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
+.contact-accordion[open]{ box-shadow:0 4px 14px rgba(0,0,0,.07) }
+.contact-accordion__summary{
+  list-style:none; cursor:pointer; padding:16px 18px; display:flex; align-items:baseline; gap:12px;
 }
-.contact-accordion__summary::-webkit-details-marker { display: none; }
-.contact-accordion__title { font-weight: 700; font-size: 1.05rem; }
-.contact-accordion__hint { color: #666; font-size: .95rem; }
-.contact-accordion__body { padding: 16px 18px 20px; border-top: 1px solid #f0f0f0; }
+.contact-accordion__summary::-webkit-details-marker{ display:none }
+.contact-accordion__title{ font-weight:800; font-size:1.05rem }
+.contact-accordion__hint{ color:#666; font-size:.95rem }
+.contact-accordion__body{ padding:16px 18px 20px; border-top:1px solid #f0f0f0 }
+
+/* Ticket portal body */
+.ticket-portal{ max-width:860px; padding:4px 2px; }
 
 /* Tabs */
-.ticket-portal { max-width: 860px; }
-.tp-tabs {
-  display: inline-flex; gap: 8px; margin: 6px 0 18px;
-  border: 1px solid #eee; padding: 4px; border-radius: 999px; background: #fafafa;
+.ticket-portal .tp-tabs{
+  display:inline-flex; gap:8px; margin:6px 0 18px;
+  border:1px solid var(--border); padding:4px; border-radius:999px; background:#fafafa;
 }
-.tp-tab {
-  appearance: none; border: 0; background: transparent; cursor: pointer;
-  padding: 8px 14px; border-radius: 999px; font-weight: 600;
+.ticket-portal .tp-tab{
+  appearance:none; border:0; background:transparent; cursor:pointer;
+  padding:8px 14px; border-radius:999px; font-weight:700;
 }
-.tp-tab--active { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.ticket-portal .tp-tab.tp-tab--active{ background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.06); }
 
-/* Form grid */
-.tp-grid {
-  display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: 14px;
-}
-.tp-field { display: grid; gap: 6px; }
-.tp-field span { font-weight: 600; }
-.tp-field em { font-style: normal; color: var(--brand-red, #aa1e2e); }
-.tp-field--full { grid-column: 1 / -1; }
+/* Form grid + fields */
+.ticket-portal .tp-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px }
+.ticket-portal .tp-field{ display:grid; gap:6px }
+.ticket-portal .tp-field span{ font-weight:700 }
+.ticket-portal .tp-field em{ font-style:normal; color:var(--red) }
+.ticket-portal .tp-field--full{ grid-column:1 / -1 }
 
-/* Inputs */
-.tp-field input[type="text"],
-.tp-field input[type="email"],
-.tp-field input[type="file"],
-.tp-field textarea {
-  width: 100%;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 10px 12px;
-  font: inherit;
-  outline: none;
-  background: #fff;
+.ticket-portal .tp-field input[type="text"],
+.ticket-portal .tp-field input[type="email"],
+.ticket-portal .tp-field input[type="file"],
+.ticket-portal .tp-field textarea{
+  width:100%; display:block; border:1px solid var(--border);
+  border-radius:10px; padding:10px 12px; font:inherit; background:#fff; outline:none;
 }
-.tp-field textarea { resize: vertical; min-height: 140px; }
-.tp-field input:focus,
-.tp-field textarea:focus {
-  border-color: var(--brand-red, #aa1e2e);
-  box-shadow: 0 0 0 3px rgba(170,30,46,.12);
+.ticket-portal .tp-field textarea{ resize:vertical; min-height:140px; }
+.ticket-portal .tp-field input:focus,
+.ticket-portal .tp-field textarea:focus{
+  border-color:var(--red);
+  box-shadow:0 0 0 3px rgba(170,30,46,.12);
 }
 
-/* Actions + hints */
-.tp-actions { display:flex; align-items:center; gap: 12px; margin-top: 10px; }
-.tp-hint { font-size:.95rem; color:#444; }
+/* Actions + hint */
+.ticket-portal .tp-actions{ display:flex; align-items:center; gap:12px; margin-top:10px }
+.ticket-portal .tp-hint{ font-size:.95rem; color:#444 }
 
 /* Lookup result */
-.tp-result__title { margin: 18px 0 10px; }
-.tp-ticket { border:1px solid #eee; border-radius:12px; padding:12px; background:#fff; }
-.tp-card-line { display:flex; gap:10px; padding:4px 0; }
-.tp-card-line strong { min-width:120px; }
+.ticket-portal .tp-result__title{ margin:18px 0 10px }
+.ticket-portal .tp-ticket{ border:1px solid var(--border); border-radius:12px; padding:12px; background:#fff }
+.ticket-portal .tp-card-line{ display:flex; gap:10px; padding:4px 0 }
+.ticket-portal .tp-card-line strong{ min-width:120px }
+.ticket-portal .tp-thread{ margin-top:10px; border-top:1px dashed var(--border); padding-top:10px }
+.ticket-portal .tp-msg{ padding:10px 0; border-bottom:1px solid #f5f5f5 }
+.ticket-portal .tp-msg:last-child{ border-bottom:0 }
+.ticket-portal .tp-msg-meta{ font-size:.9rem; color:#666; margin-bottom:4px }
+.ticket-portal .tp-msg-body{ white-space:pre-wrap; word-break:break-word }
+.ticket-portal .tp-comment{ margin-top:10px }
 
-.tp-thread { margin-top:10px; border-top:1px dashed #eee; padding-top:10px; }
-.tp-msg { padding:10px 0; border-bottom:1px solid #f5f5f5; }
-.tp-msg:last-child { border-bottom:0; }
-.tp-msg-meta { font-size:.9rem; color:#666; margin-bottom:4px; }
-.tp-msg-body { white-space:pre-wrap; word-break:break-word; }
-
-.tp-comment { margin-top:10px; }
-
-/* Responsive */
-@media (max-width: 820px) {
-  .tp-grid { grid-template-columns: 1fr; }
-  .ticket-portal { max-width: 100%; }
+@media (max-width:820px){
+  .ticket-portal{ max-width:100% }
+  .ticket-portal .tp-grid{ grid-template-columns:1fr }
 }
