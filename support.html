@@ -49,7 +49,7 @@
             <button
               type="button"
               id="toggle-ticket-form"
-              class="btn btn--ghost"
+              class="btn btn--outline"
               aria-expanded="false"
               aria-controls="ticket-form-panel">
               Open a Ticket
@@ -154,10 +154,23 @@
                       <span>Describe the issue <em>*</em></span>
                       <textarea name="issue" required maxlength="5000" rows="6" placeholder="What happened? When did it start? Error messages?"></textarea>
                     </label>
-                    <label class="tp-field tp-field--full">
-                      <span>Attachments (up to 5, max 15 MB each; no executables)</span>
-                      <input name="files[]" type="file" multiple accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
-                    </label>
+
+                    <!-- Ticket attachments using the same widget UI -->
+                    <div class="tp-field tp-field--full attachments">
+                      <div class="attach-row">
+                        <button type="button" id="tp-add-files" class="attach-btn" title="Add up to 5 files">
+                          <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          </svg>
+                          Add files
+                        </button>
+                      </div>
+                      <div id="tp-file-list" class="attach-list"></div>
+                      <input type="file" id="tp-files" name="files[]" multiple hidden
+                             accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
+                      <div class="attach-note">Up to 5 files, max 15&nbsp;MB each; allowed: PNG, JPG, PDF, TXT/LOG, DOC/DOCX, XLSX, CSV.</div>
+                    </div>
                   </div>
 
                   <!-- Hook for CAPTCHA if you want it (hCaptcha/Cloudflare Turnstile) -->
@@ -165,6 +178,7 @@
 
                   <div class="tp-actions">
                     <button type="submit" class="btn btn--primary" id="tpCreateSubmit">Submit ticket</button>
+                    <button type="button" class="btn btn--outline" id="tpCreateCancel">Cancel</button>
                     <span class="tp-hint" id="tpCreateHint" role="status" aria-live="polite"></span>
                   </div>
                 </form>
@@ -189,6 +203,7 @@
 
                   <div class="tp-actions">
                     <button type="submit" class="btn btn--primary">Email me a secure link</button>
+                    <button type="button" class="btn btn--outline" id="tpLookupCancel">Cancel</button>
                     <span class="tp-hint" id="tpLookupHint" role="status" aria-live="polite"></span>
                   </div>
                 </form>
@@ -324,7 +339,7 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    /* ===== Email form: attachments + open/close (unchanged) ===== */
+    /* ===== Inline worker for attachments ===== */
     function createIngestWorker(){
       const src = `
         const jobs = new Map();
@@ -361,6 +376,7 @@
       return w;
     }
 
+    /* ===== Attachment widget (shared) ===== */
     function setupAttachmentWidget({ addBtnId, inputId, listId, limits }){
       const addBtn = document.getElementById(addBtnId);
       const input  = document.getElementById(inputId);
@@ -491,7 +507,7 @@
       }
       function addFile(file){
         if (ready.length + active.size >= MAX_FILES) return;
-        if (file.size > MAX_SIZE) { alert(`${file.name} is larger than 5 MB.`); return; }
+        if (file.size > MAX_SIZE) { alert(`${file.name} is larger than ${fmtMB(MAX_SIZE)}.`); return; }
         const okType = allowed.includes(file.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(file.name);
         if (!okType) { alert(`${file.name} is not an allowed file type.`); return; }
         const signature = sig(file);
@@ -523,7 +539,7 @@
     }
 
     (function(){
-      /* Email panel open/close */
+      /* Email panel open/close + submit */
       const toggleBtn = document.getElementById('toggle-email-form');
       const panel     = document.getElementById('email-form-panel');
       const form      = document.getElementById('helpdesk-email-form');
@@ -570,6 +586,7 @@
         isOpen: ()=> toggleBtn.getAttribute('aria-expanded') === 'true'
       };
 
+      // Email attachments widget
       const widget = setupAttachmentWidget({
         addBtnId: 'hd-add-files',
         inputId : 'hd-files',
@@ -587,18 +604,40 @@
       form.addEventListener('submit', async (e)=>{
         e.preventDefault(); clearStatus();
         if (!form.reportValidity()){ setStatusErr('Please complete all required fields.'); return; }
+
         sendBtn.disabled = true; cancelBtn.disabled = true; document.getElementById('hd-add-files').disabled = true;
         setStatusSend();
-        const name=(hd-name.value||'').trim(), company=(hd-company.value||'').trim(), email=(hd-email.value||'').trim(), issue=(hd-issue.value||'').trim(), hp=(hd-hp.value||'').trim();
+
+        const name    = (document.getElementById('hd-name').value||'').trim();
+        const company = (document.getElementById('hd-company').value||'').trim();
+        const email   = (document.getElementById('hd-email').value||'').trim();
+        const issue   = (document.getElementById('hd-issue').value||'').trim();
+        const hp      = (document.getElementById('hd-hp').value||'').trim();
+
         try{
-          const fd = new FormData(); fd.set('name',name); fd.set('company',company); fd.set('email',email); fd.set('issue',issue); fd.set('website_honeypot',hp);
+          const fd = new FormData();
+          fd.set('name',name);
+          fd.set('company',company);
+          fd.set('email',email);
+          fd.set('issue',issue);
+          fd.set('website_honeypot',hp);
           for (const f of widget.get()) fd.append('attachments[]', f, f.name);
+
           const resp = await fetch(API('api/helpdesk.php'), { method:'POST', body: fd });
-          const text = await resp.text(); let data; try{ data = JSON.parse(text); }catch{ throw new Error('Non-JSON'); }
+          const text = await resp.text();
+          let data; try{ data = JSON.parse(text); }catch{ throw new Error('Non-JSON'); }
           if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Send failed');
-          setStatusOK('Sent'); resetFormAndFiles();
-        }catch(err){ console.error('Helpdesk send failed:', err); setStatusErr('Send failed — please try again.'); }
-        finally{ sendBtn.disabled=false; cancelBtn.disabled=false; document.getElementById('hd-add-files').disabled=false; }
+
+          setStatusOK('Sent');
+          resetFormAndFiles();
+        }catch(err){
+          console.error('Helpdesk send failed:', err);
+          setStatusErr('Send failed — please try again.');
+        }finally{
+          sendBtn.disabled = false;
+          cancelBtn.disabled = false;
+          document.getElementById('hd-add-files').disabled = false;
+        }
       });
     })();
 
@@ -645,16 +684,35 @@
         isOpen: ()=> toggleBtn.getAttribute('aria-expanded') === 'true'
       };
 
-      // Tabs (removed scrollIntoView to prevent jumps)
+      // Tabs (no scrollIntoView to avoid jumps)
       $$('.tp-tab', portal).forEach(btn=>{
         btn.addEventListener('click', (e)=>{
           $$('.tp-tab', portal).forEach(b=>b.classList.remove('tp-tab--active'));
           e.currentTarget.classList.add('tp-tab--active');
           const tgt = e.currentTarget.getAttribute('data-tp');
           $$('.tp-panel', portal).forEach(p => p.hidden = !p.classList.contains(`tp-panel--${tgt}`));
-          // no scrolling here on purpose
         });
       });
+
+      // Ticket Create: attachment widget (same UI)
+      const tpFiles = (typeof setupAttachmentWidget === 'function')
+        ? setupAttachmentWidget({
+            addBtnId: 'tp-add-files',
+            inputId : 'tp-files',
+            listId  : 'tp-file-list',
+            limits  : {
+              maxFiles: 5,
+              maxSize : 15 * 1024 * 1024,
+              allowed : [
+                'image/png','image/jpeg','application/pdf','text/plain',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'text/csv'
+              ]
+            }
+          })
+        : null;
 
       // Create ticket submit
       $('#tpCreate', portal)?.addEventListener('submit', async (e)=>{
@@ -668,17 +726,34 @@
         const need = ['name','email','subject','issue'];
         for (const n of need){ if (!(fd.get(n)||'').toString().trim()){ hint.textContent='Please fill out all required fields.'; btn.disabled=false; return; } }
 
+        // append files from widget, if any
+        if (tpFiles) {
+          for (const f of tpFiles.get()) fd.append('files[]', f, f.name);
+        }
+
         try {
           const res = await fetch("/api/tickets/create.php", { method:"POST", body: fd, credentials: "same-origin" });
           const data = await res.json();
           if (!res.ok) throw new Error(data?.error || "Submission failed.");
           hint.textContent = `Ticket created! #${data.public_ref}. Check your email for confirmation.`;
           form.reset();
+          tpFiles?.reset?.();
         } catch (err) {
           hint.textContent = err.message || "Error creating ticket.";
         } finally {
           btn.disabled = false;
         }
+      });
+
+      // Cancel buttons: clear + close
+      document.getElementById('tpCreateCancel')?.addEventListener('click', () => {
+        document.getElementById('tpCreate')?.reset();
+        tpFiles?.reset?.();
+        window.saPanels?.ticket?.close?.();
+      });
+      document.getElementById('tpLookupCancel')?.addEventListener('click', () => {
+        document.getElementById('tpLookupStart')?.reset();
+        window.saPanels?.ticket?.close?.();
       });
 
       // Start lookup (sends magic link)
@@ -698,7 +773,7 @@
         }
       });
 
-      // Deep-link magic token (?tkn=...) — keep smooth scroll here
+      // Deep-link magic token (?tkn=...)
       (async () => {
         const url = new URL(window.location.href);
         const token = url.searchParams.get("tkn");
