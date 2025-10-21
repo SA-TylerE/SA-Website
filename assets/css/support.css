@@ -1,38 +1,33 @@
 /* =========================================================
-   Shared: collapsible + form styling
+   Shared: collapsible panels + form styling (used by Support & Contact)
    ========================================================= */
-.reveal-slot { margin-top: 10px; }
-.collapsible{ display:block; }
-.collapsible__body{
-  background:#fff; border:1px solid var(--border); border-radius:12px; padding:18px;
-  box-shadow:0 10px 24px rgba(0,0,0,.06);
+
+.is-hidden{ display:none !important; }
+
+.collapsible[hidden]{ display:none !important; }
+.collapsible{
+  display:block; overflow:hidden; height:auto; opacity:1; padding:0; border:0; background:transparent; box-shadow:none;
+  transition: none;
 }
 
-/* Shared form layout (matches Contact) */
-.support-form .form-grid,
-.ticket-portal .form-grid{
-  display:grid; grid-template-columns:1fr 1fr; gap:14px;
-}
-.support-form .form-grid .full,
-.ticket-portal .form-grid .full{ grid-column:1 / -1; }
-.support-form label span,
-.ticket-portal label span{ display:block; font-weight:700; margin-bottom:6px; }
-.support-form input, .support-form textarea,
-.ticket-portal input, .ticket-portal textarea{
+/* Shared form layout */
+.support-form .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
+.support-form .form-grid .full{ grid-column:1 / -1; }
+.support-form label span{ display:block; font-weight:700; margin-bottom:6px; }
+.support-form input, .support-form textarea{
   width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font:inherit;
 }
-.support-form input:focus, .support-form textarea:focus,
-.ticket-portal input:focus, .ticket-portal textarea:focus{
+.support-form input:focus, .support-form textarea:focus{
   outline:2px solid rgba(170,30,46,.25); border-color:var(--red);
 }
-.form-actions, .tp-actions{ display:flex; gap:12px; margin-top:8px; align-items:center; justify-content:flex-start }
-.form-required-note{ margin-left:auto; color:var(--gray-dark); font-size:.95rem; }
-@media (max-width:720px){ .support-form .form-grid, .ticket-portal .form-grid { grid-template-columns:1fr } }
+.support-form .form-actions{ display:flex; gap:12px; margin-top:8px; align-items:center; }
+.support-form .form-note{ margin:10px 0 0; color:var(--gray-dark); font-size:.95rem; }
+@media (max-width:720px){ .support-form .form-grid{ grid-template-columns:1fr } }
 
-/* Attachments (solid light border) */
+/* Attachments (shared) */
 .attach-row{ display:flex; gap:10px; align-items:center; margin: 2px 0 6px; }
 .attach-btn{
-  appearance:none; border:1px solid var(--border); background:#fff;
+  appearance:none; border:1px solid var(--border); background:#fff; /* solid border */
   padding:10px 14px; border-radius:var(--radius-pill); font-weight:700; cursor:pointer;
   display:inline-flex; gap:10px; align-items:center; transition:all .15s ease; color:var(--red);
 }
@@ -74,7 +69,9 @@
 /* =========================================================
    Support-only sections
    ========================================================= */
+
 .support-hero{ --hero-bg: url('/assets/img/support-hero.png'); }
+
 #helpdesk.section{ padding:20px 0 0 }
 #remote.section{   padding:8px 0 14px }
 
@@ -114,10 +111,10 @@
 .override-download-btn.selected img{ filter:brightness(0) invert(1) }
 
 /* =========================================================
-   Ticket Portal look & spacing parity
+   Ticket Portal (accordion-like form)
    ========================================================= */
-#tickets .card{ padding:16px }
-.ticket-portal{ max-width: 100%; padding:4px 2px; margin: 0 auto; }
+
+.ticket-portal{ max-width: 100%; padding:4px 2px; }
 
 /* Tabs */
 .ticket-portal .tp-tabs{
@@ -130,6 +127,32 @@
 }
 .ticket-portal .tp-tab.tp-tab--active{ background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.06); }
 
+/* Form grid + fields */
+.ticket-portal .tp-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px }
+.ticket-portal .tp-field{ display:grid; gap:6px }
+.ticket-portal .tp-field span{ font-weight:700 }
+.ticket-portal .tp-field em{ font-style:normal; color:var(--red) }
+.ticket-portal .tp-field--full{ grid-column:1 / -1 }
+
+.ticket-portal .tp-field input[type="text"],
+.ticket-portal .tp-field input[type="email"],
+.ticket-portal .tp-field input[type="file"],
+.ticket-portal .tp-field input[type="tel"],
+.ticket-portal .tp-field textarea{
+  width:100%; display:block; border:1px solid var(--border);
+  border-radius:10px; padding:10px 12px; font:inherit; background:#fff; outline:none;
+}
+.ticket-portal .tp-field textarea{ resize:vertical; min-height:140px; }
+.ticket-portal .tp-field input:focus,
+.ticket-portal .tp-field textarea:focus{
+  border-color:var(--red);
+  box-shadow:0 0 0 3px rgba(170,30,46,.12);
+}
+
+/* Actions + hint */
+.ticket-portal .tp-actions{ display:flex; align-items:center; gap:12px; margin-top:10px }
+.ticket-portal .tp-hint{ font-size:.95rem; color:#444 }
+
 /* Lookup result */
 .ticket-portal .tp-result__title{ margin:18px 0 10px }
 .ticket-portal .tp-ticket{ border:1px solid var(--border); border-radius:12px; padding:12px; background:#fff }
@@ -141,3 +164,8 @@
 .ticket-portal .tp-msg-meta{ font-size:.9rem; color:#666; margin-bottom:4px }
 .ticket-portal .tp-msg-body{ white-space:pre-wrap; word-break:break-word }
 .ticket-portal .tp-comment{ margin-top:10px }
+
+@media (max-width:820px){
+  .ticket-portal{ max-width:100% }
+  .ticket-portal .tp-grid{ grid-template-columns:1fr }
+}
