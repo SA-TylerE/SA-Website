@@ -57,12 +57,12 @@
           </div>
         </article>
 
-        <!-- MOUNT POINTS (empty until opened) -->
+        <!-- Email form mount (empty until opened) -->
         <div id="email-form-mount"></div>
       </div>
     </section>
 
-    <!-- Ticket Portal -->
+    <!-- Ticket mount -->
     <section class="section" id="tickets">
       <div class="container">
         <div id="ticket-form-mount"></div>
@@ -337,7 +337,6 @@
             catch { busy = false; removeId(job.id); }
           }, 0);
         } else {
-          // graceful fallback animation if worker fails
           const dur = Math.max(600, Math.min(2200, 450 + (job.file.size/(1024*1024))*350));
           const t0 = performance.now();
           entry.state = 'working'; entry.mode = 'sim'; busy = true;
@@ -347,7 +346,7 @@
             const pct = Math.round((1 - Math.pow(1 - t, 3)) * 100);
             entry.els.fill.style.width = pct + '%';
             entry.els.pct.textContent  = pct + '%';
-            if (t < 1){ requestAnimationFrame(tick); } else { busy = false; markReady(job.id); }
+            if (t < 1){ requestAnimationFrame(tick); } else { busy = false; markReady(id); }
           };
           requestAnimationFrame(tick);
         }
@@ -355,7 +354,7 @@
 
       function addFile(file){
         if (ready.length + active.size >= MAX_FILES) return;
-        if (file.size > MAX_SIZE) { alert(`${file.name} is larger than 5 MB.`); return; }
+        if (file.size > MAX_SIZE) { alert(`${file.name} is larger than ${(MAX_SIZE/1048576)|0} MB.`); return; }
         const okType = allowed.includes(file.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(file.name);
         if (!okType) { alert(`${file.name} is not an allowed file type.`); return; }
 
@@ -394,12 +393,13 @@
 
     /* ===== Global panel controller (mount/unmount, mutual exclusion) ===== */
     (function initPanels(){
-      const emailBtn  = document.getElementById('toggle-email-form');
-      const ticketBtn = document.getElementById('toggle-ticket-form');
+      const emailBtn   = document.getElementById('toggle-email-form');
+      const ticketBtn  = document.getElementById('toggle-ticket-form');
       const emailMount = document.getElementById('email-form-mount');
-      const ticketMount = document.getElementById('ticket-form-mount');
+      const ticketMount= document.getElementById('ticket-form-mount');
 
-      // Expose small helpers so each panel can close the other
+      const $ = (s, el=document)=> el.querySelector(s);
+
       window.saPanels = {
         email: {
           isOpen: ()=> !!emailMount.firstElementChild,
@@ -413,9 +413,8 @@
 
       /* ---------- EMAIL FORM ---------- */
       function mountEmail(){
-        // Card + padding to match ticket form look/feel
         emailMount.innerHTML = `
-          <div class="collapsible is-open" style="opacity:1;height:auto;padding-top:12px">
+          <div class="collapsible is-open form-card">
             <div class="card collapsible__body">
               <h3>Send details to the helpdesk</h3>
 
@@ -473,11 +472,10 @@
           </div>
         `;
 
-        // Wire up the email form logic (same as before, but without bad escapes)
-        const form      = document.getElementById('helpdesk-email-form');
-        const cancelBtn = document.getElementById('cancel-email-form');
-        const statusEl  = document.getElementById('hd-status');
-        const sendBtn   = document.getElementById('hd-send');
+        const form      = $('#helpdesk-email-form');
+        const cancelBtn = $('#cancel-email-form');
+        const statusEl  = $('#hd-status');
+        const sendBtn   = $('#hd-send');
 
         function setStatus(cls, html){ statusEl.className = `form-status ${cls} is-visible`; statusEl.innerHTML = html; }
         const setOK   = (m)=> setStatus('form-status--ok', `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>${m}`);
@@ -537,7 +535,7 @@
       /* ---------- TICKET FORM ---------- */
       function mountTicket(){
         ticketMount.innerHTML = `
-          <div class="collapsible is-open" style="opacity:1;height:auto;padding-top:12px">
+          <div class="collapsible is-open form-card">
             <div class="card collapsible__body">
               <h3>Open / Manage a Ticket</h3>
               <section class="ticket-portal" aria-label="Ticket portal">
@@ -576,9 +574,8 @@
                         <textarea name="issue" required maxlength="5000" rows="6" placeholder="What happened? When did it start? Error messages?"></textarea>
                       </label>
 
-                      <!-- Attachments widget -->
+                      <!-- Attachments widget (no native browse field) -->
                       <div class="tp-field tp-field--full attachments">
-                        <span>Attachments (up to 5, max 15 MB each; no executables)</span>
                         <div class="attach-row">
                           <button type="button" id="tp-add-files" class="attach-btn" title="Add up to 5 files">
                             <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
@@ -594,9 +591,6 @@
                         <div class="attach-note">Up to 5 files, max 15&nbsp;MB each; allowed: PNG, JPG, PDF, TXT/LOG, DOC/DOCX, XLSX, CSV.</div>
                       </div>
                     </div>
-
-                    <!-- CAPTCHA hook -->
-                    <div id="tpCreateCaptcha" hidden></div>
 
                     <div class="tp-actions">
                       <button type="submit" class="btn btn--primary" id="tpCreateSubmit">Submit ticket</button>
@@ -621,9 +615,6 @@
                       </label>
                     </div>
 
-                    <!-- Optional CAPTCHA hook -->
-                    <div id="tpLookupCaptcha" hidden></div>
-
                     <div class="tp-actions">
                       <button type="submit" class="btn btn--primary">Email me a secure link</button>
                       <button type="button" class="btn btn--outline" id="tpLookupCancel">Cancel</button>
@@ -632,7 +623,6 @@
                     </div>
                   </form>
 
-                  <!-- Magic-link result -->
                   <div id="tpLookupResult" class="tp-result" hidden>
                     <h3 class="tp-result__title">Your ticket</h3>
                     <div class="tp-ticket" id="tpTicketCard"></div>
@@ -654,11 +644,11 @@
           </div>
         `;
 
-        // Ticket tabs (no scroll jump)
         const portal = ticketMount.querySelector('.ticket-portal');
         const $ = (s, el=portal)=> el.querySelector(s);
         const $$ = (s, el=portal)=> Array.from(el.querySelectorAll(s));
 
+        // Tabs (no scroll jump)
         $$('.tp-tab').forEach(btn=>{
           btn.addEventListener('click', (e)=>{
             $$('.tp-tab').forEach(b=>b.classList.remove('tp-tab--active'));
@@ -668,7 +658,7 @@
           });
         });
 
-        // Ticket create: attachments + submit + cancel
+        // Create: attachments + submit + cancel
         const widget = setupAttachmentWidget({
           addBtnId: 'tp-add-files',
           inputId : 'tp-files',
@@ -701,7 +691,6 @@
           const need = ['name','email','phone','subject','issue'];
           for (const n of need){ if (!(fd.get(n)||'').toString().trim()){ hint.textContent='Please fill out all required fields.'; btn.disabled=false; return; } }
 
-          // Append queued files
           for (const f of widget.get()) fd.append('files[]', f, f.name);
 
           try{
@@ -714,7 +703,7 @@
           finally{ btn.disabled=false; }
         });
 
-        // Start lookup (emails magic link)
+        // Lookup start (send magic link)
         $('#tpLookupStart')?.addEventListener('submit', async (e)=>{
           e.preventDefault();
           const fd = new FormData(e.currentTarget);
@@ -730,7 +719,7 @@
           }
         });
 
-        // Live phone formatter (US) for tp-phone
+        // Live phone formatter for tp-phone
         (function initPhoneMask(){
           const input = document.getElementById('tp-phone');
           if (!input) return;
@@ -795,7 +784,6 @@
       /* ---------- TOGGLE BUTTONS ---------- */
       emailBtn?.addEventListener('click', ()=>{
         const expanding = emailBtn.getAttribute('aria-expanded') !== 'true';
-        // close the other
         if (expanding && window.saPanels.ticket.isOpen()) window.saPanels.ticket.close();
         if (expanding){ mountEmail(); emailBtn.setAttribute('aria-expanded','true'); }
         else { window.saPanels.email.close(); }
