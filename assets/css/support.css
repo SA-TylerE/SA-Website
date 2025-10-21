@@ -1,38 +1,35 @@
 /* =========================================================
-   Shared: collapsible panels + form styling (used by Support & Contact)
+   Shared: collapsible + form styling
    ========================================================= */
-
-.collapsible[hidden]{ display:none !important; }
-.collapsible{
-  display:block; overflow:hidden; height:0; opacity:0; padding:0; border:0; background:transparent; box-shadow:none;
-  transition: height .28s ease, opacity .2s ease, background-color .24s ease, border-color .24s ease, box-shadow .24s ease;
-  will-change: height, opacity;
-  margin-top: 12px;          /* uniform spacing above each panel */
-  margin-bottom: 0;          /* no extra space below; next section sets its own padding */
-}
-.collapsible.is-open{ padding-top:12px; }
+.reveal-slot { margin-top: 10px; }
+.collapsible{ display:block; }
 .collapsible__body{
   background:#fff; border:1px solid var(--border); border-radius:12px; padding:18px;
   box-shadow:0 10px 24px rgba(0,0,0,.06);
 }
 
-@media (prefers-reduced-motion:reduce){ .collapsible{ transition:none } }
-
-/* Shared form layout (same grid proportions as contact page) */
-.support-form .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
-.support-form .form-grid .full{ grid-column:1 / -1; }
-.support-form label span{ display:block; font-weight:700; margin-bottom:6px; }
-.support-form input, .support-form textarea{
+/* Shared form layout (matches Contact) */
+.support-form .form-grid,
+.ticket-portal .form-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:14px;
+}
+.support-form .form-grid .full,
+.ticket-portal .form-grid .full{ grid-column:1 / -1; }
+.support-form label span,
+.ticket-portal label span{ display:block; font-weight:700; margin-bottom:6px; }
+.support-form input, .support-form textarea,
+.ticket-portal input, .ticket-portal textarea{
   width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font:inherit;
 }
-.support-form input:focus, .support-form textarea:focus{
+.support-form input:focus, .support-form textarea:focus,
+.ticket-portal input:focus, .ticket-portal textarea:focus{
   outline:2px solid rgba(170,30,46,.25); border-color:var(--red);
 }
-.support-form .form-actions{ display:flex; gap:12px; margin-top:8px; align-items:center; }
-.support-form .form-note{ margin:10px 0 0; color:var(--gray-dark); font-size:.95rem; }
-@media (max-width:720px){ .support-form .form-grid{ grid-template-columns:1fr } }
+.form-actions, .tp-actions{ display:flex; gap:12px; margin-top:8px; align-items:center; justify-content:flex-start }
+.form-required-note{ margin-left:auto; color:var(--gray-dark); font-size:.95rem; }
+@media (max-width:720px){ .support-form .form-grid, .ticket-portal .form-grid { grid-template-columns:1fr } }
 
-/* Attachments (solid light border per your older style) */
+/* Attachments (solid light border) */
 .attach-row{ display:flex; gap:10px; align-items:center; margin: 2px 0 6px; }
 .attach-btn{
   appearance:none; border:1px solid var(--border); background:#fff;
@@ -77,13 +74,9 @@
 /* =========================================================
    Support-only sections
    ========================================================= */
-
 .support-hero{ --hero-bg: url('/assets/img/support-hero.png'); }
-
-/* Standardized vertical rhythm for support sections */
-#helpdesk.section{ padding:28px 0 0 }
-#tickets.section{  padding:20px 0 0 }   /* same feel as email panel when open */
-#remote.section{   padding:20px 0 24px }
+#helpdesk.section{ padding:20px 0 0 }
+#remote.section{   padding:8px 0 14px }
 
 .helpdesk-card{ margin:0; display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between; }
 .helpdesk-card__intro{ min-width:260px }
@@ -121,10 +114,10 @@
 .override-download-btn.selected img{ filter:brightness(0) invert(1) }
 
 /* =========================================================
-   Ticket Portal (tabs + layout aligned to email/contact)
+   Ticket Portal look & spacing parity
    ========================================================= */
-
-.ticket-portal{ width:100%; padding:4px 2px; } /* no max-width so fields can span full section */
+#tickets .card{ padding:16px }
+.ticket-portal{ max-width: 100%; padding:4px 2px; margin: 0 auto; }
 
 /* Tabs */
 .ticket-portal .tp-tabs{
@@ -137,7 +130,7 @@
 }
 .ticket-portal .tp-tab.tp-tab--active{ background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.06); }
 
-/* Lookup result card */
+/* Lookup result */
 .ticket-portal .tp-result__title{ margin:18px 0 10px }
 .ticket-portal .tp-ticket{ border:1px solid var(--border); border-radius:12px; padding:12px; background:#fff }
 .ticket-portal .tp-card-line{ display:flex; gap:10px; padding:4px 0 }
@@ -147,4 +140,4 @@
 .ticket-portal .tp-msg:last-child{ border-bottom:0 }
 .ticket-portal .tp-msg-meta{ font-size:.9rem; color:#666; margin-bottom:4px }
 .ticket-portal .tp-msg-body{ white-space:pre-wrap; word-break:break-word }
-.ticket-portal .tp-hint{ font-size:.95rem; color:#444 }
+.ticket-portal .tp-comment{ margin-top:10px }
