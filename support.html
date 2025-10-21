@@ -30,7 +30,7 @@
     <!-- Helpdesk -->
     <section class="section" id="helpdesk">
       <div class="container">
-        <article class="card helpdesk-card">
+        <article class="card helpdesk-card no-lift">
           <div class="helpdesk-card__intro">
             <h2>Contact the Helpdesk</h2>
             <p class="lead">Speak with a tech or send us an email—whatever's convenient.</p>
@@ -38,209 +38,37 @@
 
           <div class="helpdesk-actions">
             <a class="btn btn--primary" href="tel:+1-503-878-7000">Call/Text 503-878-7000</a>
+
             <button
               type="button"
               id="toggle-email-form"
               class="btn btn--outline"
               aria-expanded="false"
-              aria-controls="email-form-panel">
+              aria-controls="email-form-mount">
               Email Helpdesk
             </button>
+
             <button
               type="button"
               id="toggle-ticket-form"
               class="btn btn--outline"
               aria-expanded="false"
-              aria-controls="ticket-form-panel">
+              aria-controls="ticket-form-mount">
               Open a Ticket
             </button>
           </div>
         </article>
 
-        <!-- Collapsible email form panel (hidden w/ display:none when closed) -->
-        <div id="email-form-panel" class="collapsible is-hidden">
-          <div class="card collapsible__body">
-            <h3>Send details to the helpdesk</h3>
-
-            <form id="helpdesk-email-form" class="support-form" novalidate enctype="multipart/form-data">
-              <div class="form-grid">
-                <label>
-                  <span>Name<span class="req" aria-hidden="true">*</span></span>
-                  <input type="text" id="hd-name" name="name" autocomplete="name" required aria-required="true">
-                </label>
-
-                <label>
-                  <span>Company<span class="req" aria-hidden="true">*</span></span>
-                  <input type="text" id="hd-company" name="company" autocomplete="organization" required aria-required="true">
-                </label>
-
-                <label class="full">
-                  <span>Email<span class="req" aria-hidden="true">*</span></span>
-                  <input type="email" id="hd-email" name="email" autocomplete="email" required aria-required="true">
-                </label>
-
-                <label class="full">
-                  <span>Issue<span class="req" aria-hidden="true">*</span></span>
-                  <textarea id="hd-issue" name="issue" rows="5" placeholder="Briefly describe the problem…" required aria-required="true"></textarea>
-                </label>
-
-                <!-- Attachments widget -->
-                <div class="full attachments">
-                  <div class="attach-row">
-                    <button type="button" id="hd-add-files" class="attach-btn" title="Add up to 5 files">
-                      <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                      </svg>
-                      Add files
-                    </button>
-                  </div>
-                  <div id="hd-file-list" class="attach-list"></div>
-                  <input type="file" id="hd-files" name="attachments[]" multiple hidden
-                         accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
-                  <div class="attach-note">Up to 5 files, max 5&nbsp;MB each. Allowed: PNG, JPG, PDF, TXT/LOG, DOC/DOCX, XLSX, CSV.</div>
-                </div>
-
-                <!-- Honeypot -->
-                <input type="text" id="hd-hp" name="website_honeypot" autocomplete="off" tabindex="-1" style="display:none">
-              </div>
-
-              <div class="form-actions">
-                <button type="submit" class="btn btn--primary" id="hd-send">Send</button>
-                <button type="button" class="btn btn--outline" id="cancel-email-form">Cancel</button>
-                <span id="hd-status" class="form-status" role="status" aria-live="polite"></span>
-                <span class="form-required-note"><span class="req" aria-hidden="true">*</span> Required</span>
-              </div>
-            </form>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- Ticket Portal (shown/hidden like Email; section hidden when closed to remove spacing) -->
-    <section class="section is-hidden" id="tickets">
-      <div class="container">
-        <div id="ticket-form-panel" class="">
-          <div class="card collapsible__body">
-            <h3>Open / Manage a Ticket</h3>
-            <section class="ticket-portal" aria-label="Ticket portal">
-              <div class="tp-tabs" role="tablist" aria-label="Ticket actions">
-                <button class="tp-tab tp-tab--active" data-tp="create" role="tab" aria-selected="true">Open a new ticket</button>
-                <button class="tp-tab" data-tp="lookup" role="tab" aria-selected="false">Check ticket status</button>
-              </div>
-
-              <!-- Create -->
-              <div class="tp-panel tp-panel--create" role="tabpanel">
-                <form id="tpCreate" enctype="multipart/form-data" novalidate>
-                  <div class="tp-grid">
-                    <label class="tp-field">
-                      <span>Full name <em>*</em></span>
-                      <input name="name" type="text" required maxlength="120" autocomplete="name">
-                    </label>
-                    <label class="tp-field">
-                      <span>Company</span>
-                      <input name="company" type="text" maxlength="190" autocomplete="organization">
-                    </label>
-                    <label class="tp-field">
-                      <span>Email <em>*</em></span>
-                      <input name="email" type="email" required maxlength="190" autocomplete="email">
-                    </label>
-                    <label class="tp-field">
-                      <span>Phone <em>*</em></span>
-                      <input name="phone" id="tp-phone" type="tel" required maxlength="14" inputmode="tel" pattern="^\(\d{3}\) \d{3}-\d{4}$" placeholder="(555) 123-4567" autocomplete="tel">
-                    </label>
-                    <label class="tp-field tp-field--full">
-                      <span>Subject <em>*</em></span>
-                      <input name="subject" type="text" required maxlength="150">
-                    </label>
-                    <label class="tp-field tp-field--full">
-                      <span>Describe the issue <em>*</em></span>
-                      <textarea name="issue" required maxlength="5000" rows="6" placeholder="What happened? When did it start? Error messages?"></textarea>
-                    </label>
-
-                    <!-- Attachments widget (same as Email) -->
-                    <div class="tp-field tp-field--full attachments">
-                      <span>Attachments (up to 5, max 15 MB each; no executables)</span>
-                      <div class="attach-row">
-                        <button type="button" id="tp-add-files" class="attach-btn" title="Add up to 5 files">
-                          <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
-                            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
-                            <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                          </svg>
-                          Add files
-                        </button>
-                      </div>
-                      <div id="tp-file-list" class="attach-list"></div>
-                      <input type="file" id="tp-files" name="files[]" multiple hidden
-                             accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
-                    </div>
-                  </div>
-
-                  <!-- Hook for CAPTCHA if you want it (hCaptcha/Cloudflare Turnstile) -->
-                  <div id="tpCreateCaptcha" hidden></div>
-
-                  <div class="tp-actions">
-                    <button type="submit" class="btn btn--primary" id="tpCreateSubmit">Submit ticket</button>
-                    <button type="button" class="btn btn--outline" id="tpCreateCancel">Cancel</button>
-                    <span class="tp-hint" id="tpCreateHint" role="status" aria-live="polite"></span>
-                    <span class="form-required-note"><span class="req" aria-hidden="true">*</span> Required</span>
-                  </div>
-                </form>
-              </div>
-
-              <!-- Lookup -->
-              <div class="tp-panel tp-panel--lookup" role="tabpanel" hidden aria-hidden="true">
-                <form id="tpLookupStart" novalidate>
-                  <div class="tp-grid">
-                    <label class="tp-field">
-                      <span>Requester email <em>*</em></span>
-                      <input name="email" type="email" required maxlength="190">
-                    </label>
-                    <label class="tp-field">
-                      <span>Ticket number (optional)</span>
-                      <input name="ticket_number" type="text" maxlength="20" placeholder="If you have it">
-                    </label>
-                  </div>
-
-                  <!-- Optional CAPTCHA hook -->
-                  <div id="tpLookupCaptcha" hidden></div>
-
-                  <div class="tp-actions">
-                    <button type="submit" class="btn btn--primary">Email me a secure link</button>
-                    <button type="button" class="btn btn--outline" id="tpLookupCancel">Cancel</button>
-                    <span class="tp-hint" id="tpLookupHint" role="status" aria-live="polite"></span>
-                    <span class="form-required-note"><span class="req" aria-hidden="true">*</span> Required</span>
-                  </div>
-                </form>
-
-                <!-- Magic-link result -->
-                <div id="tpLookupResult" class="tp-result" hidden>
-                  <h3 class="tp-result__title">Your ticket</h3>
-                  <div class="tp-ticket" id="tpTicketCard"></div>
-
-                  <form id="tpAddComment" class="tp-comment" novalidate>
-                    <label class="tp-field tp-field--full">
-                      <span>Add a public comment (optional)</span>
-                      <textarea name="message" rows="4" maxlength="5000"></textarea>
-                    </label>
-                    <div class="tp-actions">
-                      <button type="submit" class="btn">Post comment</button>
-                      <span class="tp-hint" id="tpCommentHint" role="status" aria-live="polite"></span>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
+        <!-- MOUNT POINTS (fully empty when closed) -->
+        <div id="email-form-mount"></div>
+        <div id="ticket-form-mount"></div>
       </div>
     </section>
 
     <!-- Remote support (Splashtop SOS) -->
     <section class="section" id="remote">
       <div class="container remote-grid">
-        <article class="card download-card">
+        <article class="card download-card no-lift">
           <div class="download-header">
             <a id="download-button" class="btn btn--primary" href="#" aria-label="Download Splashtop SOS">
               <img id="platform-icon" class="platform-icon" src="" alt="" />
@@ -270,7 +98,7 @@
           </noscript>
         </article>
 
-        <div class="card howto-card">
+        <div class="card howto-card no-lift">
           <h2>How it works</h2>
           <ol class="howto-steps">
             <li><strong>Download & open the app.</strong> Click the button for your platform above.</li>
@@ -345,7 +173,15 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    /* ===== Shared: attachment widget (same as your previous version) ===== */
+    /* ===== Small helper: fade-up reveal on each mount ===== */
+    function revealIn(el){
+      if (!el) return;
+      el.classList.add('reveal');
+      el.offsetHeight; // reflow
+      requestAnimationFrame(()=> el.classList.add('is-visible'));
+    }
+
+    /* ===== Attachment widget (shared by Email & Ticket) ===== */
     function createIngestWorker(){
       const src = `
         const jobs = new Map();
@@ -386,14 +222,17 @@
       const addBtn = document.getElementById(addBtnId);
       const input  = document.getElementById(inputId);
       const listEl = document.getElementById(listId);
+
       const ready = [];
       const active = new Map();
       const q = [];
       let busy = false;
       let worker = null;
+
       const MAX_FILES = limits.maxFiles;
       const MAX_SIZE  = limits.maxSize;
       const allowed   = limits.allowed;
+
       const fmtMB = n => (n/(1024*1024)).toFixed(2)+' MB';
       const sig = f => `${f.name}|${f.size}|${f.lastModified}`;
 
@@ -402,6 +241,7 @@
         addBtn.disabled = count >= MAX_FILES;
         addBtn.title = addBtn.disabled ? `Limit reached (${MAX_FILES} files)` : `Add up to ${MAX_FILES} files`;
       }
+
       function chipFor(file, id){
         const chip = document.createElement('span');
         chip.className = 'file-chip is-loading';
@@ -421,6 +261,7 @@
           removeBtn: chip.querySelector('.file-chip__remove')
         };
       }
+
       function markReady(id){
         const entry = active.get(id);
         if (!entry) return;
@@ -433,6 +274,7 @@
         setBtnState();
         pump();
       }
+
       function removeId(id){
         const entry = active.get(id);
         if (entry){
@@ -445,7 +287,7 @@
           const idx = ready.findIndex(r => r.id === id);
           if (idx >= 0){
             try {
-              const el = listEl.querySelector(`.file-chip[data-id="${id}"]`);
+              const el = listEl.querySelector('.file-chip[data-id="'+id+'"]');
               if (el) el.remove();
             } catch {}
             ready.splice(idx,1);
@@ -461,6 +303,7 @@
         if (!chip) return;
         removeId(chip.dataset.id);
       });
+
       function ensureWorker(){
         if (worker) return;
         try {
@@ -483,11 +326,13 @@
           worker.onerror = ()=>{ busy = false; };
         } catch { worker = null; }
       }
+
       function pump(){
         if (busy || q.length === 0) return;
         const job = q.shift();
         const entry = active.get(job.id);
         if (!entry) { pump(); return; }
+
         if (worker){
           busy = true; entry.state = 'working'; entry.mode = 'worker';
           setTimeout(()=> {
@@ -510,21 +355,26 @@
           requestAnimationFrame(tick);
         }
       }
+
       function addFile(file){
         if (ready.length + active.size >= MAX_FILES) return;
-        if (file.size > MAX_SIZE) { alert(`${file.name} is larger than ${(MAX_SIZE/(1024*1024)).toFixed(0)} MB.`); return; }
+        if (file.size > MAX_SIZE) { alert(file.name + ' is larger than 5 MB.'); return; }
         const okType = allowed.includes(file.type) || /\.(png|jpe?g|pdf|txt|log|docx?|xlsx|csv)$/i.test(file.name);
-        if (!okType) { alert(`${file.name} is not an allowed file type.`); return; }
+        if (!okType) { alert(file.name + ' is not an allowed file type.'); return; }
         const signature = sig(file);
         for (const [, v] of active) if (sig(v.file) === signature) return;
         if (ready.some(r => sig(r.file) === signature)) return;
-        const id = (self.crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+
+        const id = (self.crypto?.randomUUID ? crypto.randomUUID() : (Date.now()+'-'+Math.random().toString(16).slice(2)));
         const els = chipFor(file, id);
         active.set(id, { file, els, state:'queued', mode:'pending' });
         setBtnState();
+
         setTimeout(()=> { ensureWorker(); q.push({ id, file }); pump(); }, 0);
       }
+
       function addMany(files){ files.forEach((f, i)=> setTimeout(()=> addFile(f), i*40)); }
+
       addBtn.addEventListener('click', ()=> input.click());
       input.addEventListener('change', ()=>{
         const files = Array.from(input.files || []);
@@ -532,216 +382,476 @@
         if (!files.length) return;
         addMany(files);
       });
+
       function reset(){
-        if (worker){
-          active.forEach((_, id)=> { try { worker.postMessage({cmd:'abort', id}); } catch {} });
-        }
+        // Abort active jobs
+        // (worker may be null if not supported)
+        try {
+          active.forEach((_, id)=> { try { worker?.postMessage({cmd:'abort', id}); } catch {} });
+        } catch {}
         listEl.querySelectorAll('.file-chip').forEach(el => el.remove());
         active.clear();
-        ready.length = 0; q.length = 0; busy = false; setBtnState();
+        ready.length = 0;
+        q.length = 0;
+        busy = false;
+        setBtnState();
       }
+
       return { get: ()=> ready.map(r => r.file), reset };
     }
-  </script>
 
-  <!-- Toggle + forms + phone mask -->
-  <script>
-  (function(){
-    // Buttons
-    const emailBtn  = document.getElementById('toggle-email-form');
-    const ticketBtn = document.getElementById('toggle-ticket-form');
+    /* ===== Phone mask (shared for ticket) ===== */
+    function attachPhoneMask(inputId){
+      const input = document.getElementById(inputId);
+      if (!input) return;
 
-    // Panels/sections
-    const emailPanel    = document.getElementById('email-form-panel');
-    const ticketSection = document.getElementById('tickets');
-
-    // Simple show/hide helpers (zero space when hidden)
-    const show = el => { el?.classList.remove('is-hidden'); };
-    const hide = el => { el?.classList.add('is-hidden'); };
-
-    // Start hidden
-    hide(emailPanel);
-    hide(ticketSection);
-
-    function openEmail(){
-      hide(ticketSection);
-      show(emailPanel);
-      emailBtn?.setAttribute('aria-expanded','true');
-      ticketBtn?.setAttribute('aria-expanded','false');
-    }
-    function closeEmail(){
-      hide(emailPanel);
-      emailBtn?.setAttribute('aria-expanded','false');
-    }
-    function openTicket(){
-      hide(emailPanel);
-      show(ticketSection);
-      emailBtn?.setAttribute('aria-expanded','false');
-      ticketBtn?.setAttribute('aria-expanded','true');
-    }
-    function closeTicket(){
-      hide(ticketSection);
-      ticketBtn?.setAttribute('aria-expanded','false');
-    }
-
-    emailBtn?.addEventListener('click', ()=>{
-      const expanded = emailBtn.getAttribute('aria-expanded') === 'true';
-      expanded ? closeEmail() : openEmail();
-    });
-    ticketBtn?.addEventListener('click', ()=>{
-      const expanded = ticketBtn.getAttribute('aria-expanded') === 'true';
-      expanded ? closeTicket() : openTicket();
-    });
-
-    // Email form: widget, cancel, submit
-    const emailForm  = document.getElementById('helpdesk-email-form');
-    const cancelEmail= document.getElementById('cancel-email-form');
-    const statusEl   = document.getElementById('hd-status');
-    const sendBtn    = document.getElementById('hd-send');
-
-    const hdWidget = setupAttachmentWidget({
-      addBtnId: 'hd-add-files',
-      inputId : 'hd-files',
-      listId  : 'hd-file-list',
-      limits  : { maxFiles: 5, maxSize : 5 * 1024 * 1024,
-        allowed : ['image/png','image/jpeg','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv']
+      function formatUS(digits) {
+        const d = digits.slice(0, 10);
+        if (d.length === 0) return '';
+        if (d.length < 4)  return `(${d}`;
+        if (d.length < 7)  return `(${d.slice(0,3)}) ${d.slice(3)}`;
+        return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
       }
-    });
-
-    function setStatus(cls, html){
-      statusEl.className = `form-status ${cls} is-visible`;
-      statusEl.innerHTML = html;
-    }
-    function clearStatus(){
-      statusEl.classList.remove('is-visible');
-      setTimeout(()=>{ statusEl.className='form-status'; statusEl.textContent=''; }, 200);
-    }
-    function setOK(msg){
-      setStatus('form-status--ok',
-        `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>${msg}`);
-      setTimeout(()=> clearStatus(), 6000);
-    }
-
-    cancelEmail?.addEventListener('click', ()=>{
-      emailForm?.reset();
-      hdWidget.reset();
-      clearStatus();
-      closeEmail();
-    });
-
-    emailForm?.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      clearStatus();
-      if (!emailForm.reportValidity()){
-        setStatus('form-status--error','Please complete all required fields.');
-        return;
+      function digitCountUpTo(str, pos) {
+        let cnt = 0;
+        for (let i = 0; i < pos && i < str.length; i++) if (/\d/.test(str[i])) cnt++;
+        return cnt;
       }
-      sendBtn.disabled = true; cancelEmail.disabled = true; document.getElementById('hd-add-files').disabled = true;
-      setStatus('form-status--progress', `<span class="spinner" aria-hidden="true"></span>Sending...`);
-      try{
-        const fd = new FormData(emailForm);
-        for (const f of hdWidget.get()) fd.append('attachments[]', f, f.name);
-        const resp = await fetch(API('api/helpdesk.php'), { method:'POST', body: fd });
-        const text = await resp.text(); let data; try{ data = JSON.parse(text); }catch{ throw new Error('Non-JSON'); }
-        if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Send failed');
-        setOK('Sent');
-        emailForm.reset(); hdWidget.reset();
-      }catch(err){
-        setStatus('form-status--error','Send failed — please try again.');
-      }finally{
-        sendBtn.disabled = false; cancelEmail.disabled = false; document.getElementById('hd-add-files').disabled = false;
+      function caretPosForDigitIndex(str, digitIndex) {
+        if (digitIndex <= 0) return 0;
+        let cnt = 0;
+        for (let i = 0; i < str.length; i++) {
+          if (/\d/.test(str[i])) cnt++;
+          if (cnt >= digitIndex) return i + 1;
+        }
+        return str.length;
       }
-    });
+      function setValidityForPartial(val) {
+        if (val && !/^\(\d{3}\) \d{3}-\d{4}$/.test(val)) {
+          input.setCustomValidity('Please enter a full 10-digit US number, e.g. (555) 123-4567.');
+        } else {
+          input.setCustomValidity('');
+        }
+      }
 
-    // Ticket: tabs (no auto scroll)
-    const portal = document.querySelector('.ticket-portal');
-    if (portal){
-      const tabs = portal.querySelectorAll('.tp-tab');
-      tabs.forEach(btn=>{
-        btn.addEventListener('click', (e)=>{
-          tabs.forEach(b=>b.classList.remove('tp-tab--active'));
-          e.currentTarget.classList.add('tp-tab--active');
-          const tgt = e.currentTarget.getAttribute('data-tp');
-          portal.querySelectorAll('.tp-panel').forEach(p => {
-            p.hidden = !p.classList.contains(`tp-panel--${tgt}`);
+      input.addEventListener('input', () => {
+        const oldVal = input.value;
+        const oldPos = input.selectionStart ?? oldVal.length;
+        const digitsBefore = digitCountUpTo(oldVal, oldPos);
+
+        const onlyDigits = oldVal.replace(/\D/g, '').slice(0, 10);
+        const newVal = formatUS(onlyDigits);
+        const newPos = caretPosForDigitIndex(newVal, digitsBefore);
+
+        if (newVal !== oldVal) {
+          input.value = newVal;
+          queueMicrotask(() => input.setSelectionRange(newPos, newPos));
+        }
+        setValidityForPartial(input.value);
+      });
+
+      input.addEventListener('blur', () => {
+        setValidityForPartial(input.value);
+      });
+
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text') || '';
+        const digits = pasted.replace(/\D/g, '').slice(0, 10);
+        input.value = formatUS(digits);
+        const end = input.value.length;
+        input.setSelectionRange(end, end);
+        setValidityForPartial(input.value);
+      });
+    }
+
+    /* ===== Templated forms (mounted/unmounted) ===== */
+    const emailTemplate = () => `
+      <div class="reveal card collapsible__body no-lift">
+        <h3>Send details to the helpdesk</h3>
+
+        <form id="helpdesk-email-form" class="support-form" novalidate enctype="multipart/form-data">
+          <div class="form-grid">
+            <label>
+              <span>Name<span class="req" aria-hidden="true">*</span></span>
+              <input type="text" id="hd-name" name="name" autocomplete="name" required aria-required="true">
+            </label>
+
+            <label>
+              <span>Company<span class="req" aria-hidden="true">*</span></span>
+              <input type="text" id="hd-company" name="company" autocomplete="organization" required aria-required="true">
+            </label>
+
+            <label class="full">
+              <span>Email<span class="req" aria-hidden="true">*</span></span>
+              <input type="email" id="hd-email" name="email" autocomplete="email" required aria-required="true">
+            </label>
+
+            <label class="full">
+              <span>Issue<span class="req" aria-hidden="true">*</span></span>
+              <textarea id="hd-issue" name="issue" rows="5" placeholder="Briefly describe the problem…" required aria-required="true"></textarea>
+            </label>
+
+            <!-- Attachments widget -->
+            <div class="full attachments">
+              <div class="attach-row">
+                <button type="button" id="hd-add-files" class="attach-btn" title="Add up to 5 files">
+                  <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  Add files
+                </button>
+              </div>
+              <div id="hd-file-list" class="attach-list"></div>
+              <input type="file" id="hd-files" name="attachments[]" multiple hidden
+                      accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
+              <div class="attach-note">Up to 5 files, max 5&nbsp;MB each. Allowed: PNG, JPG, PDF, TXT/LOG, DOC/DOCX, XLSX, CSV.</div>
+            </div>
+
+            <!-- Honeypot -->
+            <input type="text" id="hd-hp" name="website_honeypot" autocomplete="off" tabindex="-1" style="display:none">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary" id="hd-send">Send</button>
+            <button type="button" class="btn btn--outline" id="cancel-email-form">Cancel</button>
+            <span id="hd-status" class="form-status" role="status" aria-live="polite"></span>
+            <span class="form-required-note"><span class="req" aria-hidden="true">*</span> Required</span>
+          </div>
+        </form>
+      </div>
+    `;
+
+    const ticketTemplate = () => `
+      <div class="reveal card collapsible__body no-lift">
+        <h3>Open / Manage a Ticket</h3>
+
+        <section class="ticket-portal" aria-label="Ticket portal">
+          <div class="tp-tabs" role="tablist" aria-label="Ticket actions">
+            <button class="tp-tab tp-tab--active" data-tp="create" role="tab" aria-selected="true">Open a new ticket</button>
+            <button class="tp-tab" data-tp="lookup" role="tab" aria-selected="false">Check ticket status</button>
+          </div>
+
+          <!-- Create -->
+          <div class="tp-panel tp-panel--create" role="tabpanel">
+            <form id="tpCreate" enctype="multipart/form-data" novalidate>
+              <div class="tp-grid">
+                <label class="tp-field">
+                  <span>Full name <em>*</em></span>
+                  <input name="name" type="text" required maxlength="120" autocomplete="name">
+                </label>
+                <label class="tp-field">
+                  <span>Company</span>
+                  <input name="company" type="text" maxlength="190" autocomplete="organization">
+                </label>
+
+                <label class="tp-field">
+                  <span>Email <em>*</em></span>
+                  <input name="email" type="email" required maxlength="190" autocomplete="email">
+                </label>
+                <label class="tp-field">
+                  <span>Phone <em>*</em></span>
+                  <input id="tp-phone" name="phone" type="tel" required autocomplete="tel" inputmode="tel" maxlength="14" pattern="^\\(\\d{3}\\) \\d{3}-\\d{4}$" placeholder="(555) 123-4567">
+                </label>
+
+                <label class="tp-field tp-field--full">
+                  <span>Subject <em>*</em></span>
+                  <input name="subject" type="text" required maxlength="150">
+                </label>
+                <label class="tp-field tp-field--full">
+                  <span>Describe the issue <em>*</em></span>
+                  <textarea name="issue" required maxlength="5000" rows="6" placeholder="What happened? When did it start? Error messages?"></textarea>
+                </label>
+
+                <!-- Attachments widget (same UX as email) -->
+                <div class="tp-field tp-field--full">
+                  <span>Attachments (up to 5, max 15 MB each; no executables)</span>
+                  <div class="attachments">
+                    <div class="attach-row">
+                      <button type="button" id="tp-add-files" class="attach-btn" title="Add up to 5 files">
+                        <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
+                          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                          <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Add files
+                      </button>
+                    </div>
+                    <div id="tp-file-list" class="attach-list"></div>
+                    <input type="file" id="tp-files" name="files[]" multiple hidden
+                          accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
+                  </div>
+                </div>
+              </div>
+
+              <!-- CAPTCHA hook (hidden) -->
+              <div id="tpCreateCaptcha" hidden></div>
+
+              <div class="tp-actions">
+                <button type="submit" class="btn btn--primary" id="tpCreateSubmit">Submit ticket</button>
+                <button type="button" class="btn btn--outline" id="tpCreateCancel">Cancel</button>
+                <span class="tp-hint" id="tpCreateHint" role="status" aria-live="polite"></span>
+                <span class="form-required-note only-desktop"><span class="req" aria-hidden="true">*</span> Required</span>
+              </div>
+            </form>
+          </div>
+
+          <!-- Lookup -->
+          <div class="tp-panel tp-panel--lookup" role="tabpanel" hidden aria-hidden="true">
+            <form id="tpLookupStart" novalidate>
+              <div class="tp-grid">
+                <label class="tp-field">
+                  <span>Requester email <em>*</em></span>
+                  <input name="email" type="email" required maxlength="190">
+                </label>
+                <label class="tp-field">
+                  <span>Ticket number (optional)</span>
+                  <input name="ticket_number" type="text" maxlength="20" placeholder="If you have it">
+                </label>
+              </div>
+
+              <div id="tpLookupCaptcha" hidden></div>
+
+              <div class="tp-actions">
+                <button type="submit" class="btn btn--primary">Email me a secure link</button>
+                <button type="button" class="btn btn--outline" id="tpLookupCancel">Cancel</button>
+                <span class="tp-hint" id="tpLookupHint" role="status" aria-live="polite"></span>
+                <span class="form-required-note only-desktop"><span class="req" aria-hidden="true">*</span> Required</span>
+              </div>
+            </form>
+
+            <!-- Magic-link result -->
+            <div id="tpLookupResult" class="tp-result" hidden>
+              <h3 class="tp-result__title">Your ticket</h3>
+              <div class="tp-ticket" id="tpTicketCard"></div>
+
+              <form id="tpAddComment" class="tp-comment" novalidate>
+                <label class="tp-field tp-field--full">
+                  <span>Add a public comment (optional)</span>
+                  <textarea name="message" rows="4" maxlength="5000"></textarea>
+                </label>
+                <div class="tp-actions">
+                  <button type="submit" class="btn">Post comment</button>
+                  <span class="tp-hint" id="tpCommentHint" role="status" aria-live="polite"></span>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+
+    /* ===== Mount/Unmount + wiring ===== */
+    (function(){
+      const emailMount  = document.getElementById('email-form-mount');
+      const ticketMount = document.getElementById('ticket-form-mount');
+
+      const emailBtn  = document.getElementById('toggle-email-form');
+      const ticketBtn = document.getElementById('toggle-ticket-form');
+
+      function clearMount(mount){
+        if (!mount) return;
+        mount.innerHTML = '';
+      }
+
+      function openEmail(){
+        // Close ticket if open
+        clearMount(ticketMount);
+        ticketBtn.setAttribute('aria-expanded','false');
+
+        emailMount.innerHTML = emailTemplate();
+        emailBtn.setAttribute('aria-expanded','true');
+        revealIn(emailMount.firstElementChild);
+
+        // Wire email form
+        const form      = document.getElementById('helpdesk-email-form');
+        const cancelBtn = document.getElementById('cancel-email-form');
+        const statusEl  = document.getElementById('hd-status');
+        const sendBtn   = document.getElementById('hd-send');
+
+        const widget = setupAttachmentWidget({
+          addBtnId: 'hd-add-files',
+          inputId : 'hd-files',
+          listId  : 'hd-file-list',
+          limits  : {
+            maxFiles: 5, maxSize : 5 * 1024 * 1024,
+            allowed : ['image/png','image/jpeg','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv']
+          }
+        });
+
+        let fadeTimer=null, resetTimer=null;
+        const cancelTimers=()=>{ if(fadeTimer)clearTimeout(fadeTimer); if(resetTimer)clearTimeout(resetTimer); fadeTimer=resetTimer=null; };
+        const setStatus=(cls,html)=>{ cancelTimers(); statusEl.className='form-status '+cls+' is-visible'; statusEl.innerHTML=html; };
+        const ok=(m)=>{ setStatus('form-status--ok', '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'+m); fadeTimer=setTimeout(()=>{ statusEl.classList.remove('is-visible'); resetTimer=setTimeout(()=>{ statusEl.className='form-status'; statusEl.textContent=''; },300); },7000); };
+        const err=(m)=> setStatus('form-status--error', m);
+        const sending=()=> setStatus('form-status--progress', '<span class="spinner" aria-hidden="true"></span>Sending...');
+
+        cancelBtn.addEventListener('click', ()=>{
+          form.reset(); widget.reset();
+          clearMount(emailMount);
+          emailBtn.setAttribute('aria-expanded','false');
+        });
+
+        form.addEventListener('submit', async (e)=>{
+          e.preventDefault();
+          if (!form.reportValidity()){ err('Please complete all required fields.'); return; }
+          sending();
+          sendBtn.disabled=true; cancelBtn.disabled=true; document.getElementById('hd-add-files').disabled=true;
+          try{
+            const fd=new FormData(form);
+            for (const f of widget.get()) fd.append('attachments[]', f, f.name);
+            const resp=await fetch(API('api/helpdesk.php'),{method:'POST',body:fd});
+            const text=await resp.text(); let data; try{data=JSON.parse(text);}catch{throw new Error('Non-JSON');}
+            if(!resp.ok||!data?.ok) throw new Error(data?.error||'Send failed');
+            ok('Sent'); form.reset(); widget.reset();
+          }catch(e2){ err('Send failed — please try again.'); }
+          finally{
+            sendBtn.disabled=false; cancelBtn.disabled=false; document.getElementById('hd-add-files').disabled=false;
+          }
+        });
+      }
+
+      function openTicket(){
+        // Close email if open
+        clearMount(emailMount);
+        emailBtn.setAttribute('aria-expanded','false');
+
+        ticketMount.innerHTML = ticketTemplate();
+        ticketBtn.setAttribute('aria-expanded','true');
+        revealIn(ticketMount.firstElementChild);
+
+        // Tabs
+        const portal = ticketMount.querySelector('.ticket-portal');
+        Array.from(portal.querySelectorAll('.tp-tab')).forEach(btn=>{
+          btn.addEventListener('click', (e)=>{
+            Array.from(portal.querySelectorAll('.tp-tab')).forEach(b=>b.classList.remove('tp-tab--active'));
+            e.currentTarget.classList.add('tp-tab--active');
+            const tgt = e.currentTarget.getAttribute('data-tp');
+            Array.from(portal.querySelectorAll('.tp-panel')).forEach(p=>{
+              p.hidden = !p.classList.contains('tp-panel--'+tgt);
+              p.setAttribute('aria-hidden', p.hidden ? 'true' : 'false');
+            });
           });
         });
-      });
-    }
 
-    // Ticket: attachment widget (same UI)
-    const tpWidget = setupAttachmentWidget({
-      addBtnId: 'tp-add-files',
-      inputId : 'tp-files',
-      listId  : 'tp-file-list',
-      limits  : { maxFiles: 5, maxSize : 15 * 1024 * 1024,
-        allowed : ['image/png','image/jpeg','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv']
+        // Phone mask
+        attachPhoneMask('tp-phone');
+
+        // Attachments (ticket)
+        const widget = setupAttachmentWidget({
+          addBtnId: 'tp-add-files',
+          inputId : 'tp-files',
+          listId  : 'tp-file-list',
+          limits  : {
+            maxFiles: 5, maxSize : 15 * 1024 * 1024,
+            allowed : ['image/png','image/jpeg','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv']
+          }
+        });
+
+        // Create ticket
+        const createForm = portal.querySelector('#tpCreate');
+        const hint       = portal.querySelector('#tpCreateHint');
+        const submitBtn  = portal.querySelector('#tpCreateSubmit');
+        const cancelBtn  = portal.querySelector('#tpCreateCancel');
+
+        cancelBtn.addEventListener('click', ()=>{
+          createForm.reset(); widget.reset();
+          clearMount(ticketMount); ticketBtn.setAttribute('aria-expanded','false');
+        });
+
+        createForm.addEventListener('submit', async (e)=>{
+          e.preventDefault();
+          hint.textContent=''; submitBtn.disabled=true; cancelBtn.disabled=true;
+          const fd = new FormData(createForm);
+          const need=['name','email','phone','subject','issue'];
+          for (const n of need){ if (!(fd.get(n)||'').toString().trim()){ hint.textContent='Please fill out all required fields.'; submitBtn.disabled=false; cancelBtn.disabled=false; return; } }
+          // append files
+          for (const f of widget.get()) fd.append('files[]', f, f.name);
+
+          try{
+            const res = await fetch('/api/tickets/create.php', { method:'POST', body:fd, credentials:'same-origin' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || 'Submission failed.');
+            hint.textContent = `Ticket created! #${data.public_ref}. Check your email for confirmation.`;
+            createForm.reset(); widget.reset();
+          }catch(err){ hint.textContent = err.message || 'Error creating ticket.'; }
+          finally{ submitBtn.disabled=false; cancelBtn.disabled=false; }
+        });
+
+        // Lookup
+        const lookupForm = portal.querySelector('#tpLookupStart');
+        const lookupHint = portal.querySelector('#tpLookupHint');
+        const lookupCancel = portal.querySelector('#tpLookupCancel');
+        lookupCancel.addEventListener('click', ()=>{
+          lookupForm.reset(); clearMount(ticketMount); ticketBtn.setAttribute('aria-expanded','false');
+        });
+        lookupForm.addEventListener('submit', async (e)=>{
+          e.preventDefault();
+          const fd = new FormData(lookupForm); lookupHint.textContent='';
+          try{
+            const res = await fetch('/api/tickets/lookup_start.php', { method:'POST', body:fd, credentials:'same-origin' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || 'Request failed.');
+            lookupHint.textContent='If that email exists for a ticket, a secure link has been sent.';
+            lookupForm.reset();
+          }catch(err){ lookupHint.textContent = err.message || 'Error sending link.'; }
+        });
+
+        // Deep-link (?tkn=...)
+        (async ()=>{
+          const url = new URL(window.location.href);
+          const token = url.searchParams.get('tkn');
+          if (!token) return;
+          // switch to lookup
+          portal.querySelector('.tp-tab[data-tp="lookup"]').click();
+          try{
+            const res = await fetch('/api/tickets/lookup_fetch.php?tkn='+encodeURIComponent(token), { credentials:'same-origin' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || 'Could not load ticket.');
+            portal.querySelector('#tpLookupResult').hidden=false;
+            portal.querySelector('#tpTicketCard').innerHTML = `
+              <div class="tp-card-line"><strong>Ticket #</strong> ${data.public_ref}</div>
+              <div class="tp-card-line"><strong>Subject</strong> ${data.subject}</div>
+              <div class="tp-card-line"><strong>Status</strong> ${data.status}</div>
+              <div class="tp-card-line"><strong>Last Update</strong> ${data.updated_at}</div>
+              <div class="tp-thread">
+                ${data.thread.map(m => `
+                  <div class="tp-msg">
+                    <div class="tp-msg-meta">${m.when} — ${m.author}${m.public ? '' : ' (private)'}</div>
+                    <div class="tp-msg-body">${m.body_html}</div>
+                  </div>`).join("")}
+              </div>
+            `;
+            // comment handler
+            const commentForm = portal.querySelector('#tpAddComment');
+            commentForm.addEventListener('submit', async (e)=>{
+              e.preventDefault();
+              const hint = portal.querySelector('#tpCommentHint'); hint.textContent='';
+              const f = new FormData(commentForm); f.append('tkn', token);
+              try{
+                const r = await fetch('/api/tickets/add_comment.php', { method:'POST', body:f, credentials:'same-origin' });
+                const out = await r.json();
+                if (!r.ok) throw new Error(out?.error || 'Failed to post comment.');
+                hint.textContent='Comment posted.'; commentForm.reset();
+              }catch(err){ hint.textContent = err.message || 'Error posting comment.'; }
+            });
+          }catch{ /* quiet */ }
+        })();
       }
-    });
 
-    // Ticket: phone live mask
-    (function initTicketPhoneMask(){
-      const input = document.getElementById('tp-phone');
-      if (!input) return;
-      function formatUS(d){ const s=d.slice(0,10); if (!s) return ''; if (s.length<4) return `(${s}`; if (s.length<7) return `(${s.slice(0,3)}) ${s.slice(3)}`; return `(${s.slice(0,3)}) ${s.slice(3,6)}-${s.slice(6)}`; }
-      function digitsUpTo(str,pos){ let c=0; for(let i=0;i<pos&&i<str.length;i++) if(/\d/.test(str[i])) c++; return c; }
-      function caretForDigit(str,idx){ if(idx<=0) return 0; let c=0; for(let i=0;i<str.length;i++){ if(/\d/.test(str[i])) c++; if(c>=idx) return i+1; } return str.length; }
-      function valid(v){ if (v && !/^\(\d{3}\) \d{3}-\d{4}$/.test(v)) input.setCustomValidity('Please enter a full 10-digit US number, e.g. (555) 123-4567.'); else input.setCustomValidity(''); }
-      input.addEventListener('input', ()=>{
-        const oldVal=input.value, oldPos=input.selectionStart??oldVal.length, dc=digitsUpTo(oldVal,oldPos);
-        const digits=oldVal.replace(/\D/g,'').slice(0,10), nv=formatUS(digits), np=caretForDigit(nv,dc);
-        if(nv!==oldVal){ input.value=nv; queueMicrotask(()=> input.setSelectionRange(np,np)); }
-        valid(input.value);
+      // Button toggles
+      emailBtn.addEventListener('click', ()=>{
+        const open = emailBtn.getAttribute('aria-expanded') === 'true';
+        if (open){ clearMount(emailMount); emailBtn.setAttribute('aria-expanded','false'); }
+        else { openEmail(); }
       });
-      input.addEventListener('blur', ()=> valid(input.value));
-      input.addEventListener('paste', (e)=>{
-        e.preventDefault(); const pasted=(e.clipboardData||window.clipboardData).getData('text')||'';
-        const digits=pasted.replace(/\D/g,'').slice(0,10); input.value=formatUS(digits);
-        const end=input.value.length; input.setSelectionRange(end,end); valid(input.value);
+
+      ticketBtn.addEventListener('click', ()=>{
+        const open = ticketBtn.getAttribute('aria-expanded') === 'true';
+        if (open){ clearMount(ticketMount); ticketBtn.setAttribute('aria-expanded','false'); }
+        else { openTicket(); }
       });
     })();
-
-    // Ticket: submit + cancel
-    const tpCreate = document.getElementById('tpCreate');
-    const tpCreateHint = document.getElementById('tpCreateHint');
-    const tpCreateBtn  = document.getElementById('tpCreateSubmit');
-    const tpCreateCancel = document.getElementById('tpCreateCancel');
-
-    tpCreate?.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      tpCreateHint.textContent = '';
-      const fd = new FormData(tpCreate);
-      const need = ['name','email','phone','subject','issue'];
-      for (const n of need){ if (!(fd.get(n)||'').toString().trim()){ tpCreateHint.textContent='Please fill out all required fields.'; return; } }
-      tpCreateBtn.disabled = true;
-      try{
-        // Attach files
-        for (const f of tpWidget.get()) fd.append('files[]', f, f.name);
-        const res = await fetch('/api/tickets/create.php', { method:'POST', body: fd, credentials:'same-origin' });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.error || 'Submission failed.');
-        tpCreateHint.textContent = `Ticket created! #${data.public_ref}. Check your email for confirmation.`;
-        tpCreate.reset(); tpWidget.reset();
-      }catch(err){ tpCreateHint.textContent = err.message || 'Error creating ticket.'; }
-      finally{ tpCreateBtn.disabled = false; }
-    });
-
-    tpCreateCancel?.addEventListener('click', ()=>{
-      tpCreate?.reset(); tpWidget.reset(); // clear files too
-      // Also close the section:
-      const ticketBtn = document.getElementById('toggle-ticket-form');
-      if (ticketBtn) { ticketBtn.setAttribute('aria-expanded','false'); }
-      const ticketSection = document.getElementById('tickets');
-      ticketSection?.classList.add('is-hidden');
-    });
-
-    const tpLookupCancel = document.getElementById('tpLookupCancel');
-    tpLookupCancel?.addEventListener('click', ()=>{
-      document.getElementById('tpLookupStart')?.reset();
-      const lookupPanel = document.querySelector('.tp-panel--lookup');
-      lookupPanel?.setAttribute('hidden','');
-    });
-  })();
   </script>
 </body>
 </html>
