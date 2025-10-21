@@ -43,7 +43,7 @@
               id="toggle-email-form"
               class="btn btn--outline"
               aria-expanded="false"
-              aria-controls="email-form-panel">
+              aria-controls="email-form-mount">
               Email Helpdesk
             </button>
             <button
@@ -51,188 +51,22 @@
               id="toggle-ticket-form"
               class="btn btn--outline"
               aria-expanded="false"
-              aria-controls="ticket-form-panel">
+              aria-controls="ticket-form-mount">
               Open a Ticket
             </button>
           </div>
         </article>
 
-        <!-- Collapsible email form panel -->
-        <div id="email-form-panel" class="collapsible" hidden>
-          <div class="card collapsible__body">
-            <h3>Send details to the helpdesk</h3>
-
-            <form id="helpdesk-email-form" class="support-form" novalidate enctype="multipart/form-data">
-              <div class="form-grid">
-                <label>
-                  <span>Name<span class="req" aria-hidden="true">*</span></span>
-                  <input type="text" id="hd-name" name="name" autocomplete="name" required aria-required="true">
-                </label>
-
-                <label>
-                  <span>Company<span class="req" aria-hidden="true">*</span></span>
-                  <input type="text" id="hd-company" name="company" autocomplete="organization" required aria-required="true">
-                </label>
-
-                <label class="full">
-                  <span>Email<span class="req" aria-hidden="true">*</span></span>
-                  <input type="email" id="hd-email" name="email" autocomplete="email" required aria-required="true">
-                </label>
-
-                <label class="full">
-                  <span>Issue<span class="req" aria-hidden="true">*</span></span>
-                  <textarea id="hd-issue" name="issue" rows="5" placeholder="Briefly describe the problem…" required aria-required="true"></textarea>
-                </label>
-
-                <!-- Attachments widget -->
-                <div class="full attachments">
-                  <div class="attach-row">
-                    <button type="button" id="hd-add-files" class="attach-btn" title="Add up to 5 files">
-                      <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                      </svg>
-                      Add files
-                    </button>
-                  </div>
-                  <div id="hd-file-list" class="attach-list"></div>
-                  <input type="file" id="hd-files" name="attachments[]" multiple hidden
-                         accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
-                  <div class="attach-note">Up to 5 files, max 5&nbsp;MB each. Allowed: PNG, JPG, PDF, TXT/LOG, DOC/DOCX, XLSX, CSV.</div>
-                </div>
-
-                <!-- Honeypot -->
-                <input type="text" id="hd-hp" name="website_honeypot" autocomplete="off" tabindex="-1" style="display:none">
-              </div>
-
-              <div class="form-actions">
-                <button type="submit" class="btn btn--primary" id="hd-send">Send</button>
-                <button type="button" class="btn btn--outline" id="cancel-email-form">Cancel</button>
-                <span id="hd-status" class="form-status" role="status" aria-live="polite"></span>
-                <span class="form-required-note"><span class="req" aria-hidden="true">*</span> Required</span>
-              </div>
-            </form>
-          </div>
-        </div>
-
+        <!-- MOUNT POINTS (empty until opened) -->
+        <div id="email-form-mount"></div>
       </div>
     </section>
 
-    <!-- Ticket Portal (collapsible like Email) -->
+    <!-- Ticket Portal -->
     <section class="section" id="tickets">
       <div class="container">
-        <div id="ticket-form-panel" class="collapsible" hidden>
-          <div class="card collapsible__body">
-            <h3>Open / Manage a Ticket</h3>
-
-            <section class="ticket-portal" aria-label="Ticket portal">
-              <div class="tp-tabs" role="tablist" aria-label="Ticket actions">
-                <button class="tp-tab tp-tab--active" data-tp="create" role="tab" aria-selected="true">Open a new ticket</button>
-                <button class="tp-tab" data-tp="lookup" role="tab" aria-selected="false">Check ticket status</button>
-              </div>
-
-              <!-- Create (same grid as email/contact) -->
-              <div class="tp-panel tp-panel--create" role="tabpanel">
-                <form id="tpCreate" class="support-form" enctype="multipart/form-data" novalidate>
-                  <div class="form-grid">
-                    <label>
-                      <span>Full name <span class="req" aria-hidden="true">*</span></span>
-                      <input name="name" type="text" required maxlength="120" autocomplete="name">
-                    </label>
-                    <label>
-                      <span>Company (optional)</span>
-                      <input name="company" type="text" maxlength="190" autocomplete="organization">
-                    </label>
-
-                    <label>
-                      <span>Email <span class="req" aria-hidden="true">*</span></span>
-                      <input name="email" type="email" required maxlength="190" autocomplete="email">
-                    </label>
-                    <label>
-                      <span>Phone <span class="req" aria-hidden="true">*</span></span>
-                      <input name="phone" id="tp-phone" type="tel" required autocomplete="tel"
-                             inputmode="tel" maxlength="14"
-                             pattern="^\(\d{3}\) \d{3}-\d{4}$" placeholder="(555) 123-4567">
-                    </label>
-
-                    <label class="full">
-                      <span>Subject <span class="req" aria-hidden="true">*</span></span>
-                      <input name="subject" type="text" required maxlength="150">
-                    </label>
-                    <label class="full">
-                      <span>Describe the issue <span class="req" aria-hidden="true">*</span></span>
-                      <textarea name="issue" required maxlength="5000" rows="6" placeholder="What happened? When did it start? Error messages?"></textarea>
-                    </label>
-
-                    <!-- Attachments widget (same as email) -->
-                    <div class="full attachments">
-                      <div class="attach-row">
-                        <button type="button" id="tp-add-files" class="attach-btn" title="Add up to 5 files">
-                          <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
-                            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
-                            <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                          </svg>
-                          Add files
-                        </button>
-                      </div>
-                      <div id="tp-file-list" class="attach-list"></div>
-                      <input type="file" id="tp-files" name="files[]" multiple hidden
-                             accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
-                      <div class="attach-note">Up to 5 files, max 15&nbsp;MB each; no executables.</div>
-                    </div>
-                  </div>
-
-                  <div class="form-actions">
-                    <button type="submit" class="btn btn--primary" id="tpCreateSubmit">Submit ticket</button>
-                    <button type="button" class="btn btn--outline" id="tpCreateCancel">Cancel</button>
-                    <span class="tp-hint" id="tpCreateHint" role="status" aria-live="polite"></span>
-                  </div>
-                </form>
-              </div>
-
-              <!-- Lookup -->
-              <div class="tp-panel tp-panel--lookup" role="tabpanel" hidden aria-hidden="true">
-                <form id="tpLookupStart" class="support-form" novalidate>
-                  <div class="form-grid">
-                    <label class="full">
-                      <span>Requester email <span class="req" aria-hidden="true">*</span></span>
-                      <input name="email" type="email" required maxlength="190">
-                    </label>
-                    <label class="full">
-                      <span>Ticket number (optional)</span>
-                      <input name="ticket_number" type="text" maxlength="20" placeholder="If you have it">
-                    </label>
-                  </div>
-
-                  <div class="form-actions">
-                    <button type="submit" class="btn btn--primary">Email me a secure link</button>
-                    <button type="button" class="btn btn--outline" id="tpLookupCancel">Cancel</button>
-                    <span class="tp-hint" id="tpLookupHint" role="status" aria-live="polite"></span>
-                  </div>
-                </form>
-
-                <!-- Magic-link result -->
-                <div id="tpLookupResult" class="tp-result" hidden>
-                  <h3 class="tp-result__title">Your ticket</h3>
-                  <div class="tp-ticket" id="tpTicketCard"></div>
-
-                  <form id="tpAddComment" class="support-form tp-comment" novalidate>
-                    <div class="form-grid">
-                      <label class="full">
-                        <span>Add a public comment (optional)</span>
-                        <textarea name="message" rows="4" maxlength="5000"></textarea>
-                      </label>
-                    </div>
-                    <div class="form-actions">
-                      <button type="submit" class="btn">Post comment</button>
-                      <span class="tp-hint" id="tpCommentHint" role="status" aria-live="polite"></span>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
+        <!-- MOUNT POINT -->
+        <div id="ticket-form-mount"></div>
       </div>
     </section>
 
@@ -284,7 +118,176 @@
   <!-- Shared footer -->
   <div data-include="/partials/footer.html"></div>
 
-  <!-- Scripts -->
+  <!-- ========= Templates (cloned and inserted on demand) ========= -->
+  <template id="tmpl-email-panel">
+    <div class="collapsible is-open">
+      <div class="card collapsible__body">
+        <h3>Send details to the helpdesk</h3>
+        <form id="helpdesk-email-form" class="support-form" novalidate enctype="multipart/form-data">
+          <div class="form-grid">
+            <label>
+              <span>Name<span class="req" aria-hidden="true">*</span></span>
+              <input type="text" id="hd-name" name="name" autocomplete="name" required aria-required="true">
+            </label>
+            <label>
+              <span>Company<span class="req" aria-hidden="true">*</span></span>
+              <input type="text" id="hd-company" name="company" autocomplete="organization" required aria-required="true">
+            </label>
+            <label class="full">
+              <span>Email<span class="req" aria-hidden="true">*</span></span>
+              <input type="email" id="hd-email" name="email" autocomplete="email" required aria-required="true">
+            </label>
+            <label class="full">
+              <span>Issue<span class="req" aria-hidden="true">*</span></span>
+              <textarea id="hd-issue" name="issue" rows="5" placeholder="Briefly describe the problem…" required aria-required="true"></textarea>
+            </label>
+
+            <!-- Attachments widget -->
+            <div class="full attachments">
+              <div class="attach-row">
+                <button type="button" id="hd-add-files" class="attach-btn" title="Add up to 5 files">
+                  <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  Add files
+                </button>
+              </div>
+              <div id="hd-file-list" class="attach-list"></div>
+              <input type="file" id="hd-files" name="attachments[]" multiple hidden
+                     accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
+              <div class="attach-note">Up to 5 files, max 5&nbsp;MB each. Allowed: PNG, JPG, PDF, TXT/LOG, DOC/DOCX, XLSX, CSV.</div>
+            </div>
+
+            <!-- Honeypot -->
+            <input type="text" id="hd-hp" name="website_honeypot" autocomplete="off" tabindex="-1" style="display:none">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary" id="hd-send">Send</button>
+            <button type="button" class="btn btn--outline" id="cancel-email-form">Cancel</button>
+            <span id="hd-status" class="form-status" role="status" aria-live="polite"></span>
+            <span class="form-required-note"><span class="req" aria-hidden="true">*</span> Required</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </template>
+
+  <template id="tmpl-ticket-panel">
+    <div class="collapsible is-open">
+      <div class="card collapsible__body">
+        <h3>Open / Manage a Ticket</h3>
+        <section class="ticket-portal" aria-label="Ticket portal">
+          <div class="tp-tabs" role="tablist" aria-label="Ticket actions">
+            <button class="tp-tab tp-tab--active" data-tp="create" role="tab" aria-selected="true">Open a new ticket</button>
+            <button class="tp-tab" data-tp="lookup" role="tab" aria-selected="false">Check ticket status</button>
+          </div>
+
+          <!-- Create -->
+          <div class="tp-panel tp-panel--create" role="tabpanel">
+            <form id="tpCreate" class="support-form" enctype="multipart/form-data" novalidate>
+              <div class="form-grid">
+                <label>
+                  <span>Full name <span class="req" aria-hidden="true">*</span></span>
+                  <input name="name" type="text" required maxlength="120" autocomplete="name">
+                </label>
+                <label>
+                  <span>Company</span>
+                  <input name="company" type="text" maxlength="190" autocomplete="organization">
+                </label>
+                <label>
+                  <span>Email <span class="req" aria-hidden="true">*</span></span>
+                  <input name="email" type="email" required maxlength="190" autocomplete="email">
+                </label>
+                <label>
+                  <span>Phone <span class="req" aria-hidden="true">*</span></span>
+                  <input name="phone" id="tp-phone" type="tel" required autocomplete="tel"
+                         inputmode="tel" maxlength="14"
+                         pattern="^\(\d{3}\) \d{3}-\d{4}$" placeholder="(555) 123-4567">
+                </label>
+
+                <label class="full">
+                  <span>Subject <span class="req" aria-hidden="true">*</span></span>
+                  <input name="subject" type="text" required maxlength="150">
+                </label>
+                <label class="full">
+                  <span>Describe the issue <span class="req" aria-hidden="true">*</span></span>
+                  <textarea name="issue" required maxlength="5000" rows="6" placeholder="What happened? When did it start? Error messages?"></textarea>
+                </label>
+
+                <!-- Attachments widget -->
+                <div class="full attachments">
+                  <div class="attach-row">
+                    <button type="button" id="tp-add-files" class="attach-btn" title="Add up to 5 files">
+                      <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                      Add files
+                    </button>
+                  </div>
+                  <div id="tp-file-list" class="attach-list"></div>
+                  <input type="file" id="tp-files" name="files[]" multiple hidden
+                         accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
+                  <div class="attach-note">Up to 5 files, max 15&nbsp;MB each; no executables.</div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn--primary" id="tpCreateSubmit">Submit ticket</button>
+                <button type="button" class="btn btn--outline" id="tpCreateCancel">Cancel</button>
+                <span class="tp-hint" id="tpCreateHint" role="status" aria-live="polite"></span>
+                <span class="form-required-note"><span class="req" aria-hidden="true">*</span> Required</span>
+              </div>
+            </form>
+          </div>
+
+          <!-- Lookup -->
+          <div class="tp-panel tp-panel--lookup" role="tabpanel" hidden aria-hidden="true">
+            <form id="tpLookupStart" class="support-form" novalidate>
+              <div class="form-grid">
+                <label class="full">
+                  <span>Requester email <span class="req" aria-hidden="true">*</span></span>
+                  <input name="email" type="email" required maxlength="190">
+                </label>
+                <label class="full">
+                  <span>Ticket number</span>
+                  <input name="ticket_number" type="text" maxlength="20" placeholder="If you have it">
+                </label>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn--primary">Email me a secure link</button>
+                <button type="button" class="btn btn--outline" id="tpLookupCancel">Cancel</button>
+                <span class="tp-hint" id="tpLookupHint" role="status" aria-live="polite"></span>
+                <span class="form-required-note"><span class="req" aria-hidden="true">*</span> Required</span>
+              </div>
+            </form>
+
+            <div id="tpLookupResult" class="tp-result" hidden>
+              <h3 class="tp-result__title">Your ticket</h3>
+              <div class="tp-ticket" id="tpTicketCard"></div>
+
+              <form id="tpAddComment" class="support-form tp-comment" novalidate>
+                <div class="form-grid">
+                  <label class="full">
+                    <span>Add a public comment (optional)</span>
+                    <textarea name="message" rows="4" maxlength="5000"></textarea>
+                  </label>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn">Post comment</button>
+                  <span class="tp-hint" id="tpCommentHint" role="status" aria-live="polite"></span>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </template>
+
+  <!-- ========================== Scripts ========================== -->
   <script>
     /* ===== Splashtop platform detection (unchanged) ===== */
     document.addEventListener("DOMContentLoaded", function () {
@@ -328,7 +331,7 @@
           const p = downloads[key];
           const btn = document.createElement("button");
           btn.className = "override-download-btn";
-        btn.type = "button";
+          btn.type = "button";
           btn.dataset.key = key;
           btn.innerHTML = `<img src="${p.icon}" alt="${p.name}"> ${p.name}`;
           btn.addEventListener("click", () => updateDownload(key, true));
@@ -344,7 +347,7 @@
 
     const API = (p) => `${window.location.origin}/${String(p).replace(/^\/+/, '')}`;
 
-    /* ===== Shared attachment widget (email + ticket) ===== */
+    /* ===== Attachment widget factory (shared) ===== */
     function createIngestWorker(){
       const src = `
         const jobs = new Map();
@@ -542,260 +545,221 @@
       return { get: ()=> ready.map(r => r.file), reset };
     }
 
-    /* ===== Email panel open/close + submit ===== */
+    /* ===== Panel mount/unmount helpers ===== */
+    const mounts = {
+      email: document.getElementById('email-form-mount'),
+      ticket: document.getElementById('ticket-form-mount')
+    };
+    const tmpls = {
+      email: document.getElementById('tmpl-email-panel'),
+      ticket: document.getElementById('tmpl-ticket-panel')
+    };
+
+    function unmount(name){
+      const m = mounts[name];
+      if (!m) return;
+      m.innerHTML = ''; // removes from DOM => no spacing artifacts
+    }
+    function isMounted(name){
+      const m = mounts[name];
+      return m && m.firstElementChild;
+    }
+    function mount(name){
+      const m = mounts[name], t = tmpls[name];
+      if (!m || !t || isMounted(name)) return null;
+      const node = t.content.cloneNode(true);
+      m.appendChild(node);
+      return m.firstElementChild; // root of the mounted panel
+    }
+
+    /* ===== Email panel wiring (mount/unmount) ===== */
     (function(){
       const toggleBtn = document.getElementById('toggle-email-form');
-      const panel     = document.getElementById('email-form-panel');
-      const form      = document.getElementById('helpdesk-email-form');
-      const cancelBtn = document.getElementById('cancel-email-form');
-      const statusEl  = document.getElementById('hd-status');
-      const sendBtn   = document.getElementById('hd-send');
-      let isAnimating = false, fadeTimer = null, resetTimer = null;
+      let widget = null; // attachments instance
+      function wireEmailPanel(){
+        const root = mounts.email.firstElementChild;
+        if (!root) return;
+        const form      = root.querySelector('#helpdesk-email-form');
+        const cancelBtn = root.querySelector('#cancel-email-form');
+        const statusEl  = root.querySelector('#hd-status');
+        const sendBtn   = root.querySelector('#hd-send');
 
-      const cancelTimers = ()=>{ if (fadeTimer) clearTimeout(fadeTimer); if (resetTimer) clearTimeout(resetTimer); fadeTimer = resetTimer = null; };
-      const setStatus = (cls, html)=>{ cancelTimers(); statusEl.className = `form-status ${cls} is-visible`; statusEl.innerHTML = html; };
-      const setStatusOK    = (m)=>{ setStatus('form-status--ok', `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>${m}`); fadeTimer=setTimeout(()=>{ statusEl.classList.remove('is-visible'); resetTimer=setTimeout(()=>{ statusEl.className='form-status'; statusEl.textContent=''; },300);},7000); };
-      const setStatusErr   = (m)=> setStatus('form-status--error', m);
-      const setStatusSend  = ()=> setStatus('form-status--progress', `<span class="spinner" aria-hidden="true"></span>Sending...`);
-      const clearStatus    = ()=>{ cancelTimers(); statusEl.classList.remove('is-visible'); resetTimer=setTimeout(()=>{ statusEl.className='form-status'; statusEl.textContent=''; },250); };
+        let fadeTimer=null, resetTimer=null;
+        const set = (cls, html)=>{ if(fadeTimer)clearTimeout(fadeTimer); if(resetTimer)clearTimeout(resetTimer); statusEl.className=`form-status ${cls} is-visible`; statusEl.innerHTML=html; };
+        const ok  = m=>{ set('form-status--ok', `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>${m}`); fadeTimer=setTimeout(()=>{ statusEl.classList.remove('is-visible'); resetTimer=setTimeout(()=>{ statusEl.className='form-status'; statusEl.textContent=''; },300);},7000); };
+        const err = m=> set('form-status--error', m);
+        const prog= ()=> set('form-status--progress', `<span class="spinner" aria-hidden="true"></span>Sending...`);
+        const clear= ()=>{ statusEl.classList.remove('is-visible'); resetTimer=setTimeout(()=>{ statusEl.className='form-status'; statusEl.textContent=''; },250); };
 
-      function openPanel(){
-        if (isAnimating) return; isAnimating = true;
-        panel.hidden=false; panel.classList.add('is-open'); panel.style.height='0px'; panel.style.opacity='0'; panel.offsetHeight;
-        panel.style.height = panel.scrollHeight + 'px'; panel.style.opacity='1'; toggleBtn.setAttribute('aria-expanded','true');
+        widget = setupAttachmentWidget({
+          addBtnId:'hd-add-files', inputId:'hd-files', listId:'hd-file-list',
+          limits:{ maxFiles:5, maxSize:5*1024*1024, allowed:['image/png','image/jpeg','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv']}
+        });
+
+        cancelBtn.addEventListener('click', ()=>{ form.reset(); widget.reset(); clear(); unmount('email'); toggleBtn.setAttribute('aria-expanded','false'); });
+
+        form.addEventListener('submit', async (e)=>{
+          e.preventDefault(); clear();
+          if (!form.reportValidity()){ err('Please complete all required fields.'); return; }
+          sendBtn.disabled = true; cancelBtn.disabled = true; root.querySelector('#hd-add-files').disabled = true; prog();
+          const fd = new FormData(form); for (const f of widget.get()) fd.append('attachments[]', f, f.name);
+          try{
+            const resp = await fetch(API('api/helpdesk.php'), { method:'POST', body: fd });
+            const data = await resp.json();
+            if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Send failed');
+            ok('Sent'); form.reset(); widget.reset();
+          }catch(e2){ err('Send failed — please try again.'); }
+          finally{ sendBtn.disabled=false; cancelBtn.disabled=false; root.querySelector('#hd-add-files').disabled=false; }
+        });
       }
-      function closePanel(){
-        if (isAnimating) return; isAnimating = true;
-        panel.style.height = panel.scrollHeight + 'px'; panel.offsetHeight;
-        panel.style.height = '0px'; panel.style.opacity='0'; toggleBtn.setAttribute('aria-expanded','false');
-      }
-      panel.addEventListener('transitionend', (e)=>{
-        if (e.propertyName !== 'height') return;
-        const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
-        if (isOpen){ panel.style.height='auto'; } else { panel.classList.remove('is-open'); panel.hidden=true; panel.style.height=''; }
-        isAnimating = false;
-      });
+
       toggleBtn.addEventListener('click', ()=>{
-        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-        // close Ticket if opening Email
-        if (!expanded && window.saPanels?.ticket?.isOpen?.()) window.saPanels.ticket.close();
-        expanded ? closePanel() : openPanel();
+        const open = isMounted('email');
+        if (open){ unmount('email'); toggleBtn.setAttribute('aria-expanded','false'); return; }
+        // open email => close ticket first
+        unmount('ticket');
+        document.getElementById('toggle-ticket-form').setAttribute('aria-expanded','false');
+        mount('email'); wireEmailPanel(); toggleBtn.setAttribute('aria-expanded','true');
       });
 
-      // expose to allow ticket panel to close it
+      // expose for ticket to close it if needed
       window.saPanels = window.saPanels || {};
-      window.saPanels.email = {
-        open: openPanel,
-        close: closePanel,
-        isOpen: ()=> toggleBtn.getAttribute('aria-expanded') === 'true'
-      };
-
-      const widget = setupAttachmentWidget({
-        addBtnId: 'hd-add-files',
-        inputId : 'hd-files',
-        listId  : 'hd-file-list',
-        limits  : {
-          maxFiles: 5,
-          maxSize : 5 * 1024 * 1024,
-          allowed : ['image/png','image/jpeg','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv']
-        }
-      });
-
-      function resetFormAndFiles(){ form.reset(); widget.reset(); }
-
-      cancelBtn.addEventListener('click', ()=>{ resetFormAndFiles(); clearStatus(); closePanel(); });
-
-      form.addEventListener('submit', async (e)=>{
-        e.preventDefault(); clearStatus();
-        if (!form.reportValidity()){ setStatusErr('Please complete all required fields.'); return; }
-        sendBtn.disabled = true; cancelBtn.disabled = true; document.getElementById('hd-add-files').disabled = true;
-        setStatusSend();
-
-        const fd = new FormData(form);
-        for (const f of widget.get()) fd.append('attachments[]', f, f.name);
-
-        try{
-          const resp = await fetch(API('api/helpdesk.php'), { method:'POST', body: fd });
-          const text = await resp.text(); let data; try{ data = JSON.parse(text); }catch{ throw new Error('Non-JSON'); }
-          if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Send failed');
-          setStatusOK('Sent'); resetFormAndFiles();
-        }catch(err){ console.error('Helpdesk send failed:', err); setStatusErr('Send failed — please try again.'); }
-        finally{ sendBtn.disabled=false; cancelBtn.disabled=false; document.getElementById('hd-add-files').disabled=false; }
-      });
+      window.saPanels.email = { isOpen: ()=> isMounted('email'), close: ()=>{ if(isMounted('email')){ unmount('email'); toggleBtn.setAttribute('aria-expanded','false'); } } };
     })();
 
-    /* ===== Ticket portal: collapsible + tabs + API + phone mask ===== */
+    /* ===== Ticket panel wiring (mount/unmount) ===== */
     (function(){
-      const $  = (s, el=document)=>el.querySelector(s);
-      const $$ = (s, el=document)=>Array.from(el.querySelectorAll(s));
-
       const toggleBtn = document.getElementById('toggle-ticket-form');
-      const panel     = document.getElementById('ticket-form-panel');
-      const portal    = panel.querySelector('.ticket-portal');
 
-      let animating = false;
+      function wireTicketPanel(){
+        const root = mounts.ticket.firstElementChild;
+        if (!root) return;
+        const portal = root.querySelector('.ticket-portal');
 
-      function openPanel(){
-        if (animating) return; animating = true;
-        panel.hidden=false; panel.classList.add('is-open'); panel.style.height='0px'; panel.style.opacity='0'; panel.offsetHeight;
-        panel.style.height = panel.scrollHeight + 'px'; panel.style.opacity='1'; toggleBtn.setAttribute('aria-expanded','true');
+        // Tabs (no scrolling)
+        portal.querySelectorAll('.tp-tab').forEach(btn=>{
+          btn.addEventListener('click', (e)=>{
+            portal.querySelectorAll('.tp-tab').forEach(b=>b.classList.remove('tp-tab--active'));
+            e.currentTarget.classList.add('tp-tab--active');
+            const tgt = e.currentTarget.getAttribute('data-tp');
+            portal.querySelectorAll('.tp-panel').forEach(p => p.hidden = !p.classList.contains(`tp-panel--${tgt}`));
+          });
+        });
+
+        // Phone mask (same as contact)
+        (function initPhoneMask(){
+          const input = portal.querySelector('#tp-phone'); if (!input) return;
+          function f(d){d=d.slice(0,10); if(!d) return ''; if(d.length<4) return `(${d}`; if(d.length<7) return `(${d.slice(0,3)}) ${d.slice(3)}`; return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;}
+          const dc=(s,p)=>{let c=0;for(let i=0;i<p&&i<s.length;i++) if(/\d/.test(s[i])) c++;return c;}
+          const cp=(s,i)=>{if(i<=0)return 0;let c=0;for(let k=0;k<s.length;k++){if(/\d/.test(s[k])) c++; if(c>=i) return k+1}return s.length}
+          const val=(v)=>{ if(v && !/^\(\d{3}\) \d{3}-\d{4}$/.test(v)) input.setCustomValidity('Please enter a full 10-digit US number, e.g. (555) 123-4567.'); else input.setCustomValidity(''); }
+          input.addEventListener('input',()=>{const ov=input.value,op=input.selectionStart??ov.length,db=dc(ov,op);const nd=ov.replace(/\D/g,'').slice(0,10);const nv=f(nd);const np=cp(nv,db); if(nv!==ov){input.value=nv; queueMicrotask(()=>input.setSelectionRange(np,np));} val(input.value);});
+          input.addEventListener('blur',()=>val(input.value));
+          input.addEventListener('paste',(e)=>{e.preventDefault();const d=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,10); input.value=f(d); const end=input.value.length; input.setSelectionRange(end,end); val(input.value);});
+        })();
+
+        // Attachments (ticket)
+        const tpWidget = setupAttachmentWidget({
+          addBtnId: 'tp-add-files',
+          inputId : 'tp-files',
+          listId  : 'tp-file-list',
+          limits  : { maxFiles:5, maxSize:15*1024*1024, allowed:['image/png','image/jpeg','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv'] }
+        });
+
+        // Create ticket
+        const createForm = portal.querySelector('#tpCreate');
+        const createHint = portal.querySelector('#tpCreateHint');
+        const createBtn  = portal.querySelector('#tpCreateSubmit');
+
+        createForm.addEventListener('submit', async (e)=>{
+          e.preventDefault(); createHint.textContent=''; createBtn.disabled=true;
+          const fd = new FormData(createForm);
+          const need = ['name','email','phone','subject','issue'];
+          for (const n of need){ if (!(fd.get(n)||'').toString().trim()){ createHint.textContent='Please fill out all required fields.'; createBtn.disabled=false; return; } }
+          for (const f of tpWidget.get()) fd.append('files[]', f, f.name);
+          try{
+            const res = await fetch('/api/tickets/create.php',{method:'POST', body:fd, credentials:'same-origin'});
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || 'Submission failed.');
+            createHint.textContent = `Ticket created! #${data.public_ref}. Check your email for confirmation.`;
+            createForm.reset(); tpWidget.reset();
+          } catch(err){ createHint.textContent = err.message || 'Error creating ticket.'; }
+          finally{ createBtn.disabled=false; }
+        });
+
+        // Cancel buttons
+        portal.querySelector('#tpCreateCancel')?.addEventListener('click', ()=>{
+          portal.querySelector('#tpCreate')?.reset(); tpWidget.reset(); unmount('ticket'); toggleBtn.setAttribute('aria-expanded','false');
+        });
+        portal.querySelector('#tpLookupCancel')?.addEventListener('click', ()=>{
+          portal.querySelector('#tpLookupStart')?.reset(); unmount('ticket'); toggleBtn.setAttribute('aria-expanded','false');
+        });
+
+        // Lookup start
+        const lookupForm = portal.querySelector('#tpLookupStart');
+        const lookupHint = portal.querySelector('#tpLookupHint');
+        lookupForm?.addEventListener('submit', async (e)=>{
+          e.preventDefault(); const fd = new FormData(lookupForm); lookupHint.textContent='';
+          try{
+            const res = await fetch('/api/tickets/lookup_start.php',{method:'POST', body:fd, credentials:'same-origin'});
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || 'Request failed.');
+            lookupHint.textContent = 'If that email exists for a ticket, a secure link has been sent.';
+            lookupForm.reset();
+          }catch(err){ lookupHint.textContent = err.message || 'Error sending link.'; }
+        });
       }
-      function closePanel(){
-        if (animating) return; animating = true;
-        panel.style.height = panel.scrollHeight + 'px'; panel.offsetHeight;
-        panel.style.height = '0px'; panel.style.opacity='0'; toggleBtn.setAttribute('aria-expanded','false');
-      }
-      panel.addEventListener('transitionend', (e)=>{
-        if (e.propertyName !== 'height') return;
-        const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
-        if (isOpen){ panel.style.height='auto'; } else { panel.classList.remove('is-open'); panel.hidden=true; panel.style.height=''; }
-        animating = false;
-      });
 
-      // Mutually exclusive with Email panel
       toggleBtn.addEventListener('click', ()=>{
-        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-        if (!expanded && window.saPanels?.email?.isOpen?.()) window.saPanels.email.close();
-        expanded ? closePanel() : openPanel();
+        const open = isMounted('ticket');
+        if (open){ unmount('ticket'); toggleBtn.setAttribute('aria-expanded','false'); return; }
+        // open ticket => close email first
+        unmount('email');
+        document.getElementById('toggle-email-form').setAttribute('aria-expanded','false');
+        mount('ticket'); wireTicketPanel(); toggleBtn.setAttribute('aria-expanded','true');
       });
 
-      // Expose for cross-control
+      // expose for email to close it if needed
       window.saPanels = window.saPanels || {};
-      window.saPanels.ticket = { open: openPanel, close: closePanel, isOpen: ()=> toggleBtn.getAttribute('aria-expanded') === 'true' };
+      window.saPanels.ticket = { isOpen: ()=> isMounted('ticket'), close: ()=>{ if(isMounted('ticket')){ unmount('ticket'); toggleBtn.setAttribute('aria-expanded','false'); } } };
 
-      // Tabs (no scrolling)
-      $$('.tp-tab', portal).forEach(btn=>{
-        btn.addEventListener('click', (e)=>{
-          $$('.tp-tab', portal).forEach(b=>b.classList.remove('tp-tab--active'));
-          e.currentTarget.classList.add('tp-tab--active');
-          const tgt = e.currentTarget.getAttribute('data-tp');
-          $$('.tp-panel', portal).forEach(p => p.hidden = !p.classList.contains(`tp-panel--${tgt}`));
-        });
-      });
-
-      // Phone live formatter (same as contact page)
-      (function initPhoneMask(){
-        const input = document.getElementById('tp-phone');
-        if (!input) return;
-        function formatUS(digits){ const d=digits.slice(0,10); if(!d.length) return ''; if(d.length<4) return `(${d}`; if(d.length<7) return `(${d.slice(0,3)}) ${d.slice(3)}`; return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`; }
-        function digitCountUpTo(str,pos){ let c=0; for(let i=0;i<pos&&i<str.length;i++) if(/\d/.test(str[i])) c++; return c; }
-        function caretForIndex(str,idx){ if(idx<=0) return 0; let c=0; for(let i=0;i<str.length;i++){ if(/\d/.test(str[i])) c++; if(c>=idx) return i+1; } return str.length; }
-        function setValidity(v){ if(v && !/^\(\d{3}\) \d{3}-\d{4}$/.test(v)) input.setCustomValidity('Please enter a full 10-digit US number, e.g. (555) 123-4567.'); else input.setCustomValidity(''); }
-        input.addEventListener('input', ()=>{ const ov=input.value, op=input.selectionStart??ov.length, db=digitCountUpTo(ov,op); const nd=ov.replace(/\D/g,'').slice(0,10); const nv=formatUS(nd); const np=caretForIndex(nv,db); if(nv!==ov){ input.value=nv; queueMicrotask(()=>input.setSelectionRange(np,np)); } setValidity(input.value); });
-        input.addEventListener('blur', ()=> setValidity(input.value));
-        input.addEventListener('paste', (e)=>{ e.preventDefault(); const digits=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,10); input.value=formatUS(digits); const end=input.value.length; input.setSelectionRange(end,end); setValidity(input.value); });
-      })();
-
-      // Ticket attachments widget
-      const tpWidget = setupAttachmentWidget({
-        addBtnId: 'tp-add-files',
-        inputId : 'tp-files',
-        listId  : 'tp-file-list',
-        limits  : {
-          maxFiles: 5,
-          maxSize : 15 * 1024 * 1024,
-          allowed : ['image/png','image/jpeg','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv']
-        }
-      });
-
-      // Create ticket submit
-      $('#tpCreate', portal)?.addEventListener('submit', async (e)=>{
-        e.preventDefault();
-        const form = e.currentTarget;
-        const hint = $('#tpCreateHint', portal);
-        const btn  = $('#tpCreateSubmit', portal);
-        hint.textContent = ""; btn.disabled = true;
-
-        const fd = new FormData(form);
-        ['name','email','phone','subject','issue'].forEach(n=>{
-          if (!String(fd.get(n)||'').trim()){ hint.textContent='Please fill out all required fields.'; btn.disabled=false; return; }
-        });
-        // include files
-        for (const f of tpWidget.get()) fd.append('files[]', f, f.name);
-
-        try {
-          const res = await fetch("/api/tickets/create.php", { method:"POST", body: fd, credentials: "same-origin" });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data?.error || "Submission failed.");
-          hint.textContent = `Ticket created! #${data.public_ref}. Check your email for confirmation.`;
-          form.reset(); tpWidget.reset();
-        } catch (err) {
-          hint.textContent = err.message || "Error creating ticket.";
-        } finally {
-          btn.disabled = false;
-        }
-      });
-
-      // Ticket cancel buttons
-      document.getElementById('tpCreateCancel')?.addEventListener('click', ()=>{
-        $('#tpCreate', portal)?.reset(); tpWidget.reset(); window.saPanels.ticket.close();
-      });
-      document.getElementById('tpLookupCancel')?.addEventListener('click', ()=>{
-        $('#tpLookupStart', portal)?.reset(); window.saPanels.ticket.close();
-      });
-
-      // Start lookup (sends magic link)
-      $('#tpLookupStart', portal)?.addEventListener('submit', async (e)=>{
-        e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        const hint = $('#tpLookupHint', portal);
-        hint.textContent = "";
-        try {
-          const res = await fetch("/api/tickets/lookup_start.php", { method:"POST", body: fd, credentials:"same-origin" });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data?.error || "Request failed.");
-          hint.textContent = "If that email exists for a ticket, a secure link has been sent.";
-          e.currentTarget.reset();
-        } catch (err) {
-          hint.textContent = err.message || "Error sending link.";
-        }
-      });
-
-      // Deep-link magic token (?tkn=...)
-      (async () => {
+      // Handle deep-link token (?tkn=...)
+      (async ()=>{
         const url = new URL(window.location.href);
-        const token = url.searchParams.get("tkn");
+        const token = url.searchParams.get('tkn');
         if (!token) return;
-        if (!window.saPanels.ticket.isOpen()) window.saPanels.ticket.open();
-        const lookupTab = portal.querySelector('.tp-tab[data-tp="lookup"]');
-        if (lookupTab) lookupTab.click();
-
-        try {
-          const res = await fetch("/api/tickets/lookup_fetch.php?tkn=" + encodeURIComponent(token), { credentials:"same-origin" });
+        unmount('email'); document.getElementById('toggle-email-form').setAttribute('aria-expanded','false');
+        mount('ticket'); wireTicketPanel(); toggleBtn.setAttribute('aria-expanded','true');
+        const portal = mounts.ticket.querySelector('.ticket-portal');
+        portal.querySelector('.tp-tab[data-tp="lookup"]')?.click();
+        try{
+          const res = await fetch('/api/tickets/lookup_fetch.php?tkn='+encodeURIComponent(token), {credentials:'same-origin'});
           const data = await res.json();
-          if (!res.ok) throw new Error(data?.error || "Could not load ticket.");
-
-          document.getElementById("tpLookupResult").hidden = false;
-          document.getElementById("tpTicketCard").innerHTML = `
+          if (!res.ok) throw new Error(data?.error || 'Could not load ticket.');
+          portal.querySelector('#tpLookupResult').hidden = false;
+          portal.querySelector('#tpTicketCard').innerHTML = `
             <div class="tp-card-line"><strong>Ticket #</strong> ${data.public_ref}</div>
             <div class="tp-card-line"><strong>Subject</strong> ${data.subject}</div>
             <div class="tp-card-line"><strong>Status</strong> ${data.status}</div>
             <div class="tp-card-line"><strong>Last Update</strong> ${data.updated_at}</div>
             <div class="tp-thread">
-              ${data.thread.map(m => `
+              ${data.thread.map(m=>`
                 <div class="tp-msg">
-                  <div class="tp-msg-meta">${m.when} — ${m.author}${m.public ? '' : ' (private)'}</div>
+                  <div class="tp-msg-meta">${m.when} — ${m.author}${m.public?'':' (private)'}</div>
                   <div class="tp-msg-body">${m.body_html}</div>
-                </div>`).join("")}
-            </div>
-          `;
-
-          document.getElementById("tpAddComment")?.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const hint = document.getElementById("tpCommentHint"); hint.textContent = "";
-            const fd = new FormData(e.currentTarget);
-            fd.append("tkn", token);
-            try {
-              const res = await fetch("/api/tickets/add_comment.php", { method:"POST", body: fd, credentials:"same-origin" });
+                </div>`).join('')}
+            </div>`;
+          portal.querySelector('#tpAddComment')?.addEventListener('submit', async (e)=>{
+            e.preventDefault(); const hint = portal.querySelector('#tpCommentHint'); hint.textContent='';
+            const fd = new FormData(e.currentTarget); fd.append('tkn', token);
+            try{
+              const res = await fetch('/api/tickets/add_comment.php',{method:'POST', body:fd, credentials:'same-origin'});
               const out = await res.json();
-              if (!res.ok) throw new Error(out?.error || "Failed to post comment.");
-              hint.textContent = "Comment posted.";
-              e.currentTarget.reset();
-            } catch (err) {
-              hint.textContent = err.message || "Error posting comment.";
-            }
+              if (!res.ok) throw new Error(out?.error || 'Failed to post comment.');
+              hint.textContent = 'Comment posted.'; e.currentTarget.reset();
+            }catch(err){ hint.textContent = err.message || 'Error posting comment.'; }
           });
-        } catch { /* silent */ }
+        }catch(_e){ /* silent */ }
       })();
     })();
   </script>
