@@ -391,30 +391,17 @@
       return { get: ()=> ready.map(r => r.file), reset };
     }
 
-    /* ===== Global panel controller (mount/unmount, mutual exclusion) ===== */
-    (function initPanels(){
-      const emailBtn   = document.getElementById('toggle-email-form');
-      const ticketBtn  = document.getElementById('toggle-ticket-form');
-      const emailMount = document.getElementById('email-form-mount');
-      const ticketMount= document.getElementById('ticket-form-mount');
+    /* ===== Panel controller: mount/unmount forms & wire events ===== */
+    document.addEventListener('DOMContentLoaded', () => {
+      const emailBtn    = document.getElementById('toggle-email-form');
+      const ticketBtn   = document.getElementById('toggle-ticket-form');
+      const emailMount  = document.getElementById('email-form-mount');
+      const ticketMount = document.getElementById('ticket-form-mount');
 
-      const $ = (s, el=document)=> el.querySelector(s);
-
-      window.saPanels = {
-        email: {
-          isOpen: ()=> !!emailMount.firstElementChild,
-          close : ()=> { emailMount.replaceChildren(); emailBtn?.setAttribute('aria-expanded','false'); }
-        },
-        ticket: {
-          isOpen: ()=> !!ticketMount.firstElementChild,
-          close : ()=> { ticketMount.replaceChildren(); ticketBtn?.setAttribute('aria-expanded','false'); }
-        }
-      };
-
-      /* ---------- EMAIL FORM ---------- */
-      function mountEmail(){
+      const openEmail = () => {
+        if (emailMount.firstElementChild) return;
         emailMount.innerHTML = `
-          <div class="collapsible is-open form-card">
+          <div class="form-card">
             <div class="card collapsible__body">
               <h3>Send details to the helpdesk</h3>
 
@@ -472,10 +459,10 @@
           </div>
         `;
 
-        const form      = $('#helpdesk-email-form');
-        const cancelBtn = $('#cancel-email-form');
-        const statusEl  = $('#hd-status');
-        const sendBtn   = $('#hd-send');
+        const form      = document.getElementById('helpdesk-email-form');
+        const cancelBtn = document.getElementById('cancel-email-form');
+        const statusEl  = document.getElementById('hd-status');
+        const sendBtn   = document.getElementById('hd-send');
 
         function setStatus(cls, html){ statusEl.className = `form-status ${cls} is-visible`; statusEl.innerHTML = html; }
         const setOK   = (m)=> setStatus('form-status--ok', `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>${m}`);
@@ -498,7 +485,7 @@
         cancelBtn.addEventListener('click', ()=>{
           resetFormAndFiles();
           clearStatus();
-          window.saPanels.email.close();
+          closeEmail();
         });
 
         form.addEventListener('submit', async (e)=>{
@@ -530,12 +517,17 @@
             sendBtn.disabled=false; cancelBtn.disabled=false; document.getElementById('hd-add-files').disabled=false;
           }
         });
-      }
+      };
 
-      /* ---------- TICKET FORM ---------- */
-      function mountTicket(){
+      const closeEmail = () => {
+        emailMount.replaceChildren();
+        emailBtn.setAttribute('aria-expanded', 'false');
+      };
+
+      const openTicket = () => {
+        if (ticketMount.firstElementChild) return;
         ticketMount.innerHTML = `
-          <div class="collapsible is-open form-card">
+          <div class="form-card">
             <div class="card collapsible__body">
               <h3>Open / Manage a Ticket</h3>
               <section class="ticket-portal" aria-label="Ticket portal">
@@ -546,7 +538,7 @@
 
                 <!-- Create -->
                 <div class="tp-panel tp-panel--create" role="tabpanel">
-                  <form id="tpCreate" enctype="multipart/form-data" novalidate>
+                  <form id="tpCreate" novalidate>
                     <div class="tp-grid">
                       <label class="tp-field">
                         <span>Full name <em>*</em></span>
@@ -588,7 +580,7 @@
                         <div id="tp-file-list" class="attach-list"></div>
                         <input type="file" id="tp-files" name="files[]" multiple hidden
                                accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.doc,.docx,.xlsx,.csv">
-                        <div class="attach-note">Up to 5 files, max 15&nbsp;MB each; allowed: PNG, JPG, PDF, TXT/LOG, DOC/DOCX, XLSX, CSV.</div>
+                        <div class="attach-note">Up to 5 files, max 5&nbsp;MB each. Allowed: PNG, JPG, PDF, TXT/LOG, DOC/DOCX, XLSX, CSV.</div>
                       </div>
                     </div>
 
@@ -645,8 +637,8 @@
         `;
 
         const portal = ticketMount.querySelector('.ticket-portal');
-        const $ = (s, el=portal)=> el.querySelector(s);
         const $$ = (s, el=portal)=> Array.from(el.querySelectorAll(s));
+        const $  = (s, el=portal)=> el.querySelector(s);
 
         // Tabs (no scroll jump)
         $$('.tp-tab').forEach(btn=>{
@@ -658,28 +650,29 @@
           });
         });
 
-        // Create: attachments + submit + cancel
+        // Attachments for ticket
         const widget = setupAttachmentWidget({
           addBtnId: 'tp-add-files',
           inputId : 'tp-files',
           listId  : 'tp-file-list',
           limits  : {
-            maxFiles: 5, maxSize : 15 * 1024 * 1024,
+            maxFiles: 5, maxSize : 5 * 1024 * 1024,
             allowed : ['image/png','image/jpeg','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv']
           }
         });
 
+        // Cancel buttons
         $('#tpCreateCancel')?.addEventListener('click', ()=>{
           widget.reset();
           $('#tpCreate').reset();
-          window.saPanels.ticket.close();
+          closeTicket();
         });
-
         $('#tpLookupCancel')?.addEventListener('click', ()=>{
           $('#tpLookupStart').reset();
-          window.saPanels.ticket.close();
+          closeTicket();
         });
 
+        // Submit create
         $('#tpCreate')?.addEventListener('submit', async (e)=>{
           e.preventDefault();
           const form = e.currentTarget;
@@ -703,7 +696,7 @@
           finally{ btn.disabled=false; }
         });
 
-        // Lookup start (send magic link)
+        // Start lookup (emails magic link)
         $('#tpLookupStart')?.addEventListener('submit', async (e)=>{
           e.preventDefault();
           const fd = new FormData(e.currentTarget);
@@ -719,10 +712,11 @@
           }
         });
 
-        // Live phone formatter for tp-phone
+        // Live phone mask
         (function initPhoneMask(){
           const input = document.getElementById('tp-phone');
           if (!input) return;
+
           function formatUS(digits) {
             const d = digits.slice(0, 10);
             if (d.length === 0) return '';
@@ -779,21 +773,34 @@
             setValidityForPartial(input.value);
           });
         })();
-      }
+      };
 
-      /* ---------- TOGGLE BUTTONS ---------- */
-      emailBtn?.addEventListener('click', ()=>{
-        const expanding = emailBtn.getAttribute('aria-expanded') !== 'true';
-        if (expanding && window.saPanels.ticket.isOpen()) window.saPanels.ticket.close();
-        if (expanding){ mountEmail(); emailBtn.setAttribute('aria-expanded','true'); }
-        else { window.saPanels.email.close(); }
+      const closeTicket = () => {
+        ticketMount.replaceChildren();
+        ticketBtn.setAttribute('aria-expanded', 'false');
+      };
+
+      // Toggle buttons (mutually exclusive)
+      emailBtn?.addEventListener('click', () => {
+        const opening = emailBtn.getAttribute('aria-expanded') !== 'true';
+        if (opening) {
+          if (ticketMount.firstElementChild) closeTicket();
+          openEmail();
+          emailBtn.setAttribute('aria-expanded', 'true');
+        } else {
+          closeEmail();
+        }
       });
 
-      ticketBtn?.addEventListener('click', ()=>{
-        const expanding = ticketBtn.getAttribute('aria-expanded') !== 'true';
-        if (expanding && window.saPanels.email.isOpen()) window.saPanels.email.close();
-        if (expanding){ mountTicket(); ticketBtn.setAttribute('aria-expanded','true'); }
-        else { window.saPanels.ticket.close(); }
+      ticketBtn?.addEventListener('click', () => {
+        const opening = ticketBtn.getAttribute('aria-expanded') !== 'true';
+        if (opening) {
+          if (emailMount.firstElementChild) closeEmail();
+          openTicket();
+          ticketBtn.setAttribute('aria-expanded', 'true');
+        } else {
+          closeTicket();
+        }
       });
 
       // Deep-link (?tkn=...) opens ticket->lookup
@@ -801,7 +808,7 @@
         const url = new URL(window.location.href);
         const token = url.searchParams.get("tkn");
         if (!token) return;
-        if (!window.saPanels.ticket.isOpen()){ mountTicket(); ticketBtn?.setAttribute('aria-expanded','true'); }
+        if (!ticketMount.firstElementChild) { openTicket(); ticketBtn?.setAttribute('aria-expanded','true'); }
         const portal = ticketMount.querySelector('.ticket-portal');
         const lookupTab = portal.querySelector('.tp-tab[data-tp="lookup"]');
         if (lookupTab) lookupTab.click();
@@ -837,7 +844,7 @@
           });
         } catch {/* silent */}
       })();
-    })();
+    });
   </script>
 </body>
 </html>
